@@ -1,14 +1,55 @@
 // Wellness World - Penthouse V8 : React Three Fiber scene.
 // Verified in headless Chromium (SwiftShader): GLB loads, trimesh colliders hold the player, camera modes work. See README.md.
-import { Suspense, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Environment } from '@react-three/drei'
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
 import { Physics, RigidBody, CapsuleCollider, TrimeshCollider, interactionGroups } from '@react-three/rapier'
 import * as THREE from 'three'
 import CameraRig, { GROUPS, rigShared } from './CameraRig.jsx'
 import HUD from './HUD.jsx'
+import { Avatar, Cat } from './Avatar.jsx'
 import { input } from './input.js'
 import { camStore } from './camStore.js'
+import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
+
+RectAreaLightUniformsLib.init()
+
+// Lighting parameters. Defaults are the tuned values; ?name=value in the URL overrides them for quick A/B tuning.
+const Q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
+const num = (k, d) => (Q.has(k) ? parseFloat(Q.get(k)) : d)
+const str = (k, d) => (Q.has(k) ? Q.get(k) : d)
+export const L = {
+  sun: num('sun', 4.4), sunCol: str('sunCol', '#ffa35c'),
+  hemi: num('hemi', 0.5), hemiSky: str('hemiSky', '#ffc08a'), hemiGround: str('hemiGround', '#f2a258'),
+  env: num('env', 0.2), exp: num('exp', 1.0), tm: str('tm', 'neutral'), cove: num('cove', 7),
+  floorR: num('floorR', 2.2), floorG: num('floorG', 2.6), floorB: num('floorB', 1.1), floorEnv: num('floorEnv', 1.5),
+}
+// Albedo grade, tuned against the reference (same camera, region means). The Blender albedos were authored for Cycles' bounce light,
+// which the real-time renderer does not have, so the surfaces that receive that bounce are lifted and warmed here.
+const GRADE = {
+  WW_Parquet_Baked_GAME: { mul: [L.floorR, L.floorG, L.floorB], env: L.floorEnv },
+  WW_Plaster_Ivory_GAME: { mul: [0.90, 1.12, 0.95] },
+  WW_Ceiling_Ivory_GAME: { mul: [1.40, 1.40, 0.95] },
+  WW_Trim_Satin_GAME:    { mul: [1.00, 1.17, 0.95] },
+  WW_Skirting_GAME:      { mul: [1.00, 1.17, 0.95] },
+  WW_Frame_Bronze_GAME:  { set: [0.20, 0.125, 0.085], rough: 0.42 },   // reference frames are warm bronze, not black
+}
+const TONE = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neutral: THREE.NeutralToneMapping, linear: THREE.LinearToneMapping }
+
+function AreaLight({ position, target, rotationY = 0, color, intensity, width, height }) {
+  const ref = useRef()
+  useLayoutEffect(() => { ref.current.lookAt(...target) }, [target])
+  return <group position={position} rotation={[0, rotationY, 0]}><rectAreaLight ref={ref} color={color} intensity={intensity} width={width} height={height} /></group>
+}
+
+function SkyEnv() {
+  // the same procedural sky lights the room (image-based lighting), so interior colour and exterior colour agree
+  const mat = useMemo(makeSkyMaterial, [])
+  const { scene } = useThree()
+  useEffect(() => { scene.environmentIntensity = L.env }, [scene])
+  return <Environment resolution={128} frames={1}><mesh material={mat}><sphereGeometry args={[50, 32, 16]} /></mesh></Environment>
+}
 
 function Penthouse({ onSpawn }) {
   const { scene } = useGLTF('/wellness_world_penthouse_v8.glb')
@@ -20,6 +61,15 @@ function Penthouse({ onSpawn }) {
       if (o.isMesh && !o.userData?.ww_collider) {
         o.castShadow = o.receiveShadow = true
         const m = o.material
+        const gr = m && GRADE[m.name]
+        if (gr && !m.userData.graded) {
+          m.userData.graded = true
+          if (gr.mul) m.color.setRGB(m.color.r * gr.mul[0], m.color.g * gr.mul[1], m.color.b * gr.mul[2])
+          if (gr.set) m.color.setRGB(...gr.set)
+          if (gr.env) m.envMapIntensity = gr.env
+          if (gr.rough !== undefined) m.roughness = gr.rough
+        }
+        if (m?.name?.includes('Glass')) o.castShadow = false      // shadow maps ignore transparency: glass would block the whole sun
         if (m?.name?.includes('Glass')) { m.transparent = true; m.opacity = 0.12; m.depthWrite = false; m.side = THREE.DoubleSide }
       }
     })
@@ -51,6 +101,7 @@ const walkDir = new THREE.Vector3()
 
 function Player({ spawn, bodyRef, meshRef }) {
   const heading = useRef(0)
+  const speedRef = useRef(0)
   useFrame((_, delta) => {
     const body = bodyRef.current
     if (!body) return
@@ -61,8 +112,9 @@ function Player({ spawn, bodyRef, meshRef }) {
       const r = (input.down('KeyD') || input.down('ArrowRight') ? 1 : 0) - (input.down('KeyA') || input.down('ArrowLeft') ? 1 : 0)
       const y = rigShared.followYaw                               // walk relative to where the camera looks
       walkDir.set(-Math.sin(y) * f + Math.cos(y) * r, 0, -Math.cos(y) * f - Math.sin(y) * r)
-      if (walkDir.lengthSq()) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.8 : 2.2 }
+      if (walkDir.lengthSq()) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.2 : 1.7 }
     }
+    speedRef.current = speed
     const lin = body.linvel()
     body.setLinvel({ x: walkDir.x * speed, y: lin.y, z: walkDir.z * speed }, true)
     if (speed > 0 && meshRef.current) {                           // turn the placeholder to face its walking direction
@@ -75,11 +127,9 @@ function Player({ spawn, bodyRef, meshRef }) {
   })
   return (
     <RigidBody ref={bodyRef} position={[spawn.x, spawn.y + 1, spawn.z]} enabledRotations={[false, false, false]} colliders={false}>
-      <CapsuleCollider args={[0.5, 0.3]} position={[0, 0.8, 0]} collisionGroups={interactionGroups([GROUPS.player], [GROUPS.world, GROUPS.glass])} />
-      <group ref={meshRef}>
-        <mesh position={[0, 0.8, 0]}><capsuleGeometry args={[0.3, 1.0]} /><meshStandardMaterial color="#f3e9dc" /></mesh>
-        <mesh position={[0, 1.3, 0.27]}><sphereGeometry args={[0.07, 16, 16]} /><meshStandardMaterial color="#b9895a" /></mesh>
-      </group>
+      {/* 1.54 m tall capsule (2 x 0.55 + 2 x 0.22), 0.44 m wide: a real person, not a pill */}
+      <CapsuleCollider args={[0.55, 0.22]} position={[0, 0.77, 0]} collisionGroups={interactionGroups([GROUPS.player], [GROUPS.world, GROUPS.glass])} />
+      <group ref={meshRef}><Avatar speedRef={speedRef} /></group>
     </RigidBody>
   )
 }
@@ -88,18 +138,33 @@ export default function PenthouseScene() {
   const spawn = useMemo(() => ({ current: new THREE.Vector3(0, 0, 0) }), [])
   const bodyRef = useRef(null)
   const meshRef = useRef(null)
+  const sunTarget = useMemo(() => new THREE.Object3D(), [])
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
-      <Canvas shadows camera={{ fov: 50, near: 0.05, far: 400, position: [0, 1.7, 0] }} gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}>
-        {/* skyline panorama rendered by the V8 script (RENDER_SKYLINE_DOME). */}
-        <Suspense fallback={null}><Environment files="/wellness_world_skyline_dome.jpg" background /></Suspense>
-        {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y) */}
-        <directionalLight color="#ffc08a" intensity={3} position={[21, 8, -45]} castShadow shadow-mapSize={[2048, 2048]} />
-        <hemisphereLight args={['#c9b8ff', '#8a5a3a', 0.6]} />
+      <Canvas shadows camera={{ fov: 50, near: 0.05, far: 700, position: [0, 1.7, 0] }}
+              gl={{ toneMapping: TONE[L.tm] ?? THREE.ACESFilmicToneMapping, toneMappingExposure: L.exp }}>
+        <fog attach="fog" args={[HAZE, 110, 700]} />
+        <SkyDome />
+        <Suspense fallback={null}><SkyEnv /></Suspense>
+        <Skyline />
+        {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y). Target = room centre, shadow frustum covers the whole penthouse */}
+        <primitive object={sunTarget} position={[-1, 0, -6]} />
+        <directionalLight target={sunTarget} color={L.sunCol} intensity={L.sun} position={[20, 8, -51]} castShadow shadow-mapSize={[4096, 4096]}
+          shadow-camera-left={-14} shadow-camera-right={14} shadow-camera-top={14} shadow-camera-bottom={-14} shadow-camera-near={1} shadow-camera-far={120}
+          shadow-bias={-0.0004} shadow-normalBias={0.03} />
+        {/* warm bounce stand-in: sky colour lights upward faces, honey ground colour lights downward faces (ceiling, soffits) */}
+        <hemisphereLight args={[L.hemiSky, L.hemiGround, L.hemi]} />
+        {/* cove LED runs along the glazing wall and the right-hand glazing */}
+        <AreaLight position={[-0.4, 3.55, -11.1]} target={[-0.4, 3.9, -9.4]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />
+        <AreaLight position={[3.0, 3.55, -7.2]} rotationY={Math.PI / 2} target={[0, 0.5, -1.6]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />
         <Suspense fallback={null}>
           <Physics gravity={[0, -9.8, 0]}>
             <Penthouse onSpawn={(p) => spawn.current.copy(p)} />
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
+            {[[-6.6, 2.5, -5.6, 3], [-6.6, 2.5, -7.9, 3], [-6.6, 2.5, -10.4, 3.5]].map((l, i) => (
+              <pointLight key={i} position={[l[0], l[1], l[2]]} intensity={l[3]} distance={5.5} decay={1.6} color="#ffc486" />
+            ))}
+            <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>
         </Suspense>

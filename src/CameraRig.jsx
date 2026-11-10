@@ -21,7 +21,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 const damp = (c, t, k, dt) => c + (t - c) * (1 - Math.exp(-k * dt))
 const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10)
 
-const FOLLOW0 = { yaw: 0, pitch: 0.32, dist: 3.4 }
+const FOLLOW0 = { yaw: 0, pitch: 0.30, dist: 3.0 }
 const SIMS0 = { yaw: 0.55, pitch: 0.95, dist: 12 }
 const FREE0 = { pos: [-1.3, 1.65, -0.6], yaw: 0, pitch: -0.05 }
 const SIMS_BOUNDS = { x: [-8.2, 5.8], z: [-14, 0.3] }
@@ -126,7 +126,7 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
 
       if (mode === 'follow') {
         rigShared.followYaw = o.sy
-        if (p) _pivot.set(p.x, p.y + 1.35, p.z)
+        if (p) _pivot.set(p.x, p.y + 1.3, p.z)
       } else {
         // WASD / arrows / right-drag pan the pivot; the player is NOT moved
         const fx = -Math.sin(o.sy), fz = -Math.cos(o.sy), rx = Math.cos(o.sy), rz = -Math.sin(o.sy)

@@ -35,3 +35,8 @@ See [`docs/VISUAL_AUDIT_AND_V9_PLAN.md`](docs/VISUAL_AUDIT_AND_V9_PLAN.md) and t
 ## NOT verified
 - **Safari / macOS trackpad.** Handlers are written for Safari (non-passive wheel, `gesturestart/change`, pointer capture, Ctrl-click = pan, swipe-back suppression) but no WebKit/Safari engine was available in the test sandbox. Please report anything that misbehaves.
 - Real-GPU frame rate (tests ran at 3–8 fps in software GL), mobile/touch, Blender 5.2.3, dome orientation, Draco compression.
+
+## V9a (colour, Canary Wharf skyline, scale)
+- Procedural sunset sky, 3D Canary Wharf skyline (pyramid cap, Citi/HSBC/Barclays towers, waterfront band, river streaks) positioned from the reference image; warm hemisphere/cove/sun lighting with Neutral tone mapping; region-mean error vs reference at CAM1 ≈ 0.054.
+- Avatar rebuilt at 1.55 m (capsule collider 1.54 m × 0.44 m, walk 1.7 m/s, run 3.2 m/s) with a seated cat (0.30 m); follow-camera pivot/distance retuned. Adjoining rooms (≈2.5–3.4 m wide × 3.4 m deep × 3.5 m high) get warm interior lights.
+- Verified (headless Chromium/SwiftShader): camera collision + wheel tests pass, no console errors. NOT verified: Safari/trackpad, real-GPU frame rate, Blender 5.2.3 re-export. The side rooms' geometry is still the V8 GLB (flat-colour props); a Blender-side rebuild is not done.
