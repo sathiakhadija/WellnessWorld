@@ -1,12 +1,14 @@
-// Wellness World - Penthouse V8 : minimal React Three Fiber scene.
-// Needs:  npm i three @react-three/fiber @react-three/drei @react-three/rapier
-// Put wellness_world_penthouse_v8.glb (and optionally the dome .jpg) in your /public folder.
-// Verified: loads in headless Chromium (SwiftShader), trimesh colliders hold the player on the floor, WASD moves. See README.md.
+// Wellness World - Penthouse V8 : React Three Fiber scene.
+// Verified in headless Chromium (SwiftShader): GLB loads, trimesh colliders hold the player, camera modes work. See README.md.
 import { Suspense, useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Environment, useKeyboardControls, KeyboardControls } from '@react-three/drei'
-import { Physics, RigidBody, CapsuleCollider, TrimeshCollider } from '@react-three/rapier'
+import { useGLTF, Environment } from '@react-three/drei'
+import { Physics, RigidBody, CapsuleCollider, TrimeshCollider, interactionGroups } from '@react-three/rapier'
 import * as THREE from 'three'
+import CameraRig, { GROUPS, rigShared } from './CameraRig.jsx'
+import HUD from './HUD.jsx'
+import { input } from './input.js'
+import { camStore } from './camStore.js'
 
 function Penthouse({ onSpawn }) {
   const { scene } = useGLTF('/wellness_world_penthouse_v8.glb')
@@ -35,45 +37,61 @@ function Penthouse({ onSpawn }) {
       <primitive object={visual} />
       {colliders.map((c) => (
         <RigidBody key={c.uuid} type="fixed" colliders={false}>
-          <TrimeshCollider args={[c.userData.__pos, c.userData.__idx]} />
+          <TrimeshCollider
+            args={[c.userData.__pos, c.userData.__idx]}
+            collisionGroups={interactionGroups([c.userData.ww_collider_kind === 'glass' ? GROUPS.glass : GROUPS.world])}
+          />
         </RigidBody>
       ))}
     </>
   )
 }
 
-function Player({ spawn }) {
-  const body = useRef()
-  const [, get] = useKeyboardControls()
-  useFrame((state) => {
-    if (!body.current) return
-    const { forward, back, left, right } = get()
-    const v = new THREE.Vector3((right ? 1 : 0) - (left ? 1 : 0), 0, (back ? 1 : 0) - (forward ? 1 : 0))
-    if (v.lengthSq()) v.normalize().multiplyScalar(2.2)
-    const lin = body.current.linvel()
-    body.current.setLinvel({ x: v.x, y: lin.y, z: v.z }, true)
-    const p = body.current.translation()
-    state.camera.position.lerp(new THREE.Vector3(p.x, p.y + 1.9, p.z + 2.6), 0.1)
-    state.camera.lookAt(p.x, p.y + 1.2, p.z)
+const walkDir = new THREE.Vector3()
+
+function Player({ spawn, bodyRef, meshRef }) {
+  const heading = useRef(0)
+  useFrame((_, delta) => {
+    const body = bodyRef.current
+    if (!body) return
+    let speed = 0
+    walkDir.set(0, 0, 0)
+    if (camStore.get().mode === 'follow') {                       // free + inspect cameras never move the player
+      const f = (input.down('KeyW') || input.down('ArrowUp') ? 1 : 0) - (input.down('KeyS') || input.down('ArrowDown') ? 1 : 0)
+      const r = (input.down('KeyD') || input.down('ArrowRight') ? 1 : 0) - (input.down('KeyA') || input.down('ArrowLeft') ? 1 : 0)
+      const y = rigShared.followYaw                               // walk relative to where the camera looks
+      walkDir.set(-Math.sin(y) * f + Math.cos(y) * r, 0, -Math.cos(y) * f - Math.sin(y) * r)
+      if (walkDir.lengthSq()) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.8 : 2.2 }
+    }
+    const lin = body.linvel()
+    body.setLinvel({ x: walkDir.x * speed, y: lin.y, z: walkDir.z * speed }, true)
+    if (speed > 0 && meshRef.current) {                           // turn the placeholder to face its walking direction
+      const target = Math.atan2(walkDir.x, walkDir.z)
+      let d = target - heading.current
+      d = Math.atan2(Math.sin(d), Math.cos(d))
+      heading.current += d * (1 - Math.exp(-12 * Math.min(delta, 0.05)))
+      meshRef.current.rotation.y = heading.current
+    }
   })
   return (
-    <RigidBody ref={body} position={[spawn.x, spawn.y + 1, spawn.z]} enabledRotations={[false, false, false]} colliders={false}>
-      <CapsuleCollider args={[0.5, 0.3]} position={[0, 0.8, 0]} />
-      <mesh position={[0, 0.8, 0]}><capsuleGeometry args={[0.3, 1.0]} /><meshStandardMaterial color="#f3e9dc" /></mesh>
+    <RigidBody ref={bodyRef} position={[spawn.x, spawn.y + 1, spawn.z]} enabledRotations={[false, false, false]} colliders={false}>
+      <CapsuleCollider args={[0.5, 0.3]} position={[0, 0.8, 0]} collisionGroups={interactionGroups([GROUPS.player], [GROUPS.world, GROUPS.glass])} />
+      <group ref={meshRef}>
+        <mesh position={[0, 0.8, 0]}><capsuleGeometry args={[0.3, 1.0]} /><meshStandardMaterial color="#f3e9dc" /></mesh>
+        <mesh position={[0, 1.3, 0.27]}><sphereGeometry args={[0.07, 16, 16]} /><meshStandardMaterial color="#b9895a" /></mesh>
+      </group>
     </RigidBody>
   )
 }
 
 export default function PenthouseScene() {
   const spawn = useMemo(() => ({ current: new THREE.Vector3(0, 0, 0) }), [])
-  const map = [
-    { name: 'forward', keys: ['ArrowUp', 'KeyW'] }, { name: 'back', keys: ['ArrowDown', 'KeyS'] },
-    { name: 'left', keys: ['ArrowLeft', 'KeyA'] }, { name: 'right', keys: ['ArrowRight', 'KeyD'] },
-  ]
+  const bodyRef = useRef(null)
+  const meshRef = useRef(null)
   return (
-    <KeyboardControls map={map}>
-      <Canvas shadows camera={{ fov: 50, position: [0, 1.7, 0] }} gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}>
-        {/* skyline panorama rendered by the V8 script (RENDER_SKYLINE_DOME). If it is missing, remove this line. */}
+    <div style={{ position: 'fixed', inset: 0 }}>
+      <Canvas shadows camera={{ fov: 50, near: 0.05, far: 400, position: [0, 1.7, 0] }} gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}>
+        {/* skyline panorama rendered by the V8 script (RENDER_SKYLINE_DOME). */}
         <Suspense fallback={null}><Environment files="/wellness_world_skyline_dome.jpg" background /></Suspense>
         {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y) */}
         <directionalLight color="#ffc08a" intensity={3} position={[21, 8, -45]} castShadow shadow-mapSize={[2048, 2048]} />
@@ -81,10 +99,12 @@ export default function PenthouseScene() {
         <Suspense fallback={null}>
           <Physics gravity={[0, -9.8, 0]}>
             <Penthouse onSpawn={(p) => spawn.current.copy(p)} />
-            <Player spawn={spawn.current} />
+            <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
+            <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>
         </Suspense>
       </Canvas>
-    </KeyboardControls>
+      <HUD />
+    </div>
   )
 }
