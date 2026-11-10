@@ -76,10 +76,10 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       cam: () => ({ pos: camera.position.toArray(), fov: camera.fov }),
       player: () => { const p = playerRef.current?.translation(); return p ? [p.x, p.y, p.z] : null },
       set: (m) => setMode(m),
-      setFree: (x, y, z, yaw, pitch) => {   // jump the free camera to an exact pose (used for screenshots/tests)
+      setFree: (x, y, z, yaw, pitch, fov) => {   // jump the free camera to an exact pose (used for screenshots/tests)
         camStore.set({ mode: 'free' }); st.mode = 'free'; st.trans.t = 1
         st.x.pos.set(x, y, z); st.x.vel.set(0, 0, 0); st.x.dolly = 0
-        st.x.yaw = st.x.sy = yaw; st.x.pitch = st.x.sp = pitch
+        st.x.yaw = st.x.sy = yaw; st.x.pitch = st.x.sp = pitch; st.x.fov = fov || null
       },
     }
     return () => { input.detach(); input.hotkeys = {}; delete window.__ww }
@@ -111,7 +111,7 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
     if (ceilingRef.current) ceilingRef.current.visible = mode !== 'sims'
 
     const p = playerRef.current?.translation()
-    let outPos, outQuat, outFov = FOV[mode]
+    let outPos, outQuat, outFov = mode === 'free' && st.x.fov ? st.x.fov : FOV[mode]
 
     if (mode === 'follow' || mode === 'sims') {
       const o = mode === 'follow' ? st.f : st.s

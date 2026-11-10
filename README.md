@@ -29,6 +29,9 @@ npm run dev      # open the printed localhost URL, WASD / arrow keys to walk
 - Follow / Free / Inspect modes, eased transitions, player unmoved in Free and Inspect, camera-relative walking.
 - Camera collision: free camera stops at back/left/right walls, floor and ceiling bounds, passes the glazing; no-clip (N) passes walls; follow camera is pulled in by walls; player is stopped by the glass.
 
+## Visual audit and V9 plan
+See [`docs/VISUAL_AUDIT_AND_V9_PLAN.md`](docs/VISUAL_AUDIT_AND_V9_PLAN.md) and the screenshots in `docs/screens/`.
+
 ## NOT verified
 - **Safari / macOS trackpad.** Handlers are written for Safari (non-passive wheel, `gesturestart/change`, pointer capture, Ctrl-click = pan, swipe-back suppression) but no WebKit/Safari engine was available in the test sandbox. Please report anything that misbehaves.
 - Real-GPU frame rate (tests ran at 3–8 fps in software GL), mobile/touch, Blender 5.2.3, dome orientation, Draco compression.
