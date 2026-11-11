@@ -34,17 +34,17 @@ export const L = {
   sun: num('sun', 4.1), sunCol: str('sunCol', '#ffb06c'),
   hemi: num('hemi', 0.7), hemiSky: str('hemiSky', '#ffe0c4'), hemiGround: str('hemiGround', '#f6c08a'),
   env: num('env', 0.32), exp: num('exp', 1.0), tm: str('tm', 'neutral'), cove: num('cove', 7),
-  floorR: num('floorR', 2.2), floorG: num('floorG', 2.6), floorB: num('floorB', 1.1), floorEnv: num('floorEnv', 1.5),
+  floorR: num('floorR', 2.6), floorG: num('floorG', 3.35), floorB: num('floorB', 2.5), floorEnv: num('floorEnv', 1.5),
 }
 // Albedo grade, tuned against the reference (same camera, region means). The Blender albedos were authored for Cycles' bounce light,
 // which the real-time renderer does not have, so the surfaces that receive that bounce are lifted and warmed here.
 const GRADE = {
   WW_Parquet_Baked_GAME: { mul: [L.floorR, L.floorG, L.floorB], env: L.floorEnv },
-  WW_Plaster_Ivory_GAME: { set: [0.70, 0.60, 0.47] },      // warm ivory/cream (was a green-biased mul that read sage-grey in shade)
+  WW_Plaster_Ivory_GAME: { set: [0.62, 0.52, 0.45] },      // warm ivory/cream (was a green-biased mul that read sage-grey in shade)
   WW_Ceiling_Ivory_GAME: { set: [0.86, 0.78, 0.66] },
   WW_Trim_Satin_GAME:    { set: [0.86, 0.77, 0.63] },
   WW_Skirting_GAME:      { set: [0.86, 0.77, 0.63] },
-  WW_Frame_Bronze_GAME:  { set: [0.014, 0.014, 0.016], rough: 0.92, metal: 0.0, envI: 0.0 },   // V10: slim matte-black aluminium on every exterior frame
+  WW_Frame_Bronze_GAME:  { set: [0.046, 0.036, 0.03], rough: 0.8, metal: 0.0, envI: 0.0 },   // V10: slim matte-black aluminium on every exterior frame
 }
 const TONE = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neutral: THREE.NeutralToneMapping, linear: THREE.LinearToneMapping }
 

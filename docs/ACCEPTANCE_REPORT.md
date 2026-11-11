@@ -67,3 +67,6 @@ Cause of grey-green walls: GRADE multiplied plaster green ×1.12 on a taupe base
 
 ## Round 6: Blender interior kit
 assets/blender/make_interior.py (bpy) → src/baked/interior.json (+ .blend/.glb): stepped door architraves with plinth blocks and 3-layer cornice (1.5 m + 1.1 m), fluted pilaster with capital/base, brass tube sconce (entrance). Wired in Plan.jsx `<InteriorKit/>`; replaces box-built trim. Visually verified headless golden hour (penthouse_door_wall/*_kit.png). Not done: open doors with lit interiors (reference shows them open), bedroom/bathroom door pink cast, other presets, regressions.
+
+## Round 7: palette match (penthouse)
+k-means palette of the user's reference render vs ours, same framing. Overall mean RGB ref (158,122,107) vs ours (158,120,104). Changes: floor grade toward honey-rose (was amber, floor mean 138,90,57 → 146,99,72; ref 166,117,98 — still slightly darker/more amber), plaster dustier rose-ivory, glazing frames warm dark brown (not black/wine), golden sky mid/upper cooled toward lilac. Street not yet re-graded to the same numbers.

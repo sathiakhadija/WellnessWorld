@@ -19,7 +19,7 @@ export const PRESETS = {
   golden: {
     label: 'Signature Golden Hour', icon: '🌇', sunAz: 25, sunEl: 7, sunCol: '#ffc8a0', sun: 4.3, hemiSky: '#ffe4d4', hemiGround: '#dcc4b2', hemi: 0.75, fill: 0.6, fillCol: '#b4b0dc',
     fog: '#b898a8', exp: 1.08, lit: 0.45, glow: 0.12, tint: [1, 1, 1], lamp: 1.0, win: 1.0,
-    sky: { zen: c(0.40, 0.36, 0.64), upper: c(0.60, 0.48, 0.74), mid: c(0.90, 0.64, 0.74), pink: c(0.99, 0.62, 0.62), hor: c(0.99, 0.70, 0.56), below: c(0.45, 0.38, 0.52), glow: c(0.85, 0.46, 0.28), cHi: c(1.0, 0.72, 0.70), cLo: c(0.68, 0.56, 0.80) },
+    sky: { zen: c(0.40, 0.36, 0.64), upper: c(0.62, 0.55, 0.80), mid: c(0.80, 0.70, 0.84), pink: c(0.99, 0.62, 0.62), hor: c(0.99, 0.70, 0.56), below: c(0.45, 0.38, 0.52), glow: c(0.85, 0.46, 0.28), cHi: c(1.0, 0.72, 0.70), cLo: c(0.68, 0.56, 0.80) },
   },
   blue: {
     label: 'Blue Hour', icon: '🌆', sunAz: 40, sunEl: 5, sunCol: '#8aa0ff', sun: 0.6, hemiSky: '#8fa3e6', hemiGround: '#5a4a6a', hemi: 0.6, fill: 0.7, fillCol: '#8095d8',
