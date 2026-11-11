@@ -9,6 +9,8 @@ import * as THREE from 'three'
 import CameraRig, { GROUPS, rigShared } from './CameraRig.jsx'
 import HUD from './HUD.jsx'
 import { Avatar, Cat } from './Avatar.jsx'
+import { PlayerModel } from './character'
+import Companion from './companion/Companion.jsx'
 import { input } from './input.js'
 import { camStore } from './camStore.js'
 import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
@@ -149,6 +151,7 @@ function CleanHide({ children }) {
 }
 
 const walkDir = new THREE.Vector3()
+const LEGACY = new URLSearchParams(window.location.search).get('model') === 'legacy'     // ?model=legacy keeps the old primitive placeholder for A/B checks
 
 function Player({ spawn, bodyRef, meshRef }) {
   const heading = useRef(0)
@@ -163,14 +166,14 @@ function Player({ spawn, bodyRef, meshRef }) {
       const r = (input.down('KeyD') || input.down('ArrowRight') ? 1 : 0) - (input.down('KeyA') || input.down('ArrowLeft') ? 1 : 0)
       const y = rigShared.followYaw                               // walk relative to where the camera looks
       walkDir.set(-Math.sin(y) * f + Math.cos(y) * r, 0, -Math.cos(y) * f - Math.sin(y) * r)
-      if (walkDir.lengthSq()) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.2 : 1.7 }
+      if (walkDir.lengthSq() && !world.playerLock) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.0 : 1.3 }
     }
     speedRef.current = speed
     const tp = body.translation(); world.player.x = tp.x; world.player.y = tp.y; world.player.z = tp.z
     const lin = body.linvel()
     body.setLinvel({ x: walkDir.x * speed, y: lin.y, z: walkDir.z * speed }, true)
-    if (speed > 0 && meshRef.current) {                           // turn the placeholder to face its walking direction
-      const target = Math.atan2(walkDir.x, walkDir.z)
+    if ((speed > 0 || world.faceYaw != null) && meshRef.current) {   // turn the model to face its walking direction (or an interaction target)
+      const target = speed > 0 ? Math.atan2(walkDir.x, walkDir.z) : world.faceYaw
       let d = target - heading.current
       d = Math.atan2(Math.sin(d), Math.cos(d))
       heading.current += d * (1 - Math.exp(-12 * Math.min(delta, 0.05)))
@@ -181,7 +184,7 @@ function Player({ spawn, bodyRef, meshRef }) {
     <RigidBody ref={bodyRef} position={[spawn.x, spawn.y + 1, spawn.z]} enabledRotations={[false, false, false]} colliders={false}>
       {/* 1.54 m tall capsule (2 x 0.55 + 2 x 0.22), 0.44 m wide: a real person, not a pill */}
       <CapsuleCollider args={[0.55, 0.22]} position={[0, 0.77, 0]} collisionGroups={interactionGroups([GROUPS.player], [GROUPS.world, GROUPS.glass])} />
-      <group ref={meshRef}><Avatar speedRef={speedRef} /></group>
+      <group ref={meshRef}>{LEGACY ? <Avatar speedRef={speedRef} /> : <PlayerModel speedRef={speedRef} />}</group>
     </RigidBody>
   )
 }
@@ -215,7 +218,7 @@ export default function PenthouseScene() {
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
             {!OFF.has('tree') && <CherryTree />}
             {!OFF.has('tree') && <Petals />}
-            <CleanHide><Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></CleanHide>
+            {LEGACY ? <CleanHide><Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></CleanHide> : <Companion />}
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>
         </Suspense>

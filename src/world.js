@@ -9,3 +9,10 @@ export const world = {
 // ?off=tree,hood,plan switches parts of the scene off (profiling / fast headless tests)
 const Q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
 export const OFF = new Set((Q.get('off') || '').split(',').filter(Boolean))
+
+// Anything that must keep doors from closing on it (player + companion).
+world.companion = { x: 1e9, z: 1e9 }
+export const occupied = (x0, x1, z0, z1) => {
+  const p = world.player, c = world.companion
+  return (p.x > x0 && p.x < x1 && p.z > z0 && p.z < z1) || (c.x > x0 && c.x < x1 && c.z > z0 && c.z < z1)
+}

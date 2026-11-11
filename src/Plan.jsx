@@ -9,7 +9,7 @@ import { RigidBody, CuboidCollider, interactionGroups } from '@react-three/rapie
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { GROUPS } from './CameraRig.jsx'
-import { world } from './world.js'
+import { world, occupied } from './world.js'
 import { camStore, toast } from './camStore.js'
 
 const WORLD = interactionGroups([GROUPS.world])
@@ -247,7 +247,7 @@ function Door({ d, M }) {
         const s = st.current
         if (s.target === 1) {
           const p = world.player
-          if (Math.abs(p.x - HINGE_X) < 0.8 && Math.abs(p.z - d.zc) < d.w / 2 + 0.3) return 'Something is in the doorway'
+          if (occupied(HINGE_X - 0.8, HINGE_X + 0.8, d.zc - d.w / 2 - 0.3, d.zc + d.w / 2 + 0.3)) return 'Something is in the doorway'
           s.target = 0; return `Closing the ${d.label}`
         }
         s.target = 1; return `Opening the ${d.label}`
@@ -259,7 +259,7 @@ function Door({ d, M }) {
   useFrame((_, dt) => {
     const s = st.current
     const p = world.player
-    if (s.force == null && s.target === 0 && s.t > 0.02 && Math.abs(p.x - HINGE_X) < 0.7 && Math.abs(p.z - d.zc) < d.w / 2 + 0.25) s.target = 1   // never close on someone
+    if (s.force == null && s.target === 0 && s.t > 0.02 && occupied(HINGE_X - 0.7, HINGE_X + 0.7, d.zc - d.w / 2 - 0.25, d.zc + d.w / 2 + 0.25)) s.target = 1   // never close on someone
     if (s.force != null) { s.t = s.force; s.target = s.force > 0.5 ? 1 : 0 }                 // test hook: pin the door at a fraction
     const dir = s.force != null ? 0 : Math.sign(s.target - s.t)
     if (dir) s.t = clamp01(s.t + dir * (world.fastAnim ? dt : Math.min(dt, 0.05)) / 0.9)
@@ -380,18 +380,18 @@ function Slider({ M }) {
         const s = st.current
         if (s.target === 1) {
           const p = world.player
-          if (Math.abs(p.z - SLIDER.z) < 0.7 && p.x > SLIDER.split - 0.2 && p.x < SLIDER.x1 + 0.2) return 'Something is in the doorway'
+          if (occupied(SLIDER.split - 0.2, SLIDER.x1 + 0.2, SLIDER.z - 0.7, SLIDER.z + 0.7)) return 'Something is in the doorway'
           s.target = 0; return 'Closing the balcony door'
         }
         s.target = 1; return 'Opening the balcony door'
       },
     }
-    world.interactables.push(it)
-    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1) }
+    world.interactables.push(it); world.doors.slider = st.current
+    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); delete world.doors.slider }
   }, [])
   useFrame((_, dt) => {
     const s = st.current, p = world.player
-    if (s.target === 0 && s.t > 0.02 && Math.abs(p.z - SLIDER.z) < 0.6 && p.x > SLIDER.split - 0.1 && p.x < SLIDER.x1 + 0.1) s.target = 1
+    if (s.target === 0 && s.t > 0.02 && occupied(SLIDER.split - 0.1, SLIDER.x1 + 0.1, SLIDER.z - 0.6, SLIDER.z + 0.6)) s.target = 1
     const dir = Math.sign(s.target - s.t)
     if (dir) s.t = clamp01(s.t + dir * (world.fastAnim ? dt : Math.min(dt, 0.05)) / 1.7)
     if (mover.current) mover.current.position.x = -smooth(s.t) * PANEL_W
@@ -528,7 +528,8 @@ function Interact() {
     let best = null, bd = 1e9
     if (camStore.get().transition === 'idle' || !camStore.get().transition) for (const it of world.interactables) {
       const d = Math.hypot(it.x - p.x, it.z - p.z)
-      if (d < it.range && d < bd) { best = it; bd = d }
+      const sc = d + (it.penalty || 0)
+      if (d < it.range && sc < bd) { best = it; bd = sc }
     }
     cur.current = best
     const text = best ? (best.prompt ? best.prompt() : `${best.isOpen() ? 'close' : 'open'} the ${best.label}`) : ''
@@ -541,8 +542,10 @@ function Interact() {
       const it = cur.current
       if (!it) return
       e.preventDefault()
+      if (world.playerLock) return                              // an interaction sequence (petting) holds the controls
       const msg = it.toggle()
       if (msg) toast(msg)
+      if (it.id !== 'kitten' && world.onInteract) world.onInteract(it, msg)
     }
     window.addEventListener('keydown', on)
     return () => window.removeEventListener('keydown', on)

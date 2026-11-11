@@ -96,6 +96,8 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       clean: () => toggleClean(setMode),
       teleport: (x, y, z) => { playerRef.current?.setTranslation({ x, y, z }, true); playerRef.current?.setLinvel({ x: 0, y: 0, z: 0 }, true) },   // test hook
       fastAnim: (v) => { shared.fastAnim = !!v },
+      companion: () => shared.companionApi,                                                                                        // V12 test hook (kitten state / pet / AI states / nav)
+      character: () => shared.character,                                                                                           // V12 test hook (player model API)
       setFollowYaw: (y) => { st.f.yaw = st.f.sy = y },                                                                                              // test hook
       setFree: (x, y, z, yaw, pitch, fov) => {   // jump the free camera to an exact pose (used for screenshots/tests)
         camStore.set({ mode: 'free' }); st.mode = 'free'; st.trans.t = 1
