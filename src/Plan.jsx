@@ -88,8 +88,8 @@ function buildArch() {
   add('brass', EX0 + 0.03, EX1 - 0.03, 0, 0.005, 0.3, 0.37)                               // brushed-brass threshold strip under the door line
   // ONE frame: an espresso lining wraps the whole reveal (jambs + head, full 0.4 m wall depth) and a slim flat casing sits on the room face.
   // (V10 stacked a pale lining, a broad dark casing, an inner bead and plinth blocks here; that read as nested frames.)
-  add('dk', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('dk', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('dk', EX0, EX1, 3.07, 3.1, 0, 0.4)
-  add('dk', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('dk', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('dk', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
+  add('trim', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('trim', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('trim', EX0, EX1, 3.07, 3.1, 0, 0.4)
+  add('trim', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('trim', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('trim', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
   for (const [a, b] of [[-3.2, -0.4], [2.8, 3.95]]) {                                                              // flanking raised panels
     const x0 = a + (a < 0 ? 0.0 : 0), yb = 0.55, yt = 3.15, t = 0.05
     if (b - a < 0.6) continue
@@ -173,6 +173,7 @@ function makeMats(src = {}) {
     stone: std('#d8cab6', { roughness: 0.55 }),
     door: std('#efe5d2', { roughness: 0.55 }),
     dk: std('#2d2019', { roughness: 0.5 }),
+    doorHi: std('#e6d9c3', { roughness: 0.5 }),
     walnutHi: std('#41322a', { roughness: 0.38 }),                                          // cream satin paint
     walnut: std('#2c211c', { roughness: 0.42 }),                                          // espresso entrance door
     limestone: new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }),
@@ -189,8 +190,8 @@ function makeMats(src = {}) {
 // ------------------------------------------------------------------ doors
 const HINGE_X = -4.65
 
-const leafParts = (lw, panels = [[0.3, 1.3], [1.52, 2.74]]) => {
-  const body = [[0, DOOR_H / 2, 0, 0.05, DOOR_H - 0.02, lw]], frame = [], brass = []
+const leafParts = (lw, panels = [[0.3, 1.3], [1.52, 2.74]], h = DOOR_H - 0.02) => {
+  const body = [[0, h / 2, 0, 0.05, h, lw]], frame = [], brass = []
   const pw = lw - 0.32
   for (const sx of [1, -1]) for (const [yb, yt] of panels) {
     const x = sx * 0.0305, t = 0.012, s = 0.045
@@ -202,7 +203,7 @@ const leafParts = (lw, panels = [[0.3, 1.3], [1.52, 2.74]]) => {
 
 function Leaf({ lw, dir, hingeZ, M, rotRef, mat, hingeX = HINGE_X, hingeY = 0, entrance = false }) {
   const g = useMemo(() => {
-    const p = leafParts(lw, entrance ? [[0.3, 1.0], [1.25, 2.75]] : undefined)
+    const p = leafParts(lw, entrance ? [[0.3, 1.05], [1.3, 2.85]] : undefined, entrance ? 3.06 : undefined)
     return { body: boxes(p.body), frame: boxes(p.frame) }
   }, [lw, entrance])
   const brass = useMemo(() => {
@@ -224,7 +225,7 @@ function Leaf({ lw, dir, hingeZ, M, rotRef, mat, hingeX = HINGE_X, hingeY = 0, e
     <group ref={rotRef} position={[hingeX, hingeY, hingeZ]}>
       <group position={[0, 0, dir * lw / 2]}>
         <mesh geometry={g.body} material={mat || M.door} castShadow receiveShadow />
-        <mesh geometry={g.frame} material={entrance ? M.walnutHi : (mat || M.door)} castShadow receiveShadow />
+        <mesh geometry={g.frame} material={entrance ? M.doorHi : (mat || M.door)} castShadow receiveShadow />
       </group>
       <mesh geometry={brass} material={M.brass} castShadow />
     </group>
@@ -326,7 +327,7 @@ function Entrance({ M }) {
   return (
     <>
       <group position={[X0, 0, Z]} rotation={[0, Math.PI / 2, 0]}>
-        <Leaf lw={W} dir={1} hingeZ={0} hingeX={0} M={M} rotRef={rot} mat={M.walnut} entrance />
+        <Leaf lw={W} dir={1} hingeZ={0} hingeX={0} M={M} rotRef={rot} mat={M.door} entrance />
       </group>
       <mesh ref={glow} position={[1.2, 1.7, 2.2]} visible={false}>
         <planeGeometry args={[5, 4.2]} /><meshBasicMaterial color="#ffd9a0" toneMapped={false} />

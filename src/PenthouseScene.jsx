@@ -40,10 +40,10 @@ export const L = {
 // which the real-time renderer does not have, so the surfaces that receive that bounce are lifted and warmed here.
 const GRADE = {
   WW_Parquet_Baked_GAME: { mul: [L.floorR, L.floorG, L.floorB], env: L.floorEnv },
-  WW_Plaster_Ivory_GAME: { mul: [0.90, 1.12, 0.95] },
-  WW_Ceiling_Ivory_GAME: { mul: [1.30, 1.40, 1.15] },
-  WW_Trim_Satin_GAME:    { mul: [1.00, 1.17, 0.95] },
-  WW_Skirting_GAME:      { mul: [1.00, 1.17, 0.95] },
+  WW_Plaster_Ivory_GAME: { set: [0.80, 0.69, 0.55] }      // warm ivory/cream (was a green-biased mul that read sage-grey in shade),
+  WW_Ceiling_Ivory_GAME: { set: [0.86, 0.78, 0.66] },
+  WW_Trim_Satin_GAME:    { set: [0.86, 0.77, 0.63] },
+  WW_Skirting_GAME:      { set: [0.86, 0.77, 0.63] },
   WW_Frame_Bronze_GAME:  { set: [0.014, 0.014, 0.016], rough: 0.92, metal: 0.0, envI: 0.0 },   // V10: slim matte-black aluminium on every exterior frame
 }
 const TONE = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neutral: THREE.NeutralToneMapping, linear: THREE.LinearToneMapping }
@@ -227,6 +227,7 @@ function SunRig({ lightRef, targetRef, fillRef }) {
   return null
 }
 
+const AMB = { morning: 0.35, afternoon: 0.3, golden: 0.3, blue: 0.2, night: 0.1 }   // warm interior bounce so shadowed ivory walls stay cream, not grey-green
 const walkDir = new THREE.Vector3()
 // Active visuals: the ORIGINAL pill avatar + geometric cat are the default placeholders. The V12 procedural character/kitten/companion
 // are experimental and OFF unless ?model=v12 is passed (kept in src/character and src/companion for later replacement work).
@@ -308,7 +309,7 @@ export default function PenthouseScene() {
         <AreaLight position={[3.0, 3.55, -7.2]} rotationY={Math.PI / 2} target={[0, 0.5, -1.6]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />
         <Suspense fallback={null}>
           <Physics gravity={[0, -9.8, 0]}>
-            <LevelGate level="penthouse"><Penthouse onSpawn={(p) => spawn.current.copy(p)} /></LevelGate>
+            <LevelGate level="penthouse"><ambientLight color="#ffe6d2" intensity={AMB[atmo.preset] ?? 0.4} /><Penthouse onSpawn={(p) => spawn.current.copy(p)} /></LevelGate>
             {!OFF.has('street') && <StreetPhysics />}
             <Transit />
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
