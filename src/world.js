@@ -3,6 +3,7 @@ export const world = {
   player: { x: 0, y: 0, z: 0 },   // written by Player every frame
   fastAnim: false,                // test hook: let door animations use the real frame delta (headless runs render at <1 fps)
   doors: {},                      // test hook: door state objects by id ({t, target, force}); setting .force pins a door at that open fraction
+  level: 'penthouse',             // 'penthouse' | 'street' : which floor the player is on (interactables, camera bounds and the sun follow this)
   interactables: [],              // { id, label, x, z, range, isOpen(), toggle() -> message | false }
 }
 

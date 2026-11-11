@@ -303,12 +303,11 @@ function Entrance({ M }) {
       isOpen: () => st.current.target === 1,
       toggle: () => {
         if (camStore.get().transition !== 'idle') return false
-        st.current.target = 1; camStore.set({ transition: 'opening', dest: 'lobby' }); return false
+        st.current.target = 1; camStore.set({ transition: 'opening', dest: 'down' }); return false
       },
     }
     world.interactables.push(it); world.doors.entrance = st.current
-    world.returnHome = () => { if (camStore.get().transition === 'overlay') { st.current.target = 0; camStore.set({ transition: 'closing' }) } }
-    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); world.returnHome = null; delete world.doors.entrance }
+    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); delete world.doors.entrance }
   }, [])
   useFrame((_, dt) => {
     const s = st.current, step = world.fastAnim ? dt : Math.min(dt, 0.05)
@@ -319,7 +318,7 @@ function Entrance({ M }) {
     if (light.current) light.current.intensity = 9 * smooth(s.t)
     if (glow.current) glow.current.visible = s.t > 0.01
     const tr = camStore.get().transition
-    if (tr === 'opening' && s.t >= 1) { s.hold += step; if (s.hold > 0.5) { s.hold = 0; camStore.set({ transition: 'overlay' }) } }
+    if (tr === 'opening' && s.t >= 1) { s.hold += step; if (s.hold > 0.5) { s.hold = 0; world.rideLift ? world.rideLift('down') : camStore.set({ transition: 'idle' }) } }
     if (tr === 'closing' && s.t <= 0) camStore.set({ transition: 'idle' })
     const should = s.target === 0 && s.t < 0.04
     if (should !== blockRef.current) { blockRef.current = should; setBlock(should) }
@@ -527,6 +526,7 @@ function Interact() {
     const p = world.player
     let best = null, bd = 1e9
     if (camStore.get().transition === 'idle' || !camStore.get().transition) for (const it of world.interactables) {
+      if ((it.level || 'penthouse') !== (world.level || 'penthouse')) continue
       const d = Math.hypot(it.x - p.x, it.z - p.z)
       const sc = d + (it.penalty || 0)
       if (d < it.range && sc < bd) { best = it; bd = sc }
@@ -538,7 +538,7 @@ function Interact() {
   useEffect(() => {
     const on = (e) => {
       if (e.code !== 'Enter' || e.repeat || e.metaKey || e.altKey) return
-      if (camStore.get().transition === 'overlay') { e.preventDefault(); world.returnHome && world.returnHome(); return }
+      if (camStore.get().transition === 'overlay') { e.preventDefault(); return }
       const it = cur.current
       if (!it) return
       e.preventDefault()

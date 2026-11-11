@@ -1,12 +1,13 @@
 // Procedural golden-hour sky + 3D Canary Wharf skyline + Thames. Replaces the baked dome backdrop.
 // Colours are display (sRGB) colours sampled from the reference image, authored with toneMapped:false so they land as written.
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Neighbourhood, rearLayout } from './Neighbourhood.jsx'
 import { Boats } from './Boats.jsx'
 import { Waterfront } from './Waterfront.jsx'
-import { OFF } from './world.js'
+import { StreetVisuals } from './street/Street.jsx'
+import { world, OFF } from './world.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { buildLayout, SCALE, EYE_ABOVE_WATER, SUN_AZ_DEG, SUN_EL_DEG, TWIST } from './skylineData.js'
 
@@ -324,7 +325,7 @@ function River({ layout }) {
     })
   }, [])
   mat.uniforms.uCols.value = cols
-  useFrame(({ clock }) => { mat.uniforms.uCam.value.copy(camera.position); mat.uniforms.uTime.value = clock.elapsedTime })
+  useFrame(({ clock }) => { mat.uniforms.uCam.value.copy(camera.position); mat.uniforms.uTime.value = clock.elapsedTime; mat.uniforms.uInvScale.value = 1 / (world.extScale || SCALE) })
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -EYE_ABOVE_WATER, -577]} material={mat} renderOrder={3}>
@@ -345,14 +346,23 @@ export function Skyline() {
   const rearGeoms = useMemo(() => buildFacadeGeometries(rearLayout()), [])
   const one = layout.find((b) => b.name === 'One Canada Sq')
   // the skyline lives in "real metre" space around the CAM1 eye; scale it down and pin it to the room's eye height
+  // Seen from the penthouse the exterior is compressed (scale 1/6, pinned to the room's eye height). When the player is down on the street the very same
+  // world is drawn 1:1 with its origin at the scene origin, so street coordinates == scene coordinates and the Thames, skyline and neighbourhood agree.
+  const g = useRef()
+  useFrame(() => {
+    const street = world.level === 'street', s = street ? 1 : SCALE
+    if (!g.current) return
+    g.current.scale.setScalar(s); g.current.position.set(0, street ? 0 : 1.7, street ? 0 : -0.4); world.extScale = s
+  })
   return (
-    <group position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
+    <group ref={g} position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
       <FacadeMeshes geoms={geoms} />
       <FacadeMeshes geoms={rearGeoms} />
       {!OFF.has('hood') && <Neighbourhood />}
       {!OFF.has('hood') && <Boats />}
       <PyramidCap b={one} />
       <Waterfront />
+      {!OFF.has('street') && <StreetVisuals />}
       {/* mirrored copy under the water plane = reflections of the lit towers */}
       <group scale={[1, -1, 1]} position={[0, -2 * EYE_ABOVE_WATER, 0]}><FacadeMeshes geoms={mirrorGeoms} mirrored /></group>
       <River layout={layout} />

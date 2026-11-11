@@ -6,7 +6,8 @@ import { useRapier, interactionGroups } from '@react-three/rapier'
 import * as THREE from 'three'
 import { input } from './input.js'
 import { camStore, toast } from './camStore.js'
-import { world as shared } from './world.js'      // (rapier's own `world` is destructured below, hence the alias)
+import { world as shared } from './world.js'
+import { GY } from './street/geo.js'      // (rapier's own `world` is destructured below, hence the alias)
 
 // Collision groups. The player collides with world + glass. Camera rays only see "world" (not glass, not the player),
 // so the free camera can look through / go out past the glazing onto the balcony but never through walls or floors.
@@ -27,6 +28,10 @@ const SIMS0 = { yaw: 0.55, pitch: 0.95, dist: 12 }
 const FREE0 = { pos: [-1.3, 1.65, -0.6], yaw: 0, pitch: -0.05 }
 const SIMS_BOUNDS = { x: [-10.2, 5.8], z: [-14, 0.3] }
 const FREE_BOUNDS = { x: [-10.4, 6.4], y: [0.35, 3.5], z: [-14.8, 1.6] }
+// down on the street the same three camera modes work over the whole neighbourhood (world coordinates are 1:1 there)
+const STREET_FREE = { x: [-150, 150], y: [GY + 0.35, GY + 140], z: [-150, 302] }
+const STREET_SIMS = { x: [-150, 150], z: [-150, 302] }
+const onStreet = () => shared.level === 'street'
 
 function makeState() {
   return {
@@ -96,7 +101,8 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       clean: () => toggleClean(setMode),
       teleport: (x, y, z) => { playerRef.current?.setTranslation({ x, y, z }, true); playerRef.current?.setLinvel({ x: 0, y: 0, z: 0 }, true) },   // test hook
       fastAnim: (v) => { shared.fastAnim = !!v },
-      game: () => shared,                                                                                                          // test hook: shared game world (interactables, doors)
+      game: () => shared,
+      enterStreet: () => shared.enterStreet && shared.enterStreet(), enterPenthouse: () => shared.enterPenthouse && shared.enterPenthouse(),                                                                                                          // test hook: shared game world (interactables, doors)
       companion: () => shared.companionApi,                                                                                        // V12 test hook (kitten state / pet / AI states / nav)
       character: () => shared.character,                                                                                           // V12 test hook (player model API)
       setFollowYaw: (y) => { st.f.yaw = st.f.sy = y },                                                                                              // test hook
@@ -106,7 +112,9 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
         st.x.yaw = st.x.sy = yaw; st.x.pitch = st.x.sp = pitch; st.x.fov = fov || null
       },
     }
-    return () => { input.detach(); input.hotkeys = {}; delete window.__ww }
+    shared.teleportPlayer = (x, y, z) => { playerRef.current?.setTranslation({ x, y, z }, true); playerRef.current?.setLinvel({ x: 0, y: 0, z: 0 }, true) }
+    shared.setFollowYaw = (y) => { st.f.yaw = st.f.sy = y; st.f.eff = Math.min(st.f.eff, st.f.sd) }
+    return () => { input.detach(); input.hotkeys = {}; delete window.__ww; shared.teleportPlayer = null; shared.setFollowYaw = null }
   }, [gl, camera, playerRef])
 
   // ---------- per-frame ----------
@@ -143,7 +151,7 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       const o = mode === 'follow' ? st.f : st.s
       const lim = mode === 'follow'
         ? { pmin: -0.12, pmax: 1.25, dmin: 1.1, dmax: 7 }
-        : { pmin: 0.35, pmax: 1.45, dmin: 4, dmax: 26 }
+        : { pmin: 0.35, pmax: 1.45, dmin: 4, dmax: onStreet() ? 80 : 26 }
       const rot = (input.down('KeyQ') ? 1 : 0) - (input.down('KeyE') ? 1 : 0)
       o.yaw += -inp.ox * 0.0055 + rot * dt * 1.6
       o.pitch = clamp(o.pitch + inp.oy * 0.0045, lim.pmin, lim.pmax)
@@ -162,9 +170,11 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
         const k = o.sd * 0.0016
         o.pivot.x += (fx * mf + rx * mr) * sp + (-inp.px * rx + inp.py * fx) * k
         o.pivot.z += (fz * mf + rz * mr) * sp + (-inp.px * rz + inp.py * fz) * k
-        o.pivot.x = clamp(o.pivot.x, SIMS_BOUNDS.x[0], SIMS_BOUNDS.x[1])
-        o.pivot.z = clamp(o.pivot.z, SIMS_BOUNDS.z[0], SIMS_BOUNDS.z[1])
-        o.spivot.x = damp(o.spivot.x, o.pivot.x, 10, dt); o.spivot.z = damp(o.spivot.z, o.pivot.z, 10, dt); o.spivot.y = 0.9
+        const SB = onStreet() ? STREET_SIMS : SIMS_BOUNDS
+        o.pivot.x = clamp(o.pivot.x, SB.x[0], SB.x[1])
+        o.pivot.z = clamp(o.pivot.z, SB.z[0], SB.z[1])
+        o.pivot.y = onStreet() ? GY + 0.9 : 0.9
+        o.spivot.x = damp(o.spivot.x, o.pivot.x, 10, dt); o.spivot.z = damp(o.spivot.z, o.pivot.z, 10, dt); o.spivot.y = o.pivot.y
         _pivot.copy(o.spivot)
       }
 
@@ -214,10 +224,13 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
         }
         x.pos[ax] += d
       }
+      const FB = onStreet() ? STREET_FREE : FREE_BOUNDS
       if (collide) {
-        x.pos.x = clamp(x.pos.x, FREE_BOUNDS.x[0], FREE_BOUNDS.x[1])
-        x.pos.y = clamp(x.pos.y, FREE_BOUNDS.y[0], FREE_BOUNDS.y[1])
-        x.pos.z = clamp(x.pos.z, FREE_BOUNDS.z[0], FREE_BOUNDS.z[1])
+        x.pos.x = clamp(x.pos.x, FB.x[0], FB.x[1])
+        x.pos.y = clamp(x.pos.y, FB.y[0], FB.y[1])
+        x.pos.z = clamp(x.pos.z, FB.z[0], FB.z[1])
+      } else if (onStreet()) {
+        x.pos.y = clamp(x.pos.y, GY + 0.05, GY + 400)
       } else {
         x.pos.y = clamp(x.pos.y, 0.05, 60)
         x.pos.clampLength(0, 120)
@@ -242,6 +255,9 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       camera.quaternion.copy(outQuat)
       camera.fov = damp(camera.fov, outFov, 6, dt)
     }
+    const st1 = onStreet(), nn = st1 ? 0.15 : 0.05, ff = st1 ? 4500 : 700                                 // street scale needs a longer view and a slightly larger near plane
+    if (camera.near !== nn || camera.far !== ff) { camera.near = nn; camera.far = ff }
+    if (scene.fog) { scene.fog.near = st1 ? 600 : 100; scene.fog.far = st1 ? 3360 : 560 }              // same haze, expressed in the street's 1:1 metres
     camera.updateProjectionMatrix()
   })
 
@@ -269,7 +285,7 @@ function switchMode(st, mode, camera, playerRef) {
 function focusPlayer(st, playerRef, snap = false) {
   const p = playerRef.current?.translation()
   if (!p) return
-  st.s.pivot.set(p.x, 0.9, p.z)
+  st.s.pivot.set(p.x, onStreet() ? p.y + 0.9 : 0.9, p.z)
   if (snap) st.s.spivot.copy(st.s.pivot)
 }
 
@@ -277,6 +293,10 @@ function resetView(st, playerRef) {
   const mode = camStore.get().mode
   if (mode === 'follow') Object.assign(st.f, { yaw: FOLLOW0.yaw, pitch: FOLLOW0.pitch, dist: FOLLOW0.dist })
   if (mode === 'sims') { Object.assign(st.s, { yaw: SIMS0.yaw, pitch: SIMS0.pitch, dist: SIMS0.dist }); focusPlayer(st, playerRef) }
-  if (mode === 'free') { st.x.pos.set(...FREE0.pos); st.x.vel.set(0, 0, 0); st.x.yaw = FREE0.yaw; st.x.pitch = FREE0.pitch }
+  if (mode === 'free') {
+    const p = playerRef.current?.translation()
+    if (onStreet() && p) st.x.pos.set(p.x, p.y + 1.65, p.z + 0.6); else st.x.pos.set(...FREE0.pos)
+    st.x.vel.set(0, 0, 0); st.x.yaw = FREE0.yaw; st.x.pitch = FREE0.pitch
+  }
   toast('View reset')
 }

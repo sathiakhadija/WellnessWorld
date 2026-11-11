@@ -1,7 +1,5 @@
-// Placeholder registry for what lies beyond the main entrance. V10 intentionally builds NO exterior environment (not approved yet):
-// activating "Go Outside" shows the destination card below and Enter returns to the penthouse.
-// To add the real lobby later: register a scene id here (e.g. 'lobby' -> <LobbyScene/>), have the transition state machine in Plan.jsx's <Entrance/>
-// mount it when camStore.transition === 'overlay', and call world.returnHome() when the player comes back.
+// Cards shown while the lift travels between the penthouse and the street (HUD overlay, see Plan.jsx <Entrance/> and PenthouseScene <Transit/>).
 export const DESTINATIONS = {
-  lobby: { title: 'Building lobby', sub: 'Coming soon — the building lobby and the world outside are not part of this release.' },
+  down: { title: 'Going down', sub: 'The lift takes you to the garden lobby.' },
+  up: { title: 'Going up', sub: 'Back to the penthouse.' },
 }

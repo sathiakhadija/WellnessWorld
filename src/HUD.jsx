@@ -99,8 +99,8 @@ export default function HUD() {
       <div className="ww-prompt" style={{ opacity: show ? 1 : 0, transform: `translateX(-50%) translateY(${show ? 0 : 6}px)` }}><kbd>Enter</kbd>{last.current}</div>
       <div className="ww-toast" style={{ opacity: c.toast ? 1 : 0 }}>{c.toast}</div>
       <div className="ww-ov" style={{ opacity: ov ? 1 : 0, pointerEvents: ov ? 'auto' : 'none' }}>
-        <h2>{dest.title}</h2><p>{dest.sub}</p><p><kbd>Enter</kbd> return to the penthouse</p>
-        <button style={{ marginTop: 6, cursor: 'pointer', font: 'inherit', color: 'inherit', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)', borderRadius: 999, padding: '6px 18px' }} onClick={() => world.returnHome && world.returnHome()}>Return</button>
+        <h2>{dest.title}</h2><p>{dest.sub}</p>
+        {false && <button style={{ marginTop: 6, cursor: 'pointer', font: 'inherit', color: 'inherit', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)', borderRadius: 999, padding: '6px 18px' }} onClick={() => world.returnHome && world.returnHome()}>Return</button>}
       </div>
     </>
   )

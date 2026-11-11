@@ -17,6 +17,9 @@ import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
 import Plan from './Plan.jsx'
 import CherryTree, { Petals } from './Tree.jsx'
 import { world, OFF } from './world.js'
+import { StreetPhysics } from './street/Street.jsx'
+import { BX } from './street/plan.js'
+import { GY } from './street/geo.js'
 
 RectAreaLightUniformsLib.init()
 
@@ -150,6 +153,68 @@ function CleanHide({ children }) {
   return <group ref={ref}>{children}</group>
 }
 
+// show a subtree only on one floor (the penthouse is hidden while the player is on the street, and vice versa for nothing: the street always renders)
+function LevelGate({ level, children }) {
+  const r = useRef()
+  useFrame(() => { if (r.current) r.current.visible = world.level === level })
+  return <group ref={r}>{children}</group>
+}
+
+// The lift: penthouse <-> street. Fades to the lift card, moves the player + camera, resets the doors. Also exposes enterStreet/enterPenthouse for tests.
+function Transit() {
+  useEffect(() => {
+    const toStreet = () => {
+      world.level = 'street'
+      world.teleportPlayer && world.teleportPlayer(BX, GY + 0.05, 7.4)
+      world.setPlayerYaw && world.setPlayerYaw(0); world.setFollowYaw && world.setFollowYaw(Math.PI)
+      const d = world.doors.entrance; if (d) { d.t = 0; d.target = 0; d.force = undefined; d.hold = 0 }
+    }
+    const toPenthouse = () => {
+      world.level = 'penthouse'
+      world.teleportPlayer && world.teleportPlayer(1.2, 0.05, -1.6)
+      world.setPlayerYaw && world.setPlayerYaw(Math.PI); world.setFollowYaw && world.setFollowYaw(0)
+    }
+    world.enterStreet = toStreet; world.enterPenthouse = toPenthouse
+    world.rideLift = (dir) => {
+      camStore.set({ transition: 'overlay', dest: dir })
+      const L = world.liftDoor
+      if (dir === 'up' && L) L.target = 1
+      setTimeout(() => {
+        if (dir === 'down') { toStreet(); if (L) { L.t = 0; L.target = 1; setTimeout(() => { L.target = 0 }, 4500) } }
+        else { toPenthouse(); if (L) L.target = 0 }
+        setTimeout(() => camStore.set({ transition: 'idle', dest: '' }), 700)
+      }, 1700)
+    }
+    if (new URLSearchParams(window.location.search).get('at') === 'street') setTimeout(toStreet, 600)         // dev/test: start on the street
+    return () => { world.rideLift = null; world.enterStreet = world.enterPenthouse = null }
+  }, [])
+  return null
+}
+
+// One sun, two framings: over the penthouse (tight shadow box around the room) and on the street (a 110 m box following the player, snapped to a grid so shadows don't shimmer).
+function SunRig({ lightRef, targetRef, fillRef }) {
+  const mode = useRef('')
+  useFrame(() => {
+    const L = lightRef.current, T = targetRef.current, f = fillRef.current
+    if (!L || !T) return
+    const street = world.level === 'street', p = world.player
+    if (street) {
+      const sx = Math.round(p.x / 6) * 6, sz = Math.round(p.z / 6) * 6
+      T.position.set(sx, GY, sz); T.updateMatrixWorld(); L.position.set(sx + 21, GY + 13, sz - 45)
+      if (mode.current !== 'street') {
+        const c = L.shadow.camera; c.left = -60; c.right = 60; c.top = 60; c.bottom = -60; c.near = 1; c.far = 190; c.updateProjectionMatrix()
+        L.shadow.bias = -0.0006; L.shadow.normalBias = 0.05; mode.current = 'street'
+      }
+    } else if (mode.current !== 'penthouse') {
+      T.position.set(-1, 0, -6); T.updateMatrixWorld(); L.position.set(20, 8, -51)
+      const c = L.shadow.camera; c.left = -14; c.right = 14; c.top = 14; c.bottom = -14; c.near = 1; c.far = 120; c.updateProjectionMatrix()
+      L.shadow.bias = -0.0004; L.shadow.normalBias = 0.03; mode.current = 'penthouse'
+    }
+    if (f) f.intensity = street ? 0.55 : 0
+  })
+  return null
+}
+
 const walkDir = new THREE.Vector3()
 // Active visuals: the ORIGINAL pill avatar + geometric cat are the default placeholders. The V12 procedural character/kitten/companion
 // are experimental and OFF unless ?model=v12 is passed (kept in src/character and src/companion for later replacement work).
@@ -159,6 +224,10 @@ const LEGACY = !EXPERIMENTAL
 function Player({ spawn, bodyRef, meshRef }) {
   const heading = useRef(0)
   const speedRef = useRef(0)
+  useEffect(() => {
+    world.setPlayerYaw = (y) => { heading.current = y; world.faceYaw = null; if (meshRef.current) meshRef.current.rotation.y = y }
+    return () => { world.setPlayerYaw = null }
+  }, [meshRef])
   useFrame((_, delta) => {
     const body = bodyRef.current
     if (!body) return
@@ -173,6 +242,9 @@ function Player({ spawn, bodyRef, meshRef }) {
     }
     speedRef.current = speed
     const tp = body.translation(); world.player.x = tp.x; world.player.y = tp.y; world.player.z = tp.z
+    if (tp.y < (world.level === 'street' ? GY - 6 : -8) && world.teleportPlayer) {            // safety net: never leave the player in the void
+      if (world.level === 'street') world.teleportPlayer(BX, GY + 0.1, 8); else world.teleportPlayer(spawn.x, spawn.y + 0.2, spawn.z)
+    }
     const lin = body.linvel()
     body.setLinvel({ x: walkDir.x * speed, y: lin.y, z: walkDir.z * speed }, true)
     if ((speed > 0 || world.faceYaw != null) && meshRef.current) {   // turn the model to face its walking direction (or an interaction target)
@@ -197,6 +269,7 @@ export default function PenthouseScene() {
   const bodyRef = useRef(null)
   const meshRef = useRef(null)
   const sunTarget = useMemo(() => new THREE.Object3D(), [])
+  const sunRef = useRef(), fillRef = useRef()
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <Canvas shadows camera={{ fov: 50, near: 0.05, far: 700, position: [0, 1.7, 0] }}
@@ -207,21 +280,28 @@ export default function PenthouseScene() {
         <Skyline />
         {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y). Target = room centre, shadow frustum covers the whole penthouse */}
         <primitive object={sunTarget} position={[-1, 0, -6]} />
-        <directionalLight target={sunTarget} color={L.sunCol} intensity={L.sun} position={[20, 8, -51]} castShadow shadow-mapSize={[4096, 4096]}
+        <directionalLight ref={sunRef} target={sunTarget} color={L.sunCol} intensity={L.sun} position={[20, 8, -51]} castShadow shadow-mapSize={[4096, 4096]}
           shadow-camera-left={-14} shadow-camera-right={14} shadow-camera-top={14} shadow-camera-bottom={-14} shadow-camera-near={1} shadow-camera-far={120}
           shadow-bias={-0.0004} shadow-normalBias={0.03} />
         {/* warm bounce stand-in: sky colour lights upward faces, honey ground colour lights downward faces (ceiling, soffits) */}
         <hemisphereLight args={[L.hemiSky, L.hemiGround, L.hemi]} />
+        {/* street-only cool shadow fill (intensity 0 in the penthouse) */}
+        <hemisphereLight ref={fillRef} args={['#c9b8de', '#8f6f5e', 0]} />
+        <SunRig lightRef={sunRef} targetRef={{ current: sunTarget }} fillRef={fillRef} />
         {/* cove LED runs along the glazing wall and the right-hand glazing */}
         <AreaLight position={[-0.4, 3.55, -11.1]} target={[-0.4, 3.9, -9.4]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />
         <AreaLight position={[3.0, 3.55, -7.2]} rotationY={Math.PI / 2} target={[0, 0.5, -1.6]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />
         <Suspense fallback={null}>
           <Physics gravity={[0, -9.8, 0]}>
-            <Penthouse onSpawn={(p) => spawn.current.copy(p)} />
+            <LevelGate level="penthouse"><Penthouse onSpawn={(p) => spawn.current.copy(p)} /></LevelGate>
+            {!OFF.has('street') && <StreetPhysics />}
+            <Transit />
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
-            {!OFF.has('tree') && <CherryTree />}
-            {!OFF.has('tree') && <Petals />}
-            {LEGACY ? <CleanHide><Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></CleanHide> : <Companion />}
+            <LevelGate level="penthouse">
+              {!OFF.has('tree') && <CherryTree />}
+              {!OFF.has('tree') && <Petals />}
+              {LEGACY ? <CleanHide><Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></CleanHide> : <Companion />}
+            </LevelGate>
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>
         </Suspense>

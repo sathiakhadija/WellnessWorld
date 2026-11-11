@@ -197,6 +197,7 @@ function buildNeighbourhood() {
   void road
   const plaza = { x0: -125, x1: 80, z0: -150, z1: 62 }
   const park = { cx: 0, cz: 185, w: 240, h: 180 }
+  const carve = [{ x0: -64, x1: 64, z0: 0, z1: 216 }, { x0: -78, x1: 78, z0: 200, z1: 294 }, { x0: -154, x1: -58, z0: 220, z1: 270 }]   // the walkable street-level neighbourhood (src/street)
   const modernRects = [{ x0: 135, x1: 330, z0: 50, z1: 280 }, { x0: -330, x1: -135, z0: 50, z1: 280 }]
   const T = (cx, cz, rot) => { const cs = Math.cos(rot), sn = Math.sin(rot); return (lx, y, lz) => V(cx + lx * cs + lz * sn, GROUND_Y + y, cz - lx * sn + lz * cs) }
   const flat = (acc, cx, cz, rot, x0, x1, z0, z1, y, col) => { const P = T(cx, cz, rot); acc.quad(P(x0, y, z1), P(x1, y, z1), P(x1, y, z0), P(x0, y, z0), UV0, shadeColor(col, UP, 1)) }
@@ -205,13 +206,12 @@ function buildNeighbourhood() {
   // ---- plaza at the foot of the tower + riverside promenade
   flat(ground, 0, 0, 0, plaza.x0, plaza.x1, plaza.z0 + 30, plaza.z1, 0.12, new THREE.Color(0.62, 0.57, 0.56))
   flat(ground, 0, 0, 0, -2600, 2600, RIVER_NEAR + 2, RIVER_NEAR + 26, 0.14, new THREE.Color(0.58, 0.54, 0.54))
-  for (let x = -1500; x < 1500; x += 14 + (x % 5)) { addTree(x, RIVER_NEAR + 14, 4.2 + ((x * 7) % 3)); if (x > -100 && x < 70) continue }
-  for (let x = -100; x < 76; x += 17) { addTree(x, 40, 4.5); addTree(x, -118, 4.0) }
+  for (let x = -1500; x < 1500; x += 14 + (x % 5)) { if (x > -140 && x < 95) continue; addTree(x, RIVER_NEAR + 14, 4.2 + ((x * 7) % 3)) }
   // ---- tower shaft the penthouse stands on
   addBuilding(wall, roof, -15, -42, 94, 92, -14.5 - GROUND_Y, 0, new THREE.Color(0.66, 0.60, 0.52), SLATES[0], 'plain', rng(2), { w: 22, h: 6.4 })
 
   // ---- green square behind the tower
-  {
+  if (false) {
     const { cx, cz, w, h } = park, R = rng(41)
     flat(ground, cx, cz, 0, -w / 2 - 10, w / 2 + 10, -h / 2 - 10, h / 2 + 10, 0.1, new THREE.Color(0.56, 0.52, 0.52))                    // surrounding pavement / ring road kerb
     flat(ground, cx, cz, 0, -w / 2, w / 2, -h / 2, h / 2, 0.2, new THREE.Color(0.40, 0.52, 0.27))                                          // lawn
@@ -252,7 +252,7 @@ function buildNeighbourhood() {
         if (cz - ch / 2 < RIVER_NEAR + 28) continue                                        // keep every block (rotated cells overhang) behind the promenade, never over the water
         if (si < 2 && inRect(cx, cz, SECTORS[2], cw / 2, ch / 2)) continue                // centre sector owns the middle
         if (inRect(cx, cz, plaza, cw / 2, ch / 2)) continue
-        if (Math.abs(cx - park.cx) < park.w / 2 + 16 + cw / 2 && Math.abs(cz - park.cz) < park.h / 2 + 16 + ch / 2) continue
+        if (carve.some((r) => inRect(cx, cz, r, cw / 2, ch / 2))) continue                // street-level neighbourhood owns this ground
         const dist = Math.hypot(cx, cz)
         if (dist > 1350) continue
         const lod = dist < 260 ? 0 : dist < 600 ? 1 : 2
@@ -324,7 +324,7 @@ function dotTexture() {
 function GroundAndEmbankment() {
   const tex = useMemo(() => dotTexture(), [])
   const lamps = useMemo(() => {   // promenade along the near river edge
-    const p = []; for (let x = -2400; x <= 2400; x += 22) p.push(x, GROUND_Y + 6, RIVER_NEAR + 10)
+    const p = []; for (let x = -2400; x <= 2400; x += 22) { if (x > -135 && x < 90) continue; p.push(x, GROUND_Y + 6, RIVER_NEAR + 10) }       // (the street-level terrace has its own lamp standards)
     return new THREE.Float32BufferAttribute(p, 3)
   }, [])
   const gLamps = useMemo(() => { const g = new THREE.BufferGeometry(); g.setAttribute('position', lamps); return g }, [lamps])
@@ -333,8 +333,11 @@ function GroundAndEmbankment() {
       {/* street-level ground (dark asphalt/pavement) behind the embankment */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, GROUND_Y - 0.3, RIVER_NEAR + 2300]}><planeGeometry args={[9000, 4600]} /><meshBasicMaterial color="#4f4a55" /></mesh>
       {/* embankment wall + promenade */}
-      <mesh position={[0, GROUND_Y + 2, RIVER_NEAR + 2]}><boxGeometry args={[9000, 4, 8]} /><meshBasicMaterial color="#4a4350" /></mesh>
-      <mesh position={[0, GROUND_Y + 4.3, RIVER_NEAR + 12]}><boxGeometry args={[9000, 0.6, 16]} /><meshBasicMaterial color="#5a5260" /></mesh>
+      {/* (the stretch x -130..85 in front of the tower is rebuilt as the walkable Thames terrace in src/street) */}
+      <mesh position={[-2315, GROUND_Y + 2, RIVER_NEAR + 2]}><boxGeometry args={[4370, 4, 8]} /><meshBasicMaterial color="#4a4350" /></mesh>
+      <mesh position={[2292.5, GROUND_Y + 2, RIVER_NEAR + 2]}><boxGeometry args={[4415, 4, 8]} /><meshBasicMaterial color="#4a4350" /></mesh>
+      <mesh position={[-2315, GROUND_Y + 4.3, RIVER_NEAR + 12]}><boxGeometry args={[4370, 0.6, 16]} /><meshBasicMaterial color="#5a5260" /></mesh>
+      <mesh position={[2292.5, GROUND_Y + 4.3, RIVER_NEAR + 12]}><boxGeometry args={[4415, 0.6, 16]} /><meshBasicMaterial color="#5a5260" /></mesh>
       <points geometry={gLamps}><pointsMaterial size={4} sizeAttenuation={false} map={tex} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></points>
     </>
   )
