@@ -116,13 +116,14 @@ export function StreetVisuals() {
     ]
     const palette = ['#7d8a45', '#6f7f3f', '#91893f', '#5f7440', '#a39445', '#6a7a3c', '#87803a']
     let sd = 91; const R = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
-    const trees = []
+    const trees = [], leafTex = P.leafTexture()
     for (const kind of ['plane', 'ornamental', 'clipped']) {
       const list = built.inst[kind]; if (!list.length) continue
       const g = P.treeGeo(kind), trunk = new THREE.InstancedMesh(g.trunk, M.trunk, list.length), canopy = new THREE.InstancedMesh(g.canopy, null, list.length)
-      const cm = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: THREE.DoubleSide })
+      const cm = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, side: THREE.DoubleSide, map: leafTex, alphaTest: 0.5 })
       cm.onBeforeCompile = (sh) => {
         sh.uniforms.uTime = uTime.current
+        sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('float faceDirection = gl_FrontFacing ? 1.0 : - 1.0;', 'float faceDirection = 1.0;'))
         sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uTime;')
           .replace('#include <begin_vertex>', `#include <begin_vertex>
             float ph = instanceMatrix[3].x * 0.37 + instanceMatrix[3].z * 0.23;

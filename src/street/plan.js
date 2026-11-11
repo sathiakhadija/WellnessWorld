@@ -104,8 +104,8 @@ export function buildStreet() {
     ch.box(FL, -hw - 0.15, hw + 0.15, H - 0.1, H + 0.3, -t, 0.5, lim, 'trim', 'fulrbd'); ch.box(FL, -hw - 0.2, hw + 0.2, H + 0.3, H + 0.55, -t, 0.62, lim, 'trim', 'fulrbd')
     // ---- bronze shopfront-style glazing frame + entrance portal at the centre
     const zf = -0.08
-    for (const x of [-7, -5.2, -3.4, -1.45, 1.45, 3.4, 5.2, 7]) ch.box(FL, x - 0.05, x + 0.05, 0, 4.7, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
-    for (const y of [2.55, 4.7]) ch.box(FL, -7, 7, y - 0.06, y + 0.06, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
+    for (const x of [-7, -5.2, -3.4, -1.45, 1.45, 3.4, 5.2, 7]) ch.box(FL, x - 0.03, x + 0.03, 0, 4.7, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
+    for (const y of [2.55, 4.7]) ch.box(FL, -7, 7, y - 0.035, y + 0.035, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
     for (const s of [-1, 1]) ch.box(FL, s * 1.45 - 0.09, s * 1.45 + 0.09, 0, 3.2, zf - 0.12, zf + 0.14, bronze, 'metal', 'fulrb', 1, 1, 0)
     ch.box(FL, -1.55, 1.55, 3.2, 3.38, zf - 0.12, zf + 0.14, bronze, 'metal', 'fulrb', 1, 1, 0)
     ch.box(FL, -1.2, 1.2, 3.38, 3.5, zf - 0.02, zf + 0.04, brass, 'metal', 'fu', 1, 1, 0)

@@ -1,16 +1,33 @@
 // Street furniture and planting as reusable geometry, drawn once at the origin and instanced across the neighbourhood.
 import * as THREE from 'three'
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { Chunk, frame, C, rng } from './geo.js'
 import { PAL } from './facade.js'
+import BAKED from './baked/props.json'   // produced by assets/blender/make_props.py (Blender 5.3 / bpy): lathe, bevel and swept-curve models
 
 const F0 = frame(0, 0, 0, 0)
 const iron = () => C('#26242b'), brass = () => C(PAL.brass), stone = () => C('#d4c8b0'), oak = () => C('#8a6a48')
 
+
+// ---- Blender-baked props: triangle soup per material bucket -> creased-normal geometry (smooth on curves, crisp on bevel edges)
+function bakedGeo(name) {
+  const o = {}
+  for (const [bucket, d] of Object.entries(BAKED[name])) {
+    const n = d.p.length / 3, uv = new Float32Array(n * 2)
+    // d.p holds positions and d.c colours interleaved per triangle in blocks of 9 -> unpack
+    const P = new Float32Array(n * 3), Cc = new Float32Array(n * 3)
+    P.set(d.p); Cc.set(d.c)
+    for (let i = 0; i < n; i++) { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('color', new THREE.BufferAttribute(Cc, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
+    o[bucket] = toCreasedNormals(g, 0.7)
+  }
+  return o
+}
 // returns { bucketKey: BufferGeometry }
 const out = (ch) => { const o = {}; for (const k of Object.keys(ch.b)) o[k] = ch.b[k].geometry(); return o }
 
-export function lampGeo(h = 4.8) {
+export function lampGeo(h = 4.8) { return bakedGeo('lamp') }
+export function lampGeoOld(h = 4.8) {
   const c = new Chunk('lamp', rng(3)), I = iron()
   c.box(F0, -0.22, 0.22, 0, 0.2, -0.22, 0.22, I, 'metal', 'fulrb', 1, 1, 0)
   c.prism(F0, 0, 0, 0.17, 0.12, 0.2, 0.9, I, 'metal', 8)
@@ -25,7 +42,8 @@ export function lampGeo(h = 4.8) {
   c.prism(F0, 0, 0, 0.03, 0.01, y1, y1 + 0.22, brass(), 'metal', 6)
   return out(c)
 }
-export function benchGeo() {
+export function benchGeo() { return bakedGeo('bench') }
+export function benchGeoOld() {
   const c = new Chunk('bench', rng(4)), I = iron(), W = oak()
   for (const sx of [-0.78, 0.78]) {
     c.box(F0, sx - 0.03, sx + 0.03, 0, 0.45, -0.22, 0.22, I, 'metal', 'fulrb', 1, 1, 0)
@@ -49,20 +67,23 @@ export function pathLightGeo() {
   c.box(F0, -0.13, 0.13, 0.86, 0.92, -0.13, 0.13, stone(), 'trim', 'fulrb', 1, 1, 0)
   return out(c)
 }
-export function chairGeo() {
+export function chairGeo() { return bakedGeo('chair') }
+export function chairGeoOld() {
   const c = new Chunk('chair', rng(7)), W = C('#57473f')
   for (const [x, z] of [[-0.18, -0.18], [0.18, -0.18], [0.18, 0.18], [-0.18, 0.18]]) c.box(F0, x - 0.015, x + 0.015, 0, 0.45, z - 0.015, z + 0.015, iron(), 'metal', 'fulrb', 1, 1, 0)
   c.box(F0, -0.21, 0.21, 0.45, 0.49, -0.21, 0.21, W, 'wood', 'fulrb', 1, 1, 0.04)
   c.box(F0, -0.21, 0.21, 0.49, 0.9, -0.22, -0.19, W, 'wood', 'fulrb', 1, 1, 0.04)
   return out(c)
 }
-export function tableGeo() {
+export function tableGeo() { return bakedGeo('table') }
+export function tableGeoOld() {
   const c = new Chunk('tbl', rng(8))
   c.prism(F0, 0, 0, 0.35, 0.35, 0.72, 0.755, C('#d9cfbf'), 'trim', 14)
   c.prism(F0, 0, 0, 0.03, 0.03, 0, 0.72, iron(), 'metal', 6); c.prism(F0, 0, 0, 0.22, 0.2, 0, 0.03, iron(), 'metal', 10)
   return out(c)
 }
-export function urnGeo() {
+export function urnGeo() { return bakedGeo('urn') }
+export function urnGeoOld() {
   const c = new Chunk('urn', rng(9))
   c.prism(F0, 0, 0, 0.5, 0.5, 0, 0.12, stone(), 'trim', 10); c.prism(F0, 0, 0, 0.36, 0.52, 0.12, 0.8, stone(), 'trim', 10); c.prism(F0, 0, 0, 0.58, 0.58, 0.8, 0.9, stone(), 'trim', 10)
   c.prism(F0, 0, 0, 0.5, 0.5, 0.88, 0.92, C('#4b3a2c'), 'leaf', 10)
@@ -90,29 +111,91 @@ const merge = (gs) => {
   for (const g of gs) { P.set(g.attributes.position.array, o * 3); N.set(g.attributes.normal.array, o * 3); Cc.set(g.attributes.color.array, o * 3); o += g.attributes.position.count }
   const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.BufferAttribute(P, 3)); m.setAttribute('normal', new THREE.BufferAttribute(N, 3)); m.setAttribute('color', new THREE.BufferAttribute(Cc, 3)); return m
 }
-export function treeGeo(kind) {
-  const c = new Chunk('tree', rng(11)), bark = C(kind === 'plane' ? '#7a6f60' : '#5a4a3a')
-  let lumps = []
-  if (kind === 'plane') {                                        // London plane: tall clear trunk, broad irregular crown
-    c.prism(F0, 0, 0, 0.30, 0.2, 0, 4.6, bark, 'trunk', 7)
-    c.prism(F0, 0.0, 0, 0.2, 0.12, 4.4, 6.2, bark, 'trunk', 6)
-    const R = rng(17)
-    for (let i = 0; i < 6; i++) lumps.push(lump(1, (R() - 0.5) * 4.4, 6.4 + R() * 3.0, (R() - 0.5) * 4.4, 2.4 + R() * 0.9, 1.9 + R() * 0.7, 2.4 + R() * 0.9, i * 7))
-    lumps.push(lump(1, 0, 8.2, 0, 3.0, 1.9, 3.0, 99))
-  } else if (kind === 'ornamental') {                           // rounded specimen tree for the forecourt / walks
-    c.prism(F0, 0, 0, 0.2, 0.13, 0, 2.6, bark, 'trunk', 7)
-    const R = rng(23)
-    for (let i = 0; i < 4; i++) lumps.push(lump(1, (R() - 0.5) * 1.8, 3.6 + R() * 1.2, (R() - 0.5) * 1.8, 1.7 + R() * 0.5, 1.5 + R() * 0.4, 1.7 + R() * 0.5, i * 5))
-  } else {                                                       // 'clipped' pleached lime: a trimmed block crown on clear stems
-    c.prism(F0, -0.9, 0, 0.1, 0.08, 0, 2.7, bark, 'trunk', 6); c.prism(F0, 0.9, 0, 0.1, 0.08, 0, 2.7, bark, 'trunk', 6)
-    const g = new THREE.BoxGeometry(3.4, 1.9, 1.5, 3, 2, 2).toNonIndexed(), p = g.attributes.position, col = new Float32Array(p.count * 3)
-    for (let i = 0; i < p.count; i++) {
-      p.setXYZ(i, p.getX(i) + (hash3(p.getX(i), p.getY(i), p.getZ(i)) - 0.5) * 0.18, p.getY(i) + 3.7 + (hash3(p.getZ(i), p.getX(i), 3) - 0.5) * 0.12, p.getZ(i) + (hash3(p.getY(i), 1, p.getZ(i)) - 0.5) * 0.14)
-      const k = 0.7 + 0.28 * (p.getY(i) - 2.75) / 1.9; col[i * 3] = k * 1.04; col[i * 3 + 1] = k; col[i * 3 + 2] = k * 0.86
-    }
-    g.computeVertexNormals(); g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.deleteAttribute('uv'); lumps = [g]
+// Branching trees: tapered limbs (3 generations, irregular angles) + alpha-tested leaf-spray cards clustered on the outer twigs.
+// Species differ in trunk height, limb count/spread and crown shape. One shared leaf texture (leafTexture) drives every canopy.
+export function leafTexture() {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256
+  const g = cv.getContext('2d'); let s = 7; const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647 }
+  for (let i = 0; i < 26; i++) {
+    const a = r() * Math.PI * 2, d = 18 + r() * 88, x = 128 + Math.cos(a) * d, y = 128 + Math.sin(a) * d, rot = a + (r() - 0.5) * 1.4, L = 34 + r() * 22, W = 15 + r() * 8
+    const v = 170 + (r() * 85) | 0
+    g.save(); g.translate(x, y); g.rotate(rot)
+    g.fillStyle = `rgb(${v},${v},${v})`; g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(L * 0.2, -W, L * 0.8, -W * 0.8, L, 0); g.bezierCurveTo(L * 0.8, W * 0.8, L * 0.2, W, 0, 0); g.fill()
+    g.strokeStyle = `rgba(90,90,90,.55)`; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, 0); g.lineTo(L * 0.95, 0); g.stroke()
+    g.restore()
   }
-  return { trunk: c.b.trunk.geometry(), canopy: merge(lumps) }
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.generateMipmaps = true; return t
+}
+export function treeGeo(kind) {
+  const R = rng(kind === 'plane' ? 17 : kind === 'ornamental' ? 23 : 29)
+  const bark = C(kind === 'plane' ? '#6b6152' : '#4a3b2e'), barkLt = C(kind === 'plane' ? '#8c826c' : '#66533f')
+  const TP = [], TC = [], TU = [], TI = []                       // trunk arrays
+  const LP = [], LN = [], LC = [], LU = [], LI = []              // leaf-card arrays
+  const v3 = (x, y, z) => new THREE.Vector3(x, y, z)
+  const tips = []
+  const tube = (pts, r0, r1, sides = 6) => {
+    const base = TP.length / 3, n = pts.length
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1), p = pts[i], d = (pts[Math.min(n - 1, i + 1)].clone().sub(pts[Math.max(0, i - 1)])).normalize()
+      const up = Math.abs(d.y) > 0.9 ? v3(1, 0, 0) : v3(0, 1, 0), u = new THREE.Vector3().crossVectors(d, up).normalize(), w = new THREE.Vector3().crossVectors(d, u)
+      const rad = r0 + (r1 - r0) * t
+      for (let k = 0; k <= sides; k++) {
+        const a = (k / sides) * Math.PI * 2, wob = 1 + (R() - 0.5) * 0.12
+        TP.push(p.x + (u.x * Math.cos(a) + w.x * Math.sin(a)) * rad * wob, p.y + (u.y * Math.cos(a) + w.y * Math.sin(a)) * rad * wob, p.z + (u.z * Math.cos(a) + w.z * Math.sin(a)) * rad * wob)
+        const m = 0.55 + 0.45 * ((k + i) % 2), c = bark.clone().lerp(barkLt, 0.35 * m * R()); TC.push(c.r, c.g, c.b); TU.push(k / sides * 2, p.y * 0.5)
+      }
+    }
+    for (let i = 0; i < n - 1; i++) for (let k = 0; k < sides; k++) { const a = base + i * (sides + 1) + k, b = a + 1, c = a + sides + 1, d = c + 1; TI.push(a, b, c, b, d, c) }
+  }
+  const bend = (dir, amt) => dir.clone().add(v3((R() - 0.5) * amt, (R() - 0.5) * amt * 0.6, (R() - 0.5) * amt)).normalize()
+  const grow = (p, dir, len, rad, depth, maxD, spec) => {
+    const pts = [p.clone()]; let q = p.clone(), d = dir.clone()
+    for (let i = 1; i <= 3; i++) { d = bend(d, 0.35 - depth * 0.06).lerp(v3(0, 0.25 * spec.lift, 0), 0.12).normalize(); q = q.clone().addScaledVector(d, len / 3); pts.push(q) }
+    tube(pts, rad, rad * (depth === maxD ? 0.55 : 0.62), depth === 0 ? 7 : 5)
+    if (depth === maxD) { tips.push({ p: q.clone(), d: d.clone(), len }); return }
+    const kids = spec.kids[depth]
+    for (let k = 0; k < kids; k++) {
+      const at = pts[1 + ((k + (R() < 0.5 ? 0 : 1)) % 3)].clone(), ang = (k / kids) * Math.PI * 2 + R() * 1.3, spread = spec.spread * (0.75 + R() * 0.5)
+      const nd = d.clone().multiplyScalar(0.55).add(v3(Math.cos(ang) * spread, 0.25 + R() * 0.35, Math.sin(ang) * spread)).normalize()
+      grow(at, nd, len * (spec.shrink + R() * 0.12), rad * 0.6, depth + 1, maxD, spec)
+    }
+    if (depth < maxD) { const cont = d.clone().lerp(v3(0, 1, 0), 0.25).normalize(); if (depth === 0 && spec.leader) grow(q, cont, len * 0.8, rad * 0.6, depth + 1, maxD, spec) }
+  }
+  let crown = v3(0, 6, 0)
+  if (kind === 'plane') {                                          // London plane: tall dappled trunk, 4 strong limbs, broad open crown
+    tube([v3(0, 0, 0), v3(0.05, 1.8, 0.03), v3(-0.04, 3.6, 0.02), v3(0.03, 5.0, -0.02)], 0.34, 0.2, 8)
+    for (let k = 0; k < 4; k++) { const a = k * 1.57 + R() * 0.8; grow(v3(0.03, 4.6 + R() * 0.7, -0.02), v3(Math.cos(a) * 0.7, 0.8, Math.sin(a) * 0.7).normalize(), 3.2 + R() * 0.8, 0.17, 1, 3, { kids: [0, 3, 3], spread: 0.9, shrink: 0.7, lift: 1, leader: false }) }
+    crown = v3(0, 8.0, 0)
+  } else if (kind === 'ornamental') {                              // blossom / magnolia type: short trunk, low rounded multi-limb crown
+    tube([v3(0, 0, 0), v3(0.03, 0.9, 0.02), v3(-0.03, 1.8, 0), v3(0.0, 2.3, 0.02)], 0.2, 0.13, 7)
+    for (let k = 0; k < 3; k++) { const a = k * 2.1 + R(); grow(v3(0, 2.1 + R() * 0.3, 0), v3(Math.cos(a) * 0.8, 0.7, Math.sin(a) * 0.8).normalize(), 1.9 + R() * 0.4, 0.1, 1, 3, { kids: [0, 3, 3], spread: 0.85, shrink: 0.72, lift: 0.8, leader: false }) }
+    crown = v3(0, 4.0, 0)
+  } else {                                                         // 'clipped' pleached lime: two clear stems, flat-sided block of foliage
+    for (const x of [-0.9, 0.9]) tube([v3(x, 0, 0), v3(x, 1.3, 0), v3(x, 2.7, 0)], 0.1, 0.07, 6)
+    for (let i = 0; i < 70; i++) tips.push({ p: v3((R() - 0.5) * 3.2, 2.9 + R() * 1.7, (R() - 0.5) * 1.1), d: v3(0, 1, 0), len: 0.8 })
+    crown = v3(0, 3.8, 0)
+  }
+  // leaf-spray cards: clusters on each tip (and a few strays on the way) with soft, crown-radial normals so the canopy shades as one volume
+  const green = [C('#6f8a3c'), C('#82953f'), C('#5e7a38'), C('#9aa045')], tmp = v3(0, 0, 0)
+  const card = (cx, cy, cz, size, clusterR) => {
+    const n = v3(R() - 0.5, R() - 0.5, R() - 0.5).normalize(), u = new THREE.Vector3().crossVectors(n, Math.abs(n.y) > 0.9 ? v3(1, 0, 0) : v3(0, 1, 0)).normalize(), w = new THREE.Vector3().crossVectors(n, u)
+    const rot = R() * 6.28, cu = u.clone().multiplyScalar(Math.cos(rot)).addScaledVector(w, Math.sin(rot)), cw = new THREE.Vector3().crossVectors(n, cu)
+    const sn = tmp.set(cx - crown.x, (cy - crown.y) * 0.8 + 0.4, cz - crown.z).normalize().clone()
+    const hRel = Math.max(0, Math.min(1, (cy - (crown.y - 2.5)) / 5)), base = green[(R() * green.length) | 0], k = 0.95 + 0.65 * hRel
+    const base0 = LP.length / 3
+    for (const [a, b, uu, vv] of [[-1, -1, 0, 0], [1, -1, 1, 0], [1, 1, 1, 1], [-1, 1, 0, 1]]) {
+      LP.push(cx + (cu.x * a + cw.x * b) * size, cy + (cu.y * a + cw.y * b) * size, cz + (cu.z * a + cw.z * b) * size)
+      LN.push(sn.x, sn.y, sn.z); LC.push(base.r * k, base.g * k, base.b * k * 0.95); LU.push(uu, vv)
+    }
+    LI.push(base0, base0 + 1, base0 + 2, base0, base0 + 2, base0 + 3)
+  }
+  const per = kind === 'plane' ? 11 : kind === 'ornamental' ? 9 : 1, size = kind === 'plane' ? 1.3 : kind === 'ornamental' ? 1.05 : 0.8
+  for (const t of tips) for (let i = 0; i < per; i++) card(t.p.x + (R() - 0.5) * 2.4, t.p.y + (R() - 0.35) * 1.6, t.p.z + (R() - 0.5) * 2.4, size * (0.8 + R() * 0.5))
+  const mk = (P, Nn, Cc, U, I, norm) => {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(Cc, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I)
+    if (Nn) g.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3)); else g.computeVertexNormals(); return g
+  }
+  return { trunk: mk(TP, null, TC, TU, TI), canopy: mk(LP, LN, LC, LU, LI) }
 }
 
 // ---- Phase 1-3 additions: parked cars, bicycles, shrubs, planters (all instanced; muted palette, nothing garish)
