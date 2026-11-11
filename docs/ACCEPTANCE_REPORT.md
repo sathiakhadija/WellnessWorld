@@ -77,3 +77,26 @@ k-means palette of the user's reference render vs ours, same framing. Overall me
 
 ## Round 9: rabbit run cycle
 assets/blender/make_rabbit_rig.py splits the supplied rabbit into body/head(+face)/ears/arms/feet/tail (14k tris, joint pivots) → public/models/rabbit_rig.glb; TempModels.jsx RabbitPlayer drives a procedural run cycle (alternating legs, counter-swinging arms, ear stream/flop, lean, head nod, tail, airborne lift at sprint). Verified headless: parts assemble correctly at idle and in a sprint pose (ears back, leaning). NOT verified: smooth motion (software GL ≈1 fps), limb swing direction from the side, sign of limb rotation axes, street-level camera/scale.
+
+## Round 10 — Immersive rainy-day weather system
+
+Evidence: `docs/acceptance/weather/`. Controls: HUD weather row (☀️ ☁️ 🌦️ 🌧️ ⛈️), keys `;` / `'`, ⚙︎ for rain volume + mute + quality (low/medium/high). URL: `?weather=`, `?wq=`, `?rvol=`.
+Code: `src/weather/` (weather.js state + `registerWeatherProvider` hook for automatic weather, windowRain.js, Rain.jsx, wet.js, RainAudio.jsx), lighting in `Atmosphere.jsx`.
+
+| Test | Result | Level |
+|---|---|---|
+| A Indoor window view, moderate rain | Rain-streaked overcast sky, drops on glass, **interior dry** (rain discarded inside the footprint) — `A_window`, `A_interior_dry` | Visually verified |
+| B Close-up on glass | Lens drops of varied size with highlights, skyline visible through them, glass stays transparent — `B_close*`, `I_light/heavy_close` | Visually verified (trails are faint; no true refraction) |
+| C Sunny → rain | Values advance over ~9 s: rain 0→.63, cloud 0→.91, window wetness 0→.61; frames C0–C3 | Verified by frames + readout |
+| D Rain stops | Window water drains gradually: .80 at 8 s, .41 at 22 s, 0 at 52 s; ground dries slower (.25 at 52 s) — `D1–D3` | Verified by frames + readout |
+| E Performance | Software GL only (0.31 fps both sunny and heavy; 152 vs 154 draw calls, 360k vs 374k tris). Window rain is one shader pass, outdoor rain is one instanced draw (2.5k/6.5k/12k by quality). **Not measured on the M2.** | Not representative |
+| Street in rain | Darker wet paving, streaks — `S_street_rain` | Visually verified |
+
+Fixed this round: square blocks on glass (a degenerate `smoothstep(0,0,x)` in the bead mask), flat-block drops, slow drain, over-bright peach interior in rain.
+
+Honest limitations
+- Droplets show an inverted sky/city colour miniature, not a real refraction of the rendered scene.
+- Audio is procedural Web Audio; checked by gain readouts (indoor muffled, window taps active), **not heard by ear**.
+- Interior stays warm peach under the golden-hour preset even in rain; cooler daylight is clearer with other presets.
+- Thunder/lightning flash, light/heavy puddle look, and low/high quality were not visually compared.
+- Animation (running drops, rabbit run) cannot be judged at ~1 fps in headless software GL.

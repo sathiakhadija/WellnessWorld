@@ -19,7 +19,7 @@ const fogBase = { near: 0, far: 0 }
 
 export default function Atmosphere({ sunRef, hemiRef, fillRef }) {
   const { scene, gl } = useThree()
-  if (typeof window !== 'undefined') window.__scene = scene
+  if (typeof window !== 'undefined') { window.__scene = scene; window.__gl = gl }
   const cur = useRef(null), exterior = useRef(null), last = useRef(''), clock = useRef(0), settled = useRef(true), tintTick = useRef(0)
   useEffect(() => {                                        // initial state = golden hour exactly as before
     const g = PRESETS.golden
@@ -60,14 +60,14 @@ export default function Atmosphere({ sunRef, hemiRef, fillRef }) {
     LIVE.lamp = A.lamp * (1 + 0.45 * C); LIVE.win = A.win * (1 + 0.3 * C); LIVE.tint.copy(A.tint); LIVE.sunDir.copy(U.uSun.value); LIVE.sunEl = A.sunEl
     // lights
     const L = sunRef.current; if (L) { L.color.copy(A.sunCol).lerp(OVC_SUN, C * 0.9); L.intensity = A.sun * (1 - 0.88 * C) + FL * 2.2 }
-    const H = hemiRef.current; if (H) { H.color.copy(A.hemiSky).lerp(OVC_HEMI_SKY, C * 0.8); H.groundColor.copy(A.hemiGround).lerp(OVC_HEMI_GR, C * 0.7); H.intensity = A.hemi * (1 + 0.55 * C - 0.25 * R) + FL * 0.9 }
+    const H = hemiRef.current; if (H) { H.color.copy(A.hemiSky).lerp(OVC_HEMI_SKY, C * 0.8); H.groundColor.copy(A.hemiGround).lerp(OVC_HEMI_GR, C * 0.7); H.intensity = A.hemi * (1 + 0.12 * C - 0.32 * R) + FL * 0.9 }
     const F = fillRef.current; if (F) { F.color.copy(A.fillCol); F.userData.k = A.fill }
     if (scene.fog) {
       scene.fog.color.copy(A.fog); overcast(scene.fog.color, C * 0.8); scene.fog.color.lerp(OVC_FOG, C * 0.25 * (A.sun > 1 ? 1 : 0.4)); if (FL > 0) scene.fog.color.multiplyScalar(1 + FL * 0.5)
       if (!fogBase.far) { fogBase.near = scene.fog.near; fogBase.far = scene.fog.far }
       scene.fog.near = fogBase.near * (1 - 0.45 * R); scene.fog.far = fogBase.far * (1 - 0.42 * R - 0.1 * C)     // rain closes the view in
     }
-    gl.toneMappingExposure = A.exp * (1 - 0.06 * C) + FL * 0.25
+    gl.toneMappingExposure = A.exp * (1 - 0.14 * C - 0.06 * R) + FL * 0.25
     // settled -> refresh the image-based light once the blend has converged (cheap 128px capture)
     const near = Math.abs(A.sunEl - T.sunEl) < 0.2 && Math.abs(A.sky.zen.r - T.sky.zen.r) < 0.01 && Math.abs(A.sky.hor.b - T.sky.hor.b) < 0.01
     if (near && last.current !== st.preset) { last.current = st.preset; atmoStore.set({ rev: st.rev + 1 }) }
@@ -75,7 +75,7 @@ export default function Atmosphere({ sunRef, hemiRef, fillRef }) {
     wxTick.current += dt
     if (wxTick.current > 0.2) {
       wxTick.current = 0
-      scene.traverse((o) => { if (o.isLight && o.userData.wx) { if (o.userData.wxBase === undefined) o.userData.wxBase = o.intensity; o.intensity = o.userData.wxBase * (1 + 0.55 * C + 0.15 * R) } })
+      scene.traverse((o) => { if (o.isLight && o.userData.wx) { if (o.userData.wxBase === undefined) o.userData.wxBase = o.intensity; o.intensity = o.userData.wxBase * (1 + 0.22 * C + 0.08 * R) } })
     }
     // re-capture the image-based light once the weather has settled (the env map shows the overcast sky)
     if (Math.abs(WX.cloud - wxIbl.current) > 0.12) { const settled = Math.abs(WX.cloud - (WX.cloud > wxIbl.current ? 1 : 0)) >= 0; wxIbl.current = WX.cloud; void settled; atmoStore.set({ rev: atmoStore.get().rev + 1 }) }

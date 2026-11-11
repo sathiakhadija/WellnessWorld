@@ -76,10 +76,10 @@ export function stepWeather(dt) {
   WX.cloud = approach(WX.cloud, K.cloud, 0.30, 0.22, dt)
   WX.wind = approach(WX.wind, K.wind, 0.4, 0.3, dt)
   WX.wet = approach(WX.wet, Math.max(K.rain, 0), 0.20, 0.025, dt)           // ground: wets in ~10 s, dries over ~1.5 min
-  // glass: droplets form quickly while it rains, and drain away (slide off) over ~25 s after it stops
+  // glass: droplets form quickly while it rains, and drain away (slide off) over ~50-60 s after it stops
   const target = Math.max(WX.rain, 0)
   if (target >= WX.wetWin) WX.wetWin = approach(WX.wetWin, target, 0.5, 0, dt)
-  else WX.wetWin = Math.max(target * 0.85, WX.wetWin - dt * (0.035 + 0.02 * (1 - WX.rain)))
+  else WX.wetWin = Math.max(target * 0.85, WX.wetWin - dt * (0.014 + 0.012 * (1 - WX.rain)))
   WX.drain = WX.wetWin > WX.rain + 0.02 ? 1 : 0
   // lightning (storm only): a flash with a quick double flicker, thunder follows after a delay
   WX.flash = Math.max(0, WX.flash - dt * 3.2)
@@ -90,4 +90,5 @@ export function stepWeather(dt) {
   }
   WX.ver++
 }
-if (typeof window !== 'undefined') window.__weather = { WX, store: weatherStore, set: setWeather, KINDS }
+export const advanceWeather = (seconds) => { for (let t = 0; t < seconds; t += 0.1) stepWeather(0.1) }   // test hook: fast-forward the simulation (headless runs render at ~1 fps)
+if (typeof window !== 'undefined') window.__weather = { WX, store: weatherStore, set: setWeather, advance: advanceWeather, KINDS }

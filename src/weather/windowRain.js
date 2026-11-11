@@ -41,20 +41,22 @@ Drops runLayer(vec2 uv, vec2 cell, float rad, float seed, float act, float speed
   float x = .5 + (h21(id + seed + 3.3) - .5) * .42 + sin(t * 18. + r * 6.) * .04 * sr(0., .5, t);
   vec2 d = (f - vec2(x, y)) * cell;                                  // metres from the drop centre
   float rr = rad * (.55 + .75 * t) * (.7 + .6 * h21(id + seed + 9.9)) * on;      // grows as it runs: it picks up the beads it meets (the 'merge')
+  if (rr < .0004) return o;                                       // a drop that is still too small to exist (avoids the degenerate smoothstep -> flat blocks)
   float dist = length(vec2(d.x, d.y * .8));
   o.drop = sr(rr, rr * .6, dist) * step(.01, t) * sr(1.0, .94, t);
   o.n = d / max(rr, 1e-4);
   // trail: thin water line above the drop, strongest right behind it, vanishing toward where it started
   float above = d.y;                                                  // positive above the drop
-  float len = (1. - y - .04) * cell.y;
+  float run = (1. - y - .04) * cell.y;
+  float len = max(run, .004);
   float w = rr * (.34 + .12 * (1. - t));
   float tr = sr(w, w * .35, abs(d.x + sin(above * 90. + r * 6.) * w * .35)) * step(0., above) * sr(len, len * .35, above) * sr(0., .02, above);
-  o.trail = tr * on * (.6 + .4 * sr(0., len, len - above));
+  o.trail = tr * on * (.6 + .4 * sr(0., len, len - above)) * step(.01, run);
   // beads left along the trail
   float bead = h21(floor(vec2(id.x, floor(above / (rad * 1.9)))) + seed + 21.) ;
   vec2 bc = vec2(0., (floor(above / (rad * 1.9)) + .5) * rad * 1.9);
   float bd = length(vec2(d.x, above - bc.y)); float br = rad * .28 * step(.72, bead) * step(0., above) * step(above, len);
-  o.trail = max(o.trail, sr(br, br * .5, bd) * on * .9);
+  o.trail = max(o.trail, sr(br, br * .5, bd) * on * .9 * step(.0005, br));   // br = 0 would make sr(0,0,x) = 1 everywhere (the square blocks)
   return o;
 }
 // static fine droplets: small round beads that stay put (appear gradually as the wet amount rises, shrink away as it drains)
@@ -67,6 +69,7 @@ Drops fineLayer(vec2 uv, float cell, float rad, float seed, float act) {
   vec2 c = vec2(.28 + .44 * h21(id + seed + 1.7), .28 + .44 * r2);
   vec2 d = (f - c) * cell;
   float rr = rad * (.35 + .9 * h21(id + seed + 8.8)) * on;
+  if (rr < .0004) return o;
   float dist = length(vec2(d.x, d.y * .9));
   o.drop = sr(rr, rr * .55, dist); o.n = d / max(rr, 1e-4);
   return o;
