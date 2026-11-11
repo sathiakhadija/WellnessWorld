@@ -81,9 +81,15 @@ function Penthouse({ onSpawn, onMats }) {
     const remove = [], mats = {}
     scene.traverse((o) => {
       if (o.name?.startsWith('WW_Adjoining') || o.name?.startsWith('WW_Blossom') || o.name?.startsWith('WW_Balcony') || o.name?.startsWith('WW_Balustrade') || o.name === 'WW_COL_Balcony') { remove.push(o); return }   // old side cells (+ their props) and the old tree: rebuilt in code
-      if (o.isMesh && ['WW_Walls', 'WW_Walls_1', 'WW_Trim_Mouldings', 'WW_Trim_Mouldings_1'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, (x) => LEFTWALL(x)))
-      if (o.isMesh && ['WW_Walls', 'WW_Walls_1'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_WALL))
-      if (o.isMesh && ['WW_Trim_Mouldings', 'WW_Trim_Mouldings_1', 'WW_Trim_Mouldings_2', 'WW_Trim_Mouldings_3'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_TRIM))
+      // Single authoritative source for the left wall, its door openings and the front wall = Plan.jsx. Every GLB triangle of the old V8 left wall
+      // (plaster, door linings/architraves in Trim_Satin, skirting) is removed by MATERIAL, not by mesh name: GLTFLoader numbers split primitives
+      // differently from the Blender export, so the V9/V10 name lists missed the old door linings ("WW_Walls_2"), which stayed inside the new door
+      // openings (the "central vertical structure"), and the old skirting, which ran across the doorway floors. Sconces (Brass/SconceGlow) are kept.
+      if (o.isMesh && ['WW_Plaster_Ivory_GAME', 'WW_Trim_Satin_GAME', 'WW_Skirting_GAME'].includes(o.material?.name)) {
+        dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, (x) => LEFTWALL(x)))                // old left wall slab, linings, panelling, skirting (x <= -4.40)
+        dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_WALL))                         // old front wall slab (rebuilt with the entrance)
+      }
+      if (o.isMesh && ['WW_Trim_Satin_GAME', 'WW_Skirting_GAME'].includes(o.material?.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_TRIM))
       if (o.isMesh && o.name === 'WW_Window_Glass') dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FAR_GLASS_BAY2))
       if (o.userData?.ww_collider) colliders.push(o)          // exported "extras" from Blender
       if (o.userData?.ww_role === 'player_spawn') onSpawn?.(o.getWorldPosition(new THREE.Vector3()))

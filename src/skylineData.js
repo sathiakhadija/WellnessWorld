@@ -64,10 +64,11 @@ export function buildLayout() {
     for (let i = 0; i < n; i++) {
       const bx = cx + (i + 0.5) * (cw / n) + (rb() - 0.5) * 6, zb = -(1016 + rb() * 12)
       const w = 20 + rb() * 22, brick = rb() < 0.35
-      out.push({ name: 'bank' + k++, style: brick ? 'stone' : rb() < 0.5 ? 'stone' : 'glass', band: true, hero: false, x: bx, z: zb, w, d: w * (0.7 + rb() * 0.4), h: (nearCentre ? 14 : 10) + rb() * (nearCentre ? 16 : 10), rot: Math.atan2(bx, -zb) + (rb() - 0.5) * 0.12, shade: rb() })
+      const dd = w * (0.7 + rb() * 0.4), zf = Math.min(zb, -1022 - Math.hypot(w, dd) / 2)      // footprint stays behind the promenade (never over the quay edge / water)
+      out.push({ name: 'bank' + k++, style: brick ? 'stone' : rb() < 0.5 ? 'stone' : 'glass', band: true, hero: false, x: bx, z: zf, w, d: dd, h: (nearCentre ? 14 : 10) + rb() * (nearCentre ? 16 : 10), rot: Math.atan2(bx, -zb) + (rb() - 0.5) * 0.12, shade: rb() })
       if (rb() < (nearCentre ? 0.8 : 0.55)) {
-        const zz = -(1048 + rb() * 55), ww = 26 + rb() * 30
-        out.push({ name: 'bank' + k++, style: 'glass', band: true, hero: false, x: bx + (rb() - 0.5) * 14, z: zz, w: ww, d: ww * (0.7 + rb() * 0.5), h: 30 + rb() * (nearCentre ? 48 : 30), rot: Math.atan2(bx, -zz) + (rb() - 0.5) * 0.2, shade: rb() })
+        const ww = 26 + rb() * 30, dd2 = ww * (0.7 + rb() * 0.5), zz = Math.min(-(1048 + rb() * 55), -1022 - Math.hypot(ww, dd2) / 2)
+        out.push({ name: 'bank' + k++, style: 'glass', band: true, hero: false, x: bx + (rb() - 0.5) * 14, z: zz, w: ww, d: dd2, h: 30 + rb() * (nearCentre ? 48 : 30), rot: Math.atan2(bx, -zz) + (rb() - 0.5) * 0.2, shade: rb() })
       }
     }
     cx += cw + 36 + rb() * 80                                                    // plaza / dock basin gap
@@ -81,7 +82,12 @@ export function buildLayout() {
     const tall = (azDeg > 40 && azDeg < 95 && rnd() > 0.55) || (azDeg < -60 && rnd() > 0.93)
     const h = tall ? 90 + rnd() * 90 : 22 + rnd() * 48
     const w = 22 + rnd() * 48
-    out.push({ name: 'bg' + i, style: rnd() > 0.7 ? 'stone' : 'glass', hero: false, x: D * Math.sin(a), z: -D * Math.cos(a), w, d: w * (0.7 + rnd() * 0.6), h, rot: a + (rnd() - 0.5) * 0.6, shade: rnd() })
+    let bz = -D * Math.cos(a)
+    // V10 defect: at side azimuths (|az| > ~42 deg) D*cos(az) falls between the near embankment (z -150) and the far quay (z -1004), i.e. IN THE RIVER, so these
+    // towers floated on the water. Re-seat them on the far-bank land (same x, so the skyline's horizontal composition is unchanged).
+    if (bz > -1040 && bz < -150) bz = -(1060 + rnd() * 380)
+    else if (bz >= -150 && bz < -90) bz = -90 + rnd() * 60                                      // on the near bank, but not on the embankment/promenade strip
+    out.push({ name: 'bg' + i, style: rnd() > 0.7 ? 'stone' : 'glass', hero: false, x: D * Math.sin(a), z: bz, w, d: w * (0.7 + rnd() * 0.6), h, rot: a + (rnd() - 0.5) * 0.6, shade: rnd() })
   }
   return out
 }

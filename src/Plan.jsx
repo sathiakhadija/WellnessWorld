@@ -84,13 +84,12 @@ function buildArch() {
   const EX0 = 0.55, EX1 = 1.85
   add('plaster', -4.85, EX0, Y0, 4.1, 0, 0.4, true); add('plaster', EX1, 4.01, Y0, 4.1, 0, 0.4, true)
   add('plaster', EX0, EX1, 3.1, 4.1, 0, 0.4, true)
-  add('stone', EX0, EX1, Y0, 0, 0, 0.4, true)                                             // threshold
-  add('trim', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('trim', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('trim', EX0, EX1, 3.07, 3.1, 0, 0.4)   // reveal linings
-  // espresso-stained architrave (stepped: broad casing + inner bead) around the dark entrance door, as in the reference
-  for (const [a, b] of [[EX0 - 0.16, EX0], [EX1, EX1 + 0.16]]) add('dk', a, b, 0, 3.24, -0.035, 0)
-  add('dk', EX0 - 0.16, EX1 + 0.16, 3.1, 3.24, -0.035, 0); add('dk', EX0 - 0.2, EX1 + 0.2, 3.24, 3.3, -0.05, 0)
-  for (const [a, b] of [[EX0 - 0.05, EX0 - 0.02], [EX1 + 0.02, EX1 + 0.05]]) add('dk', a, b, 0, 3.15, -0.055, -0.035)
-  add('dk', EX0 - 0.05, EX1 + 0.05, 3.12, 3.15, -0.055, -0.035)
+  add('stone', EX0, EX1, Y0, 0, 0, 0.4, true)                                             // threshold slab, top flush with the floor
+  add('brass', EX0 + 0.03, EX1 - 0.03, 0, 0.005, 0.3, 0.37)                               // brushed-brass threshold strip under the door line
+  // ONE frame: an espresso lining wraps the whole reveal (jambs + head, full 0.4 m wall depth) and a slim flat casing sits on the room face.
+  // (V10 stacked a pale lining, a broad dark casing, an inner bead and plinth blocks here; that read as nested frames.)
+  add('dk', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('dk', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('dk', EX0, EX1, 3.07, 3.1, 0, 0.4)
+  add('dk', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('dk', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('dk', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
   for (const [a, b] of [[-3.2, -0.4], [2.8, 3.95]]) {                                                              // flanking raised panels
     const x0 = a + (a < 0 ? 0.0 : 0), yb = 0.55, yt = 3.15, t = 0.05
     if (b - a < 0.6) continue
@@ -101,7 +100,7 @@ function buildArch() {
     const t = 0.04
     add('trim', a, b, yb, yb + t, -0.025, 0); add('trim', a, b, yt - t, yt, -0.025, 0); add('trim', a, a + t, yb, yt, -0.025, 0); add('trim', b - t, b, yb, yt, -0.025, 0)
   }
-  add('skirt', -4.45, EX0 - 0.19, 0, 0.18, -0.03, 0); add('skirt', EX1 + 0.19, 3.61, 0, 0.18, -0.03, 0)
+  add('skirt', -4.45, EX0 - 0.08, 0, 0.18, -0.03, 0); add('skirt', EX1 + 0.08, 3.61, 0, 0.18, -0.03, 0)
 
   // ---- BEDROOM  interior x -9.65..-4.85, z -8.15..-3.85
   add('plaster', -9.85, -4.85, Y0, YT, -3.85, -3.65, true)                                  // north wall
@@ -173,7 +172,7 @@ function makeMats(src = {}) {
     floorBath: std('#e4dacb', { roughness: 0.25, envMapIntensity: 0.9 }),            // cream marble (placeholder finish)
     stone: std('#d8cab6', { roughness: 0.55 }),
     door: std('#efe5d2', { roughness: 0.55 }),
-    dk: std('#241a15', { roughness: 0.5 }),
+    dk: std('#2d2019', { roughness: 0.5 }),
     walnutHi: std('#41322a', { roughness: 0.38 }),                                          // cream satin paint
     walnut: std('#2c211c', { roughness: 0.42 }),                                          // espresso entrance door
     limestone: new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }),
@@ -254,14 +253,15 @@ function Door({ d, M }) {
         s.target = 1; return `Opening the ${d.label}`
       },
     }
-    world.interactables.push(it)
-    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1) }
+    world.interactables.push(it); world.doors[d.id] = st.current
+    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); delete world.doors[d.id] }
   }, [d])
   useFrame((_, dt) => {
     const s = st.current
     const p = world.player
-    if (s.target === 0 && s.t > 0.02 && Math.abs(p.x - HINGE_X) < 0.7 && Math.abs(p.z - d.zc) < d.w / 2 + 0.25) s.target = 1   // never close on someone
-    const dir = Math.sign(s.target - s.t)
+    if (s.force == null && s.target === 0 && s.t > 0.02 && Math.abs(p.x - HINGE_X) < 0.7 && Math.abs(p.z - d.zc) < d.w / 2 + 0.25) s.target = 1   // never close on someone
+    if (s.force != null) { s.t = s.force; s.target = s.force > 0.5 ? 1 : 0 }                 // test hook: pin the door at a fraction
+    const dir = s.force != null ? 0 : Math.sign(s.target - s.t)
     if (dir) s.t = clamp01(s.t + dir * (world.fastAnim ? dt : Math.min(dt, 0.05)) / 0.9)
     const a = smooth(s.t) * OPEN_ANGLE
     if (double) { if (l1.current) { l1.current.rotation.y = a; l2.current.rotation.y = -a } }
@@ -295,7 +295,7 @@ function Entrance({ M }) {
   const rot = useRef(), glow = useRef(), light = useRef()
   const blockRef = useRef(true)
   const [block, setBlock] = useState(true)
-  const X0 = 0.58, W = 1.24, Z = 0.33
+  const X0 = 0.585, W = 1.22, Z = 0.33
   useEffect(() => {
     const it = {
       id: 'entrance', label: 'main entrance', x: 1.2, z: -0.2, range: 2.3,
@@ -306,13 +306,14 @@ function Entrance({ M }) {
         st.current.target = 1; camStore.set({ transition: 'opening', dest: 'lobby' }); return false
       },
     }
-    world.interactables.push(it)
+    world.interactables.push(it); world.doors.entrance = st.current
     world.returnHome = () => { if (camStore.get().transition === 'overlay') { st.current.target = 0; camStore.set({ transition: 'closing' }) } }
-    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); world.returnHome = null }
+    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); world.returnHome = null; delete world.doors.entrance }
   }, [])
   useFrame((_, dt) => {
     const s = st.current, step = world.fastAnim ? dt : Math.min(dt, 0.05)
-    const dir = Math.sign(s.target - s.t)
+    if (s.force != null) { s.t = s.force; s.target = s.force > 0.5 ? 1 : 0 }
+    const dir = s.force != null ? 0 : Math.sign(s.target - s.t)
     if (dir) s.t = clamp01(s.t + dir * step / 1.3)
     if (rot.current) rot.current.rotation.y = -smooth(s.t) * 1.75               // swings outward (+z) into the light
     if (light.current) light.current.intensity = 9 * smooth(s.t)

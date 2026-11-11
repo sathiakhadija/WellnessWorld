@@ -249,6 +249,7 @@ function buildNeighbourhood() {
         u += cw + ROAD
         const cx = mx + lu * cs + lv * sn, cz = mz - lu * sn + lv * cs
         if (cx < sec.x0 || cx > sec.x1 || cz < sec.z0 || cz > sec.z1) continue
+        if (cz - ch / 2 < RIVER_NEAR + 28) continue                                        // keep every block (rotated cells overhang) behind the promenade, never over the water
         if (si < 2 && inRect(cx, cz, SECTORS[2], cw / 2, ch / 2)) continue                // centre sector owns the middle
         if (inRect(cx, cz, plaza, cw / 2, ch / 2)) continue
         if (Math.abs(cx - park.cx) < park.w / 2 + 16 + cw / 2 && Math.abs(cz - park.cz) < park.h / 2 + 16 + ch / 2) continue

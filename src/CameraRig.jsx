@@ -6,7 +6,7 @@ import { useRapier, interactionGroups } from '@react-three/rapier'
 import * as THREE from 'three'
 import { input } from './input.js'
 import { camStore, toast } from './camStore.js'
-import { world } from './world.js'
+import { world as shared } from './world.js'      // (rapier's own `world` is destructured below, hence the alias)
 
 // Collision groups. The player collides with world + glass. Camera rays only see "world" (not glass, not the player),
 // so the free camera can look through / go out past the glazing onto the balcony but never through walls or floors.
@@ -88,12 +88,14 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
     // test / debug handle (also handy in the console)
     window.__ww = {
       mode: () => camStore.get().mode,
+      doorForce: (id, f) => { const d = shared.doors[id]; if (d) d.force = f },                                                  // test hook
+      scene: () => scene,                                                                                                       // test / audit hook
       cam: () => ({ pos: camera.position.toArray(), fov: camera.fov }),
       player: () => { const p = playerRef.current?.translation(); return p ? [p.x, p.y, p.z] : null },
       set: (m) => setMode(m),
       clean: () => toggleClean(setMode),
       teleport: (x, y, z) => { playerRef.current?.setTranslation({ x, y, z }, true); playerRef.current?.setLinvel({ x: 0, y: 0, z: 0 }, true) },   // test hook
-      fastAnim: (v) => { world.fastAnim = !!v },
+      fastAnim: (v) => { shared.fastAnim = !!v },
       setFollowYaw: (y) => { st.f.yaw = st.f.sy = y },                                                                                              // test hook
       setFree: (x, y, z, yaw, pitch, fov) => {   // jump the free camera to an exact pose (used for screenshots/tests)
         camStore.set({ mode: 'free' }); st.mode = 'free'; st.trans.t = 1
