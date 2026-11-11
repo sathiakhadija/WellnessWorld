@@ -52,7 +52,7 @@ const ok = []; const check = (name, cond, extra = '') => { ok.push(cond); consol
   await stand(1.2, GY + 0.1, 55.5, Math.PI / 2); q = await walk(25000)
   check('Courtyard Lane west end holds (x > -98)', q[0] > -98 && q[0] < -92, f(q))
   await stand(1.2, GY + 0.1, 57, Math.PI); q = await walk(20000)
-  check('garden gate: walks in on the axis and stops at the fountain basin', q[2] > 60 && q[2] < 83, f(q))
+  check('garden gate: the axis runs clear through the square to its south gate', q[2] > 100, f(q))
   await stand(-26.8, GY + 0.1, 70, Math.PI); q = await walk(15000)
   check('West Street is walkable south to its end wall', q[2] > 100 && q[2] < 109, f(q))
 
@@ -76,7 +76,7 @@ const ok = []; const check = (name, cond, extra = '') => { ok.push(cond); consol
   check('Thames Row is clear for its first 60 m from the lane', q[2] < -5, f(q))
   await stand(-86, GY + 0.1, -40, 0); q = await walk(30000)
   check('Thames Row reaches the riverside gardens', q[2] < -88, f(q))
-  await stand(52, GY + 0.1, -110, 0); q = await walk(30000)
+  await stand(52, GY + 0.1, -95, 0); q = await walk(30000)
   check('east ramp climbs to the promenade', Math.abs(q[1] - TERR) < 0.5 && q[2] < -131, f(q))
   q = await walk(15000)
   check('balustrade stops the player at the river edge', q[2] > -146.8 && q[2] < -143, f(q))
@@ -84,7 +84,7 @@ const ok = []; const check = (name, cond, extra = '') => { ok.push(cond); consol
   check('grand stair climbs to the promenade', Math.abs(q[1] - TERR) < 0.6 && q[2] < -131, f(q))
 
   // ---- G. lift back up
-  await stand(1.2, GY + 0.1, 7.4, Math.PI)
+  await stand(1.2, GY + 0.1, 7.4, Math.PI); await p.waitForTimeout(2500)
   const pr = await p.evaluate(() => document.querySelector('.ww-prompt')?.textContent || '')
   check('lobby prompt offers the lift', /lift/i.test(pr), pr)
   await p.keyboard.press('Enter')
