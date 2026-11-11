@@ -64,7 +64,7 @@ export function Rabbit({ position = [0, 0, 0], rotationY = 0 }) {
 // The rabbit as the PLAYER: rigged-by-parts (assets/blender/make_rabbit_rig.py splits the supplied GLB into body/head/ears/arms/feet/tail with joint pivots)
 // and driven by a procedural run cycle: alternating legs + counter-swinging arms, forward lean, bouncing body with a flight phase when sprinting,
 // ears streaming back and flopping, tail bob. Gait amplitude/frequency follow the speed (walk 2.5 .. fast 3.5 .. sprint 5 m/s).
-export const RABBIT_PLAYER_HEIGHT = 0.55
+export const RABBIT_PLAYER_HEIGHT = 1.1
 export function RabbitPlayer({ speedRef }) {
   const { scene } = useGLTF(`${BASE}models/rabbit_rig.glb`)
   const rig = useMemo(() => {
