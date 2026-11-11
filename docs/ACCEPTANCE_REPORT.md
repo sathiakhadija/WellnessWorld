@@ -70,3 +70,7 @@ assets/blender/make_interior.py (bpy) → src/baked/interior.json (+ .blend/.glb
 
 ## Round 7: palette match (penthouse)
 k-means palette of the user's reference render vs ours, same framing. Overall mean RGB ref (158,122,107) vs ours (158,120,104). Changes: floor grade toward honey-rose (was amber, floor mean 138,90,57 → 146,99,72; ref 166,117,98 — still slightly darker/more amber), plaster dustier rose-ivory, glazing frames warm dark brown (not black/wine), golden sky mid/upper cooled toward lilac. Street not yet re-graded to the same numbers.
+
+## Round 8: removed extra neighbourhood + rabbit as player
+- Deleted src/Neighbourhood.jsx (old V10 sprawl: terraces/mansion blocks/slabs to the horizon, rear tower slabs) and its render in Skyline.jsx; added a sage near-bank ground plane (fog-blended) so the compact street doesn't float. Before/after: docs/acceptance/round8/aer1_a.png vs aer4_a.png. Street-level view toward the neighbourhood edge verified (aer4_c.png). Aerial view is a flat green plain to the horizon (not designed content).
+- Player is now the rabbit (0.55 m, procedural hop gait scaling with speed; Shift = fast, Shift+Space = sprint). Lemon girl: ?model=lemon; pill: ?model=pill. Verified headless: idle, walk, sprint to balcony door (rab_*.png). NOT verified: hop animation mid-cycle (≈1 fps software GL), street-level rabbit scale/camera, collisions at rabbit size (capsule unchanged, 1.54 m).

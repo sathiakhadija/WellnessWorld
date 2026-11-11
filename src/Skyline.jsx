@@ -3,7 +3,6 @@
 import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { Neighbourhood, rearLayout } from './Neighbourhood.jsx'
 import { Boats } from './Boats.jsx'
 import { Waterfront } from './Waterfront.jsx'
 import { StreetVisuals } from './street/Street.jsx'
@@ -346,7 +345,6 @@ export function Skyline() {
   const layout = useMemo(buildLayout, [])
   const geoms = useMemo(() => buildFacadeGeometries(layout), [layout])
   const mirrorGeoms = useMemo(() => buildFacadeGeometries(layout, (b) => b.hero || b.h > 60), [layout])
-  const rearGeoms = useMemo(() => buildFacadeGeometries(rearLayout()), [])
   const one = layout.find((b) => b.name === 'One Canada Sq')
   // the skyline lives in "real metre" space around the CAM1 eye; scale it down and pin it to the room's eye height
   // Seen from the penthouse the exterior is compressed (scale 1/6, pinned to the room's eye height). When the player is down on the street the very same
@@ -360,9 +358,11 @@ export function Skyline() {
   return (
     <group ref={g} name="exterior" position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
       <FacadeMeshes geoms={geoms} />
-      <FacadeMeshes geoms={rearGeoms} />
-      {!OFF.has('hood') && <Neighbourhood />}
       {!OFF.has('hood') && <Boats />}
+      {/* near-bank ground out to the haze: the compact neighbourhood no longer floats in the void now the old V10 sprawl is gone */}
+      <mesh position={[0, -EYE_ABOVE_WATER - 0.45, 2000]} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}>
+        <planeGeometry args={[9000, 4290]} /><meshLambertMaterial color="#b4c19c" />
+      </mesh>
       <PyramidCap b={one} />
       <Waterfront />
       {!OFF.has('street') && <StreetVisuals />}
