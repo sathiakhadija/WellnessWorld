@@ -409,7 +409,7 @@ export function buildStreet() {
       const c = p + w / 2; p += w
       const main = pickR(R, MAIN), brickUp = R() < (o.brickP ?? 0.55), tall = R() < 0.14
       const F = ax === 'x' ? frame(c, plane, rot, GY) : frame(plane, c, rot, GY)
-      townhouse(ch, F, { w, d: o.d ?? 12, floors: o.floors ?? (tall ? 5 : 4), main, ground: new THREE.Color(main).lerp(new THREE.Color('#9f9482'), 0.28).getStyle(), upper: brickUp ? 'brick' : 'plaster', brick: pickR(R, BRICKS), doorBay: R() < 0.5 ? 0 : (w < 6.15 ? 1 : 2), door: pickR(R, DOORS), litP: o.litP ?? 0.26, mansard: 2.1 + R() * 0.7, balc: R() < 0.55, side: PAL.stock, slate: R() < 0.7 ? PAL.slate : '#4a4650' })
+      townhouse(ch, F, { w, d: o.d ?? 12, floors: o.floors ?? (tall ? 5 : 4), main, ground: new THREE.Color(main).lerp(new THREE.Color('#f1e7d0'), 0.5).getStyle(), upper: brickUp ? 'brick' : 'plaster', brick: pickR(R, BRICKS), doorBay: R() < 0.5 ? 0 : (w < 6.15 ? 1 : 2), door: pickR(R, DOORS), litP: o.litP ?? 0.26, mansard: 2.1 + R() * 0.7, balc: R() < 0.55, side: PAL.stock, slate: R() < 0.7 ? PAL.slate : '#4a4650' })
     })
   }
   const parked = (x, z, ry, k) => put('car' + (1 + (k % 4)), x, z, ry, 1)

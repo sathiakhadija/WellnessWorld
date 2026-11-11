@@ -16,7 +16,7 @@ export function townhouse(ch, F, o) {
   const wins = [{ h: 1.95, sill: 0.62 }, { h: 2.78, sill: 0.28 }, { h: 2.3, sill: 0.55 }, { h: 1.9, sill: 0.68 }, { h: 1.6, sill: 0.7 }]
   const main = col(o.main), ground = col(o.ground), trim = col(PAL.white), stone = col(PAL.limestone)
   const doorCx = (o.doorBay + 0.5) * w / nb - w / 2
-  const litP = o.litP ?? 0.26
+  const litP = o.litP ?? 0.42
   // plinth + body
   ch.box(F, -w / 2, w / 2, 0, plinth, -d, 0, col(PAL.taupe), 'ashlar', 'flr', 2.4, 1.2)
   ch.box(F, -w / 2, w / 2, plinth, top + 0.9, -d, -t, col(o.side || PAL.stock), 'brick', 'lrb', 0.9, 1)
@@ -36,12 +36,17 @@ export function townhouse(ch, F, o) {
       const wd = wins[f]
       sash(ch, F, cx, y0 + wd.sill, winW, wd.h, t, { lit: R() < litP, stone, trim })
       if (f === 1 && o.balc) balconette(ch, F, cx, y0 + wd.sill, winW, {})
+      if (f >= 1 && f <= 2) surround(ch, F, cx, y0 + wd.sill, winW, wd.h, f === 1, stone, R)
     }
     if (f >= 1) ch.box(F, -w / 2 - 0.02, w / 2 + 0.02, y0 - 0.07, y0 + 0.07, -0.02, 0.07, stone, 'trim', 'fu', 1, 1, 0.02)         // string course
   }
   // front door + steps
   frontDoor(ch, F, doorCx, plinth, t, { door: col(o.door), stone, lit: R() < 0.5 })
   steps(ch, F, doorCx, 1.0, plinth, 5, 0.3, { stone })
+  for (const s of [-1, 1]) ch.prism(F, doorCx + s * 0.86, 0.25, 0.13, 0.11, plinth, plinth + 2.55, col(PAL.white), 'trim', 10)         // portico columns
+  ch.box(F, doorCx - 1.08, doorCx + 1.08, plinth + 2.55, plinth + 2.8, -0.05, 0.5, stone, 'trim', 'fulrbd', 1, 1, 0.015)             // entablature
+  ch.tri(F, [doorCx - 1.12, plinth + 2.8, 0.52], [doorCx + 1.12, plinth + 2.8, 0.52], [doorCx, plinth + 3.15, 0.52], stone, 'trim', [0, 0, 1])
+  ch.box(F, doorCx - 0.5, doorCx + 0.5, plinth + 2.85, plinth + 3.0, -0.03, 0.06, stone, 'trim', 'fulr', 1, 1, 0.01)                 // fanlight transom
   // cornice + parapet
   ch.box(F, -w / 2 - 0.05, w / 2 + 0.05, top, top + 0.17, -0.1, 0.24, stone, 'trim', 'fulrd')
   ch.box(F, -w / 2 - 0.1, w / 2 + 0.1, top + 0.17, top + 0.36, -0.1, 0.42, stone, 'trim', 'fulrd')
@@ -87,6 +92,20 @@ export function townhouse(ch, F, o) {
   // physics: the body + a ramp is registered by steps()
   ch.solid(F, -w / 2, w / 2, 0, top + 3, -d, 0, 'building')
   return { top: top + 0.98 + rise, w, doorCx }
+}
+
+
+// Stone architrave round a sash window: jambs, a lintel with keystone, and (piano nobile) a triangular pediment + a flower box on the sill.
+function surround(ch, F, cx, y0, ww, wh, noble, stone, R) {
+  const j = 0.13, o = 0.075, hw = ww / 2
+  for (const s of [-1, 1]) ch.box(F, cx + s * (hw + j / 2) - j / 2, cx + s * (hw + j / 2) + j / 2, y0 - 0.05, y0 + wh + 0.02, -0.02, o, stone, 'trim', 'fulr', 1, 1, 0.015)
+  ch.box(F, cx - hw - j, cx + hw + j, y0 + wh, y0 + wh + 0.17, -0.02, o + 0.03, stone, 'trim', 'fulrd', 1, 1, 0.02)
+  ch.box(F, cx - 0.09, cx + 0.09, y0 + wh - 0.04, y0 + wh + 0.2, -0.02, o + 0.05, stone, 'trim', 'fulr', 1, 1, 0.015)      // keystone
+  if (noble) {
+    const yb = y0 + wh + 0.17
+    ch.box(F, cx - hw - j - 0.06, cx + hw + j + 0.06, yb, yb + 0.07, -0.02, o + 0.07, stone, 'trim', 'fulrd', 1, 1, 0.01)
+    ch.tri(F, [cx - hw - j - 0.06, yb + 0.07, o + 0.06], [cx + hw + j + 0.06, yb + 0.07, o + 0.06], [cx, yb + 0.07 + 0.3, o + 0.06], stone, 'trim', [0, 0, 1])
+  }
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
