@@ -53,7 +53,7 @@ const ok = []; const check = (name, cond, extra = '') => { ok.push(cond); consol
   await stand(0.4, 0.1, -10.0, 0); await p.keyboard.press('Enter'); await settle(16000)
   await stand(0.4, 0.1, -11.7, 0)
   // headless frame rates are now too low for the HUD toast to be reliable; call the interactable directly (same code path as Enter)
-  const toast = await p.evaluate(() => window.__ww.companion().world.interactables.find((i) => i.id === 'balcony').toggle())
+  const toast = await p.evaluate(() => window.__ww.game().interactables.find((i) => i.id === 'balcony').toggle())
   check('refuses to close with the player in the doorway', /doorway/i.test(toast), toast)
   check('no console errors', errs.length === 0, errs.slice(0, 3).join(' | '))
   await b.close()
