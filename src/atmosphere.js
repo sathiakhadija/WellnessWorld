@@ -17,9 +17,9 @@ export const PRESETS = {
     sky: { zen: c(0.30, 0.55, 0.95), upper: c(0.45, 0.70, 1.0), mid: c(0.70, 0.85, 1.0), pink: c(0.86, 0.92, 1.0), hor: c(0.88, 0.90, 0.94), below: c(0.50, 0.55, 0.62), glow: c(0.50, 0.45, 0.30), cHi: c(1, 1, 1), cLo: c(0.82, 0.88, 0.98) },
   },
   golden: {
-    label: 'Signature Golden Hour', icon: '🌇', sunAz: 25, sunEl: 9, sunCol: '#ffcfa6', sun: 3.5, hemiSky: '#ffeadf', hemiGround: '#e6d0c6', hemi: 0.95, fill: 0.75, fillCol: '#b8b4e4',
-    fog: '#c3aab8', exp: 1.06, lit: 0.45, glow: 0.12, tint: [1, 1, 1], lamp: 1.0, win: 1.0,
-    sky: { zen: c(0.56, 0.58, 0.78), upper: c(0.70, 0.67, 0.85), mid: c(0.88, 0.78, 0.82), pink: c(0.93, 0.75, 0.76), hor: c(0.80, 0.66, 0.68), below: c(0.45, 0.42, 0.52), glow: c(0.55, 0.36, 0.22), cHi: c(1.0, 0.80, 0.78), cLo: c(0.70, 0.64, 0.80) },
+    label: 'Signature Golden Hour', icon: '🌇', sunAz: 25, sunEl: 7, sunCol: '#ffc8a0', sun: 4.3, hemiSky: '#ffe4d4', hemiGround: '#dcc4b2', hemi: 0.75, fill: 0.6, fillCol: '#b4b0dc',
+    fog: '#b898a8', exp: 1.08, lit: 0.45, glow: 0.12, tint: [1, 1, 1], lamp: 1.0, win: 1.0,
+    sky: { zen: c(0.40, 0.36, 0.64), upper: c(0.60, 0.48, 0.74), mid: c(0.90, 0.64, 0.74), pink: c(0.99, 0.62, 0.62), hor: c(0.99, 0.70, 0.56), below: c(0.45, 0.38, 0.52), glow: c(0.85, 0.46, 0.28), cHi: c(1.0, 0.72, 0.70), cLo: c(0.68, 0.56, 0.80) },
   },
   blue: {
     label: 'Blue Hour', icon: '🌆', sunAz: 40, sunEl: 5, sunCol: '#8aa0ff', sun: 0.6, hemiSky: '#8fa3e6', hemiGround: '#5a4a6a', hemi: 0.6, fill: 0.7, fillCol: '#8095d8',

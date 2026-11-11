@@ -251,7 +251,8 @@ function shopInterior(ch, F, x0, x1, y0, y1) {
   const R = ch.R, D = 3.4, z0 = -0.62, zb = z0 - D, w = x1 - x0, theme = (R() * 5) | 0
   const warm = (h, k = 1) => col(h).multiplyScalar(k)
   // back wall as a vertical gradient of glow strips; floor + ceiling
-  const wallC = ['#e6cba0', '#dcbd8e', '#c9a574', '#a88a5e']
+  const WALLS = [['#d2ab78', '#c79d68', '#b58858', '#94704a'], ['#f2e0bd', '#ead3aa', '#d9bc8f', '#b89a6e'], ['#e6e3c8', '#d9d8b8', '#c3c4a2', '#9ea083'], ['#ecd3c6', '#e2c4b4', '#cfae9d', '#a78677'], ['#e4d6bd', '#d8c7a8', '#c4b08f', '#a08c6c']]
+  const wallC = WALLS[theme]
   const bandH = (y1 - y0) / wallC.length
   wallC.forEach((c, i) => ch.box(F, x0, x1, y1 - (i + 1) * bandH, y1 - i * bandH, zb - 0.02, zb, warm(c), 'shopin', 'f', 1, 1, 0))
   ch.box(F, x0, x1, y0, y0 + 0.02, zb, z0, warm('#b98a58'), 'shopin', 'u', 1, 1, 0)

@@ -150,7 +150,7 @@ export function buildStreet() {
       ch.box(FA, -wx / 2 - 0.07, wx / 2 + 0.07, y - 0.07, y + h + 0.07, 0, 0.06, bronze, 'metal+', 'fulrb', 1, 1, 0)
       ch.box(FA, -wx / 2, wx / 2, y, y + h, 0.04, 0.07, c1, 'trim', 'f', 1, 1, 0); ch.box(FA, -wx / 2 + 0.2, wx / 2 - 0.2, y + h * 0.18, y + h * 0.55, 0.07, 0.08, c2, 'trim', 'f', 1, 1, 0)
     }
-    art(0, 3.3, 1.1, 1.4, 1.5, col('#bfb39b'), col('#8a6a78'), -1); art(0, 5.3, 1.1, 1.4, 1.5, col('#a9b39a'), col('#cbb78d'), -1); art(0, 7.3, 1.1, 1.4, 1.5, col('#d9cdb8'), col('#6d5568'), -1); art(0, 6.0, 2.3, 1.5, 1.4, col('#cbb9a0'), col('#a45f47'), 1)
+    art(0, 3.3, 1.1, 1.4, 1.5, col('#bfb39b'), col('#8a6a78'), -1); art(0, 5.3, 1.1, 1.4, 1.5, col('#a9b39a'), col('#cbb78d'), -1); art(0, 7.3, 1.1, 1.4, 1.5, col('#d9cdb8'), col('#cf8f9c'), -1); art(0, 6.0, 2.3, 1.5, 1.4, col('#cbb9a0'), col('#a45f47'), 1)
     // concierge desk (walnut, stone top) on the east side; seating group on the west
     ch.box(FP, 2.6, 5.9, 0.04, 1.05, 2.9, 3.7, walnut, 'wood', 'fulrb', 1, 1, 0.05); ch.box(FP, 2.5, 6.0, 1.05, 1.12, 2.8, 3.8, col('#e7dfcf'), 'ashlar', 'fulrbd', 2.4, 1.2); ch.solid(FP, 2.5, 6.0, 0, 1.12, 2.8, 3.8, 'desk')
     ch.box(FP, 3.2, 5.2, 1.12, 1.18, 3.1, 3.5, col('#2f2a26'), 'trim', 'u', 1, 1, 0); ch.box(FP, 4.0, 4.04, 1.12, 1.55, 3.2, 3.24, brass, 'metal', 'fulrb', 1, 1, 0); ch.box(FP, 3.85, 4.2, 1.55, 1.58, 3.1, 3.4, col('#ffe0b0'), 'glow', 'fu', 1, 1, 0)   // blotter + desk lamp
@@ -309,9 +309,10 @@ export function buildStreet() {
     // balustrade along the river edge + the street-side edge (gaps at the stairs/ramps); balusters are detail geometry (LOD)
     const gaps = [[BX - 10, BX + 10], [-87, -77], [47, 57]]
     const bal = (xa, xb, z) => {
-      ch.box(FT, xa, xb, H, H + 0.16, z - 0.2, z + 0.2, stone, 'trim', 'fulrb'); ch.box(FT, xa, xb, H + 0.9, H + 1.04, z - 0.22, z + 0.22, stone, 'trim', 'fulrb')
-      const n = Math.max(1, Math.round((xb - xa) / 0.28)); for (let i = 0; i <= n; i++) { const x = xa + (i / n) * (xb - xa); ch.prism(FT, x, z, 0.06, 0.06, H + 0.16, H + 0.9, stone, 'trim+', 4, false) }
-      for (let x = xa; x <= xb; x += 4) ch.box(FT, x - 0.14, x + 0.14, H + 0.16, H + 1.0, z - 0.14, z + 0.14, stone, 'trim', 'fulrb')
+      const ironB = col('#26242b')                                             // black wrought iron railing between stone posts (as in the reference)
+      ch.box(FT, xa, xb, H, H + 0.14, z - 0.16, z + 0.16, stone, 'trim', 'fulrb'); ch.box(FT, xa, xb, H + 0.94, H + 1.0, z - 0.05, z + 0.05, ironB, 'metal', 'fulrb')
+      const n = Math.max(1, Math.round((xb - xa) / 0.28)); for (let i = 0; i <= n; i++) { const x = xa + (i / n) * (xb - xa); ch.prism(FT, x, z, 0.018, 0.018, H + 0.14, H + 0.96, ironB, 'metal+', 4, false) }
+      for (let x = xa; x <= xb; x += 3) { ch.box(FT, x - 0.12, x + 0.12, H + 0.14, H + 1.0, z - 0.12, z + 0.12, stone, 'trim', 'fulrb'); ch.prism(FT, x, z, 0.07, 0.01, H + 1.0, H + 1.16, ironB, 'metal', 6) }
     }
     bal(x0, -50, zr + 0.35); bal(-40, x1, zr + 0.35)                                                                         // gap = the reserved ferry landing
     let cur = x0; for (const [a, b] of gaps.slice().sort((p, q) => p[0] - q[0])) { if (a > cur) bal(cur, a, zw - 0.4); cur = b } if (cur < x1) bal(cur, x1, zw - 0.4)
@@ -400,7 +401,7 @@ export function buildStreet() {
   // 6. STREETS: Courtyard Lane (quiet, narrow) widening into the Neighbourhood Avenue toward the garden square; houses with real fronts, parked cars
   // =====================================================================================================================================
   const MAIN = ['#ece3d0', '#decdae', '#e8dcc2', '#d3cab9', '#e0cdbf', '#cdd2c0', '#e6dcc9'], DOORS = ['#34473d', '#4d3548', '#2f3138', '#2d3345', '#5a3a3a', '#44504a', '#6a4d63', '#3b3226']
-  const BRICKS = [PAL.brick, PAL.stock, '#a35b45', '#b0785a', '#8f5b4a']
+  const BRICKS = [PAL.brick, PAL.stock, '#a56b50', '#b8825f', '#98694f']
   // a terrace of individually composed townhouses along an axis. ax 'x': facade plane at z = plane, centres run along x; ax 'z': plane at x = plane
   const houseRow = (ch, ax, plane, rot, from, to, o = {}) => {
     const ws = fit(to - from, o.lo ?? 5.4, o.hi ?? 7.0, R); let p = from
@@ -509,11 +510,11 @@ export function buildStreet() {
     // east side of East Street: a second, lower block of three houses facing the garden would crowd the corner; the lane's south houses already close it
     houseRow(so, 'x', 111, Math.PI, -8.3, 16.9, { d: 9, floors: 4 })
     const shopS = (xc, w, sp) => shopBuilding(sh, frame(xc, 108.75 + 0.0, Math.PI, GY), { w, d: 12, floors: 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: sp.side, balc: true, roof: 'hip', side: PAL.stock })
-    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 0, awning: '#6d5568', stall: '#d8ceb4', door: '#2b2630', side: 'l' })
-    shopS(-19.0, 7.0, { wall: 'plaster', main: '#d9c9bf', sign: 3, awning: '#8d9a85', stall: '#8f9c86', door: '#4a3a46', side: 'r' })
+    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 0, awning: '#cf8f9c', stall: '#d8ceb4', door: '#2b2630', side: 'l' })
+    shopS(-19.0, 7.0, { wall: 'plaster', main: '#d9c9bf', sign: 3, awning: '#8d9a85', stall: '#a9b89c', door: '#4a3a46', side: 'r' })
     shopS(-11.5, 6.4, { wall: 'plaster', main: '#e0d6c4', sign: 4, awning: '#c9b79a', stall: '#e4d6c2', door: '#41584a', side: 'l' })
-    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 6, awning: '#37363f', stall: '#c9b6a2', door: '#2b2630', side: 'r' })
-    shopS(28, 7.4, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#9a8095', stall: '#4d5e50', door: '#2f3d36', side: 'l' })
+    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 6, awning: '#b9778a', stall: '#dcc6b4', door: '#2b2630', side: 'r' })
+    shopS(28, 7.4, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#d9a8ae', stall: '#2f2b2c', door: '#2f3d36', side: 'l' })
     houseRow(so, 'x', 111, Math.PI, 31.7, ES1, { d: 9, floors: 4 })
     // café tables on the south pavement (under the garden railings)
     for (let i = 0; i < 3; i++) { put('table', -27 + i * 2.1, 107.6, 0, 1.0); put('chair', -27.6 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -26.4 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
@@ -532,32 +533,32 @@ export function buildStreet() {
     surf(g, 'slab', LX1, WS0 + 0.001, 86, 95, G.slab, 1.8, 1.2, 1)
     const W_ = (a, p) => ({ sign: a, ...p })
     const NORTH = [
-      { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#7a4a56', door: '#2f3d36' },
-      { w: 6.0, sign: 4, awning: '#c9b79a', wall: 'brick', main: '#b4806e', stall: '#b9a78e', door: '#415a4b' },
+      { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#3a3331', door: '#2f3d36' },
+      { w: 6.0, sign: 4, awning: '#c9b79a', wall: 'brick', main: '#b4806e', stall: '#e8dcc6', door: '#415a4b' },
       { id: 'bakery', w: 6.6, sign: 5, awning: '#b4806e', wall: 'plaster', main: '#e0d6c4', stall: '#e0d2bd', door: '#5a3a3a' },
-      { w: 5.6, sign: 7, awning: '#9a8095', wall: 'brick', main: PAL.stock, stall: '#6f8071', door: '#4d3548' },
-      { id: 'boutique', w: 6.8, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9c9bf', stall: '#cfc3a8', door: '#4a3a46' },
-      { w: 6.2, sign: 6, awning: '#37363f', wall: 'brick', main: PAL.brick, stall: '#d8ceb4', door: '#2b2630' },
-      { w: 5.8, sign: 4, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#8f9c86', door: '#2f3d36' },
+      { w: 5.6, sign: 7, awning: '#d9a8ae', wall: 'brick', main: PAL.stock, stall: '#2f2b2c', door: '#4d3548' },
+      { id: 'boutique', w: 6.8, sign: 3, awning: '#cf8f9c', wall: 'plaster', main: '#d9c9bf', stall: '#ece0c8', door: '#4a3a46' },
+      { w: 6.2, sign: 6, awning: '#b9778a', wall: 'brick', main: PAL.brick, stall: '#d8ceb4', door: '#2b2630' },
+      { w: 5.8, sign: 4, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#a9b89c', door: '#2f3d36' },
       { w: 6.6, sign: 7, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#e4d6c2', door: '#44504a' },
-      { w: 6.0, sign: 5, awning: '#6d5568', wall: 'plaster', main: '#e6dcc9', stall: '#c9b6a2', door: '#6a4d63' },
-      { w: 5.8, sign: 6, awning: '#c9b79a', wall: 'brick', main: PAL.stock, stall: '#4d5e50', door: '#34473d' },
-      { w: 6.4, sign: 4, awning: '#b4806e', wall: 'plaster', main: '#d9d1bf', stall: '#7a4a56', door: '#5a3a3a' },
-      { w: 6.2, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#b9a78e', door: '#2d3345' },
+      { w: 6.0, sign: 5, awning: '#cf8f9c', wall: 'plaster', main: '#e6dcc9', stall: '#dcc6b4', door: '#6a4d63' },
+      { w: 5.8, sign: 6, awning: '#c9b79a', wall: 'brick', main: PAL.stock, stall: '#2f2b2c', door: '#34473d' },
+      { w: 6.4, sign: 4, awning: '#b4806e', wall: 'plaster', main: '#d9d1bf', stall: '#3a3331', door: '#5a3a3a' },
+      { w: 6.2, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#e8dcc6', door: '#2d3345' },
     ]
     const SOUTH = [
-      { id: 'cafe', w: 9.4, sign: 0, awning: '#6d5568', wall: 'brick', main: PAL.brick, stall: '#e0d2bd', door: '#2b2630' },
-      { id: 'florist', w: 6.4, sign: 2, awning: '#d9cdb8', wall: 'plaster', main: '#cfc7b6', stall: '#6f8071', door: '#41584a' },
-      { w: 6.0, sign: 4, awning: '#9a8095', wall: 'plaster', main: '#d9c9bf', stall: '#cfc3a8', door: '#4d3548' },
-      { w: 5.8, sign: 6, awning: '#37363f', wall: 'brick', main: '#b0785a', stall: '#d8ceb4', door: '#2b2630' },
+      { id: 'cafe', w: 9.4, sign: 0, awning: '#cf8f9c', wall: 'brick', main: PAL.brick, stall: '#e0d2bd', door: '#2b2630' },
+      { id: 'florist', w: 6.4, sign: 2, awning: '#d9cdb8', wall: 'plaster', main: '#cfc7b6', stall: '#2f2b2c', door: '#41584a' },
+      { w: 6.0, sign: 4, awning: '#d9a8ae', wall: 'plaster', main: '#d9c9bf', stall: '#ece0c8', door: '#4d3548' },
+      { w: 5.8, sign: 6, awning: '#b9778a', wall: 'brick', main: '#b0785a', stall: '#d8ceb4', door: '#2b2630' },
       { passage: 2.6 },
-      { w: 6.4, sign: 5, awning: '#c9b79a', wall: 'plaster', main: '#e0d6c4', stall: '#8f9c86', door: '#5a3a3a' },
+      { w: 6.4, sign: 5, awning: '#c9b79a', wall: 'plaster', main: '#e0d6c4', stall: '#a9b89c', door: '#5a3a3a' },
       { w: 6.0, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#e4d6c2', door: '#44504a' },
-      { w: 7.0, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9cdbf', stall: '#c9b6a2', door: '#6a4d63' },
-      { w: 6.2, sign: 4, awning: '#b4806e', wall: 'brick', main: PAL.stock, stall: '#4d5e50', door: '#34473d' },
-      { w: 5.6, sign: 6, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#7a4a56', door: '#41584a' },
-      { w: 6.8, sign: 5, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#b9a78e', door: '#2d3345' },
-      { w: 6.0, sign: 7, awning: '#9a8095', wall: 'plaster', main: '#e6dcc9', stall: '#e0d2bd', door: '#4d3548' },
+      { w: 7.0, sign: 3, awning: '#cf8f9c', wall: 'plaster', main: '#d9cdbf', stall: '#dcc6b4', door: '#6a4d63' },
+      { w: 6.2, sign: 4, awning: '#b4806e', wall: 'brick', main: PAL.stock, stall: '#2f2b2c', door: '#34473d' },
+      { w: 5.6, sign: 6, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#3a3331', door: '#41584a' },
+      { w: 6.8, sign: 5, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#e8dcc6', door: '#2d3345' },
+      { w: 6.0, sign: 7, awning: '#d9a8ae', wall: 'plaster', main: '#e6dcc9', stall: '#e0d2bd', door: '#4d3548' },
     ]
     const total = (L) => L.reduce((s, e) => s + (e.passage ?? e.w), 0), len = LX1 - LX0 - 1.2
     const place = (list, row) => {

@@ -174,7 +174,7 @@ export function StreetVisuals() {
     normalMap.offset.x = (t * 0.012) % 1; normalMap.offset.y = (t * 0.007) % 1
     jetRefs.current.forEach((m) => { if (!m) return; const s = 0.82 + 0.18 * Math.sin(t * 2.1 + m.userData.k * 1.7); m.scale.y = s; m.position.y = m.userData.y + (s * 1.5) / 2 })
     const onStreet = world.level === 'street'
-    M.shopin.color.setScalar(0.52 + 0.44 * Math.min(1, LIVE.win))                                        // interiors read dim by day, glow at dusk
+    M.shopin.color.setScalar(0.55 + 0.62 * Math.min(1, LIVE.win))                                        // interiors read dim by day, glow at dusk
     for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * LIVE.lamp : 0
     if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second

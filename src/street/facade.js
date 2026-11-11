@@ -4,7 +4,7 @@ import { C, toWorld, dirWorld } from './geo.js'
 
 export const PAL = {
   ivory: '#ece3d0', champagne: '#decdae', cream: '#e8dcc2', greige: '#cbc1b2', stone: '#d6cab2', limestone: '#dbd0ba', taupe: '#a69888', blush: '#dcc6ba',
-  sage: '#a9b39a', mauve: '#977c92', plum: '#684b61', charcoal: '#34323a', slate: '#3f4049', stock: '#b9a07c', brick: '#a45f47', rose: '#b4806e',
+  sage: '#a9b39a', mauve: '#977c92', plum: '#684b61', charcoal: '#34323a', slate: '#3f4049', stock: '#c4ab84', brick: '#a8714f', rose: '#b4806e',
   iron: '#1c1b21', brass: '#b7965a', zinc: '#8a8e92', white: '#f1ece1', ink: '#2b3040', green: '#34473d', cocoa: '#4a3a34',
 }
 const GLASS = [C('#2a2832'), C('#24232d'), C('#312e39'), C('#292b36')]
@@ -18,6 +18,12 @@ export function pane(ch, F, x0, x1, y0, y1, z, lit) {
   const R = ch.R
   const col = lit ? LIT[(R() * LIT.length) | 0] : GLASS[(R() * GLASS.length) | 0]
   ch.acc(lit ? 'glow' : 'glass').quad(toWorld(F, x0, y0, z), toWorld(F, x1, y0, z), toWorld(F, x1, y1, z), toWorld(F, x0, y1, z), col, dirWorld(F, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+  if (lit && x1 - x0 > 0.5 && y1 - y0 > 0.6) {                      // curtains + a pelmet so a lit window reads as a room, not a flat glowing rectangle
+    const cw = (x1 - x0) * 0.24, cc = col.clone().multiplyScalar(0.62).lerp(C('#e9dccb'), 0.35), z2 = z + 0.004
+    for (const [a, b] of [[x0, x0 + cw], [x1 - cw, x1]]) ch.acc('glow').quad(toWorld(F, a, y0, z2), toWorld(F, b, y0, z2), toWorld(F, b, y1, z2), toWorld(F, a, y1, z2), cc, dirWorld(F, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+    ch.acc('glow').quad(toWorld(F, x0, y1 - 0.16, z2), toWorld(F, x1, y1 - 0.16, z2), toWorld(F, x1, y1, z2), toWorld(F, x0, y1, z2), cc.clone().multiplyScalar(0.8), dirWorld(F, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+    ch.acc('glow').quad(toWorld(F, x0 + cw, y0, z2), toWorld(F, x1 - cw, y0, z2), toWorld(F, x1 - cw, y0 + 0.5, z2), toWorld(F, x0 + cw, y0 + 0.5, z2), col.clone().multiplyScalar(0.72), dirWorld(F, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+  }
 }
 
 // Sash window set into a wall of thickness t: recessed pane + glazing bars + stone sill + flat lintel. style: 'georgian' | 'plate'

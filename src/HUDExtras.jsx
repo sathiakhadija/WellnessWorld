@@ -110,3 +110,18 @@ export function Minimap() {
   )
 }
 void BX
+
+
+// Cinematic grade: a soft vignette + warm/cool wash over the canvas (pure CSS, no extra render pass) tuned per atmosphere. Stays on in clean view.
+const GRADE = {
+  morning: ['rgba(90,100,130,0.16)', 'rgba(255,230,200,0.05)', 'rgba(200,215,255,0.03)'],
+  afternoon: ['rgba(70,80,100,0.12)', 'rgba(255,240,210,0.03)', 'rgba(0,0,0,0)'],
+  golden: ['rgba(120,50,86,0.28)', 'rgba(255,160,100,0.08)', 'rgba(255,150,190,0.05)'],
+  blue: ['rgba(26,28,84,0.42)', 'rgba(255,170,110,0.05)', 'rgba(110,120,255,0.08)'],
+  night: ['rgba(8,8,40,0.5)', 'rgba(255,170,100,0.04)', 'rgba(60,70,160,0.08)'],
+}
+export function Grade() {
+  const a = useAtmo(), [v, lo, hi] = GRADE[a.preset] || GRADE.golden
+  return <div aria-hidden style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 4, transition: 'background 1.2s',
+    background: `radial-gradient(ellipse 75% 70% at 50% 46%, rgba(0,0,0,0) 52%, ${v} 100%), linear-gradient(to top, ${lo}, rgba(0,0,0,0) 38%), linear-gradient(to bottom, ${hi}, rgba(0,0,0,0) 35%)` }} />
+}
