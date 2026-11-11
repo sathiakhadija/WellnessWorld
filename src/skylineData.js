@@ -54,13 +54,23 @@ export function buildLayout() {
   const one = out.find((b) => b.name === 'One Canada Sq')
   one.capH = (1186 * (352 - PYRAMID_APEX_PX)) / F_PX
 
-  // lit low-rise waterfront in front of the tower bases (reference: warm glittering band between towers and river)
+  // far-bank waterfront (middle ground): composed in CLUSTERS with plazas between them, a low warm front row on the quay and a taller glass row behind,
+  // so the base of the towers reads as a lived-in dockside rather than a uniform strip of boxes
   const rb = seeded(21)
-  for (let i = 0; i < 150; i++) {
-    const zb = -(1020 + rb() * 90), xb = (rb() * 2 - 1) * 3700                       // far bank is a straight embankment (the river runs left-right)
-    const a = Math.atan2(xb, -zb)
-    const w = 18 + rb() * 34
-    out.push({ name: 'bank' + i, style: 'stone', band: true, hero: false, x: xb, z: zb, w, d: w * (0.7 + rb() * 0.5), h: 12 + rb() * 26, rot: a + (rb() - 0.5) * 0.5, shade: rb() })
+  let cx = -3600, k = 0
+  while (cx < 3600) {
+    const cw = 90 + rb() * 150, n = Math.max(2, Math.round(cw / (34 + rb() * 10)))
+    const nearCentre = Math.abs(cx) < 1500
+    for (let i = 0; i < n; i++) {
+      const bx = cx + (i + 0.5) * (cw / n) + (rb() - 0.5) * 6, zb = -(1016 + rb() * 12)
+      const w = 20 + rb() * 22, brick = rb() < 0.35
+      out.push({ name: 'bank' + k++, style: brick ? 'stone' : rb() < 0.5 ? 'stone' : 'glass', band: true, hero: false, x: bx, z: zb, w, d: w * (0.7 + rb() * 0.4), h: (nearCentre ? 14 : 10) + rb() * (nearCentre ? 16 : 10), rot: Math.atan2(bx, -zb) + (rb() - 0.5) * 0.12, shade: rb() })
+      if (rb() < (nearCentre ? 0.8 : 0.55)) {
+        const zz = -(1048 + rb() * 55), ww = 26 + rb() * 30
+        out.push({ name: 'bank' + k++, style: 'glass', band: true, hero: false, x: bx + (rb() - 0.5) * 14, z: zz, w: ww, d: ww * (0.7 + rb() * 0.5), h: 30 + rb() * (nearCentre ? 48 : 30), rot: Math.atan2(bx, -zz) + (rb() - 0.5) * 0.2, shade: rb() })
+      }
+    }
+    cx += cw + 36 + rb() * 80                                                    // plaza / dock basin gap
   }
   // background city: low/mid-rise band all around the river view, plus a few taller clusters off-frame (north dock / east)
   const rnd = seeded(7)

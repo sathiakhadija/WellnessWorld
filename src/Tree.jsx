@@ -8,7 +8,7 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { GROUPS } from './CameraRig.jsx'
 
-export const TREE_POS = [3.95, -0.35, -13.1]    // planter base on the balcony deck (deck top y = -0.35)
+export const TREE_POS = [3.95, 0, -13.1]    // planter base on the balcony deck (deck top y = -0.35)
 
 function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
 
@@ -165,4 +165,30 @@ export default function CherryTree() {
       </RigidBody>
     </group>
   )
+}
+
+// Occasional drifting blossom petals: 40 tiny instanced quads, each on its own 12-30 s cycle that is only "alive" for ~9 s of it, so a few petals
+// leave the canopy now and then, tumble down on the breeze and may blow out past the balustrade. One draw call, 40 matrix writes per frame.
+export function Petals() {
+  const ref = useRef()
+  const N = 40
+  const seeds = useMemo(() => { const R = rng(31); return Array.from({ length: N }, () => ({ cyc: 12 + R() * 18, off: R() * 30, a: R() * 6.28, r: R() * 0.8, y: 1.7 + R() * 0.7, w: 0.6 + R() * 1.2, sp: 0.5 + R() * 0.8, s: 0.03 + R() * 0.02 })) }, [])
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#f7bfd0', side: THREE.DoubleSide, toneMapped: false, transparent: true, opacity: 0.9 }), [])
+  const o = useMemo(() => new THREE.Object3D(), [])
+  useFrame(({ clock }) => {
+    const m = ref.current; if (!m) return
+    const t = clock.elapsedTime
+    seeds.forEach((p, i) => {
+      const ph = ((t + p.off) % p.cyc) / 9, life = ph < 1 ? ph : -1
+      if (life < 0) { o.scale.setScalar(0.0001); o.position.set(0, -50, 0) }
+      else {
+        const T = life * 9
+        o.position.set(TREE_POS[0] + Math.cos(p.a) * p.r + T * 0.22 * p.sp + Math.sin(T * p.w) * 0.12, p.y - T * 0.17 * p.sp - 0.02 * T * T * 0.1, TREE_POS[2] + Math.sin(p.a) * p.r + T * 0.06 + Math.cos(T * p.w * 0.8) * 0.1)
+        o.rotation.set(T * 2.1 * p.w, T * 1.3, T * 1.7); o.scale.setScalar(p.s * (life < 0.1 ? life * 10 : life > 0.85 ? (1 - life) / 0.15 : 1))
+      }
+      o.updateMatrix(); m.setMatrixAt(i, o.matrix)
+    })
+    m.instanceMatrix.needsUpdate = true
+  })
+  return <instancedMesh ref={ref} args={[new THREE.PlaneGeometry(1, 0.7), mat, N]} frustumCulled={false} />
 }

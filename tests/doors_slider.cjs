@@ -1,4 +1,4 @@
-// Behaviour test: closed doors block, Enter opens them, the player can walk through; balcony sliding door + step ramp (out and back in).
+// Behaviour test: closed doors block, Enter opens them, the player can walk through; balcony sliding door on a flush threshold (out and back in).
 // Run: npm run build && npx vite preview --port 4173 &  then  node tests/doors_slider.cjs   (uses ?off=tree,hood and a small window so headless SwiftShader is fast enough)
 const { chromium } = require('playwright');
 const URL = process.env.URL || 'http://localhost:4173/?off=tree,hood';
@@ -42,10 +42,10 @@ const ok = []; const check = (name, cond, extra = '') => { ok.push(cond); consol
   q = await walk('KeyW'); check('closed balcony door blocks (z > -11.7)', q[2] > -11.72, `z=${q[2].toFixed(2)}`)
   await p.keyboard.press('Enter'); await settle(16000)
   q = await walk('KeyW', 9000); check('open balcony door: player reaches the balcony (z < -12.6)', q[2] < -12.6, `z=${q[2].toFixed(2)} y=${q[1].toFixed(2)}`)
-  check('balcony deck height (player stands lower than inside)', q[1] < -0.2, `y=${q[1].toFixed(2)}`)
+  check('balcony deck is flush with the interior floor (|y - 0| < 0.15)', Math.abs(q[1]) < 0.15, `y=${q[1].toFixed(2)}`)
   // come back in over the ramp: face +z
   await p.evaluate(() => window.__ww.setFollowYaw(Math.PI)); await p.waitForTimeout(800)
-  q = await walk('KeyW', 9000); check('walk back inside over the threshold ramp (z > -11.5)', q[2] > -11.5, `z=${q[2].toFixed(2)} y=${q[1].toFixed(2)}`)
+  q = await walk('KeyW', 9000); check('walk back inside over the flush threshold (z > -11.5)', q[2] > -11.5, `z=${q[2].toFixed(2)} y=${q[1].toFixed(2)}`)
   // close the door from inside and verify it blocks again
   await stand(0.4, 0.1, -10.0, 0); await p.keyboard.press('Enter'); await settle(16000)
   q = await walk('KeyW'); check('closed again: balcony door blocks', q[2] > -11.72, `z=${q[2].toFixed(2)}`)

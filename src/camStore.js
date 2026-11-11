@@ -8,6 +8,9 @@ let snap = {
   invertScroll: false,
   help: true,
   toast: '',
+  transition: 'idle',  // main entrance: 'idle' | 'opening' | 'overlay' | 'closing'
+  dest: '',
+  clean: false,        // inspection mode: character + HUD hidden
   prompt: '',          // contextual interaction hint ("Enter - open the bedroom door")
 }
 const subs = new Set()

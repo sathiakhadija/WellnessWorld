@@ -46,3 +46,8 @@ See `docs/V9_REPORT.md` (implemented / tested / limitations) and `docs/screens_v
 - **Enter** opens/closes the nearest door (bedroom, bathroom, balcony sliding door); prompt appears when you are within range.
 - Tests: `node tests/doors_slider.cjs` (15 checks), `tests/camera_collision.cjs`, `tests/camera_wheel.cjs`. Use `?off=tree,hood` in the URL to switch heavy parts off.
 - Still unverified: Safari/trackpad, real-GPU performance.
+
+
+## V10 (architecture, environment, interaction)
+See `docs/V10_REPORT.md` for the full list. Highlights: flush limestone balcony with glass balustrade, single cream bathroom door, matte-black exterior frames, espresso main entrance with **Go Outside** placeholder (`src/destinations.js`), real-time Thames + passenger boats + waterfront, redesigned London neighbourhood at the rear, ambient life (clouds, petals, windows lighting up), and **V = clean view** (hide character/HUD, orbit the room, V/Esc to return).
+Tests: `node tests/doors_slider.cjs`, `node tests/v10.cjs`, `node tests/camera_collision.cjs`, `node tests/camera_wheel.cjs` (after `npm run build` and `npx vite preview --port 4173`).

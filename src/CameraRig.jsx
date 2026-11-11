@@ -46,6 +46,18 @@ const _pivot = new THREE.Vector3()
 const _pos = new THREE.Vector3()
 const _q = new THREE.Quaternion()
 
+let prevView = null
+function toggleClean(setMode) {
+  const c = camStore.get()
+  if (!c.clean) {
+    prevView = { mode: c.mode, help: c.help }
+    camStore.set({ clean: true, help: false }); if (c.mode === 'follow') setMode('sims')
+    toast('Clean view — character hidden · V to return')
+  } else {
+    camStore.set({ clean: false, help: prevView ? prevView.help : true }); if (prevView) setMode(prevView.mode)
+  }
+}
+
 export default function CameraRig({ playerRef, playerMeshRef }) {
   const { camera, gl, scene } = useThree()
   const { world, rapier } = useRapier()
@@ -69,6 +81,8 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       KeyT: () => { const m = camStore.get().scrollMode === 'orbit' ? 'zoom' : 'orbit'; camStore.set({ scrollMode: m }); toast(`Two-finger scroll = ${m}`) },
       KeyI: () => { const v = !camStore.get().invertScroll; camStore.set({ invertScroll: v }); toast(v ? 'Scroll direction inverted' : 'Scroll direction normal') },
       KeyR: () => resetView(st, playerRef),
+      KeyV: () => toggleClean(setMode),
+      Escape: () => { if (camStore.get().clean) toggleClean(setMode) },
       KeyF: () => { if (camStore.get().mode === 'sims') focusPlayer(st, playerRef) },
     }
     // test / debug handle (also handy in the console)
@@ -77,6 +91,7 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       cam: () => ({ pos: camera.position.toArray(), fov: camera.fov }),
       player: () => { const p = playerRef.current?.translation(); return p ? [p.x, p.y, p.z] : null },
       set: (m) => setMode(m),
+      clean: () => toggleClean(setMode),
       teleport: (x, y, z) => { playerRef.current?.setTranslation({ x, y, z }, true); playerRef.current?.setLinvel({ x: 0, y: 0, z: 0 }, true) },   // test hook
       fastAnim: (v) => { world.fastAnim = !!v },
       setFollowYaw: (y) => { st.f.yaw = st.f.sy = y },                                                                                              // test hook
@@ -204,8 +219,10 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
       }
       _e.set(x.sp, x.sy, 0)
       outQuat = _q.setFromEuler(_e); outPos = x.pos
-      if (playerMeshRef.current) playerMeshRef.current.visible = true
+      if (playerMeshRef.current) playerMeshRef.current.visible = !camStore.get().clean
     }
+
+    if (playerMeshRef.current && camStore.get().clean) playerMeshRef.current.visible = false
 
     // ---------- eased transition between modes ----------
     const tr = st.trans

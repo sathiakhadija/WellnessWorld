@@ -13,7 +13,7 @@ import { input } from './input.js'
 import { camStore } from './camStore.js'
 import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
 import Plan from './Plan.jsx'
-import CherryTree from './Tree.jsx'
+import CherryTree, { Petals } from './Tree.jsx'
 import { world, OFF } from './world.js'
 
 RectAreaLightUniformsLib.init()
@@ -23,9 +23,9 @@ const Q = typeof window !== 'undefined' ? new URLSearchParams(window.location.se
 const num = (k, d) => (Q.has(k) ? parseFloat(Q.get(k)) : d)
 const str = (k, d) => (Q.has(k) ? Q.get(k) : d)
 export const L = {
-  sun: num('sun', 4.4), sunCol: str('sunCol', '#ffa35c'),
-  hemi: num('hemi', 0.5), hemiSky: str('hemiSky', '#ffc08a'), hemiGround: str('hemiGround', '#f2a258'),
-  env: num('env', 0.2), exp: num('exp', 1.0), tm: str('tm', 'neutral'), cove: num('cove', 7),
+  sun: num('sun', 4.1), sunCol: str('sunCol', '#ffb06c'),
+  hemi: num('hemi', 0.7), hemiSky: str('hemiSky', '#ffe0c4'), hemiGround: str('hemiGround', '#f6c08a'),
+  env: num('env', 0.32), exp: num('exp', 1.0), tm: str('tm', 'neutral'), cove: num('cove', 7),
   floorR: num('floorR', 2.2), floorG: num('floorG', 2.6), floorB: num('floorB', 1.1), floorEnv: num('floorEnv', 1.5),
 }
 // Albedo grade, tuned against the reference (same camera, region means). The Blender albedos were authored for Cycles' bounce light,
@@ -33,10 +33,10 @@ export const L = {
 const GRADE = {
   WW_Parquet_Baked_GAME: { mul: [L.floorR, L.floorG, L.floorB], env: L.floorEnv },
   WW_Plaster_Ivory_GAME: { mul: [0.90, 1.12, 0.95] },
-  WW_Ceiling_Ivory_GAME: { mul: [1.40, 1.40, 0.95] },
+  WW_Ceiling_Ivory_GAME: { mul: [1.30, 1.40, 1.15] },
   WW_Trim_Satin_GAME:    { mul: [1.00, 1.17, 0.95] },
   WW_Skirting_GAME:      { mul: [1.00, 1.17, 0.95] },
-  WW_Frame_Bronze_GAME:  { set: [0.20, 0.125, 0.085], rough: 0.42 },   // reference frames are warm bronze, not black
+  WW_Frame_Bronze_GAME:  { set: [0.014, 0.014, 0.016], rough: 0.92, metal: 0.0, envI: 0.0 },   // V10: slim matte-black aluminium on every exterior frame
 }
 const TONE = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neutral: THREE.NeutralToneMapping, linear: THREE.LinearToneMapping }
 
@@ -69,6 +69,8 @@ function dropTris(geom, pred) {
 }
 const all3 = (pos, a, b, c, f) => f(pos.getX(a), pos.getY(a), pos.getZ(a)) && f(pos.getX(b), pos.getY(b), pos.getZ(b)) && f(pos.getX(c), pos.getY(c), pos.getZ(c))
 const LEFTWALL = (x) => x <= -4.38                                           // left-wall slab, linings, panelling, skirting, cornice (x -4.85..-4.38)
+const FRONT_WALL = (x, y, z) => z > -0.002 && z < 0.402 && x > -4.86 && x < 4.02            // old front wall slab (rebuilt in Plan.jsx with the main entrance)
+const FRONT_TRIM = (x, y, z) => z > -0.07 && z < 0.07 && x > -4.46 && x < 3.99
 const FAR_GLASS_BAY2 = (x, y, z) => x > -1.91 && x < 1.21 && z < -11.78 && z > -11.80   // the middle far glass pane (replaced by the sliding door)
 const FAR_GLASS_COL = (x, y, z) => x > -4.46 && x < 3.62 && z < -11.75 && z > -11.89   // far-wall glass collider (re-created in Plan.jsx with a door gap)
 
@@ -78,8 +80,10 @@ function Penthouse({ onSpawn, onMats }) {
     const colliders = []
     const remove = [], mats = {}
     scene.traverse((o) => {
-      if (o.name?.startsWith('WW_Adjoining') || o.name?.startsWith('WW_Blossom')) { remove.push(o); return }   // old side cells (+ their props) and the old tree: rebuilt in code
+      if (o.name?.startsWith('WW_Adjoining') || o.name?.startsWith('WW_Blossom') || o.name?.startsWith('WW_Balcony') || o.name?.startsWith('WW_Balustrade') || o.name === 'WW_COL_Balcony') { remove.push(o); return }   // old side cells (+ their props) and the old tree: rebuilt in code
       if (o.isMesh && ['WW_Walls', 'WW_Walls_1', 'WW_Trim_Mouldings', 'WW_Trim_Mouldings_1'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, (x) => LEFTWALL(x)))
+      if (o.isMesh && ['WW_Walls', 'WW_Walls_1'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_WALL))
+      if (o.isMesh && ['WW_Trim_Mouldings', 'WW_Trim_Mouldings_1', 'WW_Trim_Mouldings_2', 'WW_Trim_Mouldings_3'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_TRIM))
       if (o.isMesh && o.name === 'WW_Window_Glass') dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FAR_GLASS_BAY2))
       if (o.userData?.ww_collider) colliders.push(o)          // exported "extras" from Blender
       if (o.userData?.ww_role === 'player_spawn') onSpawn?.(o.getWorldPosition(new THREE.Vector3()))
@@ -93,6 +97,8 @@ function Penthouse({ onSpawn, onMats }) {
           if (gr.set) m.color.setRGB(...gr.set)
           if (gr.env) m.envMapIntensity = gr.env
           if (gr.rough !== undefined) m.roughness = gr.rough
+          if (gr.metal !== undefined) m.metalness = gr.metal
+          if (gr.envI !== undefined) m.envMapIntensity = gr.envI
         }
         if (m?.name) mats[m.name] = m
         if (m?.name?.includes('Glass')) o.castShadow = false      // shadow maps ignore transparency: glass would block the whole sun
@@ -105,6 +111,7 @@ function Penthouse({ onSpawn, onMats }) {
       const g = c.geometry.clone().applyMatrix4(c.matrixWorld)
       const kind = c.userData.ww_collider_kind
       if (kind === 'walls') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, (x) => x <= -4.44))                           // left wall + old cells
+      if (kind === 'walls') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, FRONT_WALL))
       if (kind === 'floor') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, (x) => x <= -4.84))                           // old cell floors
       if (kind === 'glass') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, FAR_GLASS_COL))
       c.userData.__pos = new Float32Array(g.attributes.position.array)
@@ -129,6 +136,12 @@ function Penthouse({ onSpawn, onMats }) {
   )
 }
 
+function CleanHide({ children }) {
+  const ref = useRef()
+  useFrame(() => { if (ref.current) ref.current.visible = !camStore.get().clean })
+  return <group ref={ref}>{children}</group>
+}
+
 const walkDir = new THREE.Vector3()
 
 function Player({ spawn, bodyRef, meshRef }) {
@@ -139,7 +152,7 @@ function Player({ spawn, bodyRef, meshRef }) {
     if (!body) return
     let speed = 0
     walkDir.set(0, 0, 0)
-    if (camStore.get().mode === 'follow') {                       // free + inspect cameras never move the player
+    if (camStore.get().mode === 'follow' && camStore.get().transition === 'idle') {                       // free + inspect cameras never move the player
       const f = (input.down('KeyW') || input.down('ArrowUp') ? 1 : 0) - (input.down('KeyS') || input.down('ArrowDown') ? 1 : 0)
       const r = (input.down('KeyD') || input.down('ArrowRight') ? 1 : 0) - (input.down('KeyA') || input.down('ArrowLeft') ? 1 : 0)
       const y = rigShared.followYaw                               // walk relative to where the camera looks
@@ -176,7 +189,7 @@ export default function PenthouseScene() {
     <div style={{ position: 'fixed', inset: 0 }}>
       <Canvas shadows camera={{ fov: 50, near: 0.05, far: 700, position: [0, 1.7, 0] }}
               gl={{ toneMapping: TONE[L.tm] ?? THREE.ACESFilmicToneMapping, toneMappingExposure: L.exp }}>
-        <fog attach="fog" args={[HAZE, 110, 700]} />
+        <fog attach="fog" args={[HAZE, 100, 560]} />
         <SkyDome />
         <Suspense fallback={null}><SkyEnv /></Suspense>
         <Skyline />
@@ -195,7 +208,8 @@ export default function PenthouseScene() {
             <Penthouse onSpawn={(p) => spawn.current.copy(p)} />
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
             {!OFF.has('tree') && <CherryTree />}
-            <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />
+            {!OFF.has('tree') && <Petals />}
+            <CleanHide><Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></CleanHide>
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>
         </Suspense>

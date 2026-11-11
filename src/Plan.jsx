@@ -20,9 +20,10 @@ const smooth = (t) => t * t * (3 - 2 * t)
 // ------------------------------------------------------------------ floor plan
 export const DOOR_H = 3.0
 export const DOORS = [
-  { id: 'bedroom',  label: 'bedroom door',  zc: -6.0,   w: 1.5 },
-  { id: 'bathroom', label: 'bathroom door', zc: -10.05, w: 1.3 },
+  { id: 'bedroom',  label: 'bedroom door',  zc: -6.0,   w: 1.5, type: 'double' },
+  { id: 'bathroom', label: 'bathroom door', zc: -10.05, w: 1.1, type: 'single', hinge: 'north' },   // single leaf, hinged on the partition side so the open leaf never sits in the opening
 ]
+const OPEN_ANGLE = 1.83     // 105 deg
 const SLIDER = { x0: -1.9, x1: 1.2, split: -0.35, z: -11.79 }   // middle bay of the far glazing: fixed half + sliding half (1.55 m clear opening)
 const Y0 = -0.3, YT = 3.6, RC = 3.4                              // slab bottom, wall top, room ceiling (underside)
 
@@ -40,7 +41,7 @@ function buildArch() {
   for (const d of DOORS) {
     const a = d.zc - d.w / 2, b = d.zc + d.w / 2
     add('plaster', -4.85, -4.45, DOOR_H, YT, a, b, true)                    // lintel
-    add('stone', -4.85, -4.45, Y0, 0, a, b, true)                           // threshold
+    add('stone', -4.85, -4.45, Y0, 0, a, b, true)                           // threshold (same stone as the sill)
     add('trim', -4.85, -4.45, 0, DOOR_H, a - 0.0, a + 0.02)                 // reveal linings
     add('trim', -4.85, -4.45, 0, DOOR_H, b - 0.02, b + 0.0)
     add('trim', -4.85, -4.45, DOOR_H - 0.02, DOOR_H, a, b)
@@ -78,6 +79,29 @@ function buildArch() {
     add('trim', -4.45, -4.40, 0.18, 0.27, zc - 0.34, zc + 0.34)
   }
   add('trim', -4.45, -4.36, 3.66, 3.8, -11.79, 0.05); add('trim', -4.45, -4.40, 3.60, 3.66, -11.79, 0.05)   // cornice (as before)
+
+  // ---- front wall (rebuilt) with the main entrance: a 1.3 m opening through the whole 0.4 m wall, panelled surround, lintel
+  const EX0 = 0.55, EX1 = 1.85
+  add('plaster', -4.85, EX0, Y0, 4.1, 0, 0.4, true); add('plaster', EX1, 4.01, Y0, 4.1, 0, 0.4, true)
+  add('plaster', EX0, EX1, 3.1, 4.1, 0, 0.4, true)
+  add('stone', EX0, EX1, Y0, 0, 0, 0.4, true)                                             // threshold
+  add('trim', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('trim', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('trim', EX0, EX1, 3.07, 3.1, 0, 0.4)   // reveal linings
+  // espresso-stained architrave (stepped: broad casing + inner bead) around the dark entrance door, as in the reference
+  for (const [a, b] of [[EX0 - 0.16, EX0], [EX1, EX1 + 0.16]]) add('dk', a, b, 0, 3.24, -0.035, 0)
+  add('dk', EX0 - 0.16, EX1 + 0.16, 3.1, 3.24, -0.035, 0); add('dk', EX0 - 0.2, EX1 + 0.2, 3.24, 3.3, -0.05, 0)
+  for (const [a, b] of [[EX0 - 0.05, EX0 - 0.02], [EX1 + 0.02, EX1 + 0.05]]) add('dk', a, b, 0, 3.15, -0.055, -0.035)
+  add('dk', EX0 - 0.05, EX1 + 0.05, 3.12, 3.15, -0.055, -0.035)
+  for (const [a, b] of [[-3.2, -0.4], [2.8, 3.95]]) {                                                              // flanking raised panels
+    const x0 = a + (a < 0 ? 0.0 : 0), yb = 0.55, yt = 3.15, t = 0.05
+    if (b - a < 0.6) continue
+    add('trim', a, b, yb, yb + t, -0.025, 0); add('trim', a, b, yt - t, yt, -0.025, 0); add('trim', a, a + t, yb, yt, -0.025, 0); add('trim', b - t, b, yb, yt, -0.025, 0)
+  }
+  // narrow tall panel pair either side of the door (each carries a sconce): tall upper frame, short lower frame
+  for (const [a, b] of [[-0.18, 0.3], [2.1, 2.58]]) for (const [yb, yt] of [[1.2, 3.0], [0.4, 1.05]]) {
+    const t = 0.04
+    add('trim', a, b, yb, yb + t, -0.025, 0); add('trim', a, b, yt - t, yt, -0.025, 0); add('trim', a, a + t, yb, yt, -0.025, 0); add('trim', b - t, b, yb, yt, -0.025, 0)
+  }
+  add('skirt', -4.45, EX0 - 0.19, 0, 0.18, -0.03, 0); add('skirt', EX1 + 0.19, 3.61, 0, 0.18, -0.03, 0)
 
   // ---- BEDROOM  interior x -9.65..-4.85, z -8.15..-3.85
   add('plaster', -9.85, -4.85, Y0, YT, -3.85, -3.65, true)                                  // north wall
@@ -121,6 +145,20 @@ function boxes(list, matrix) {
   return g
 }
 
+function limestoneTexture() {
+  const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S
+  const g = cv.getContext('2d'); let st = 7; const r = () => { st = (st * 16807) % 2147483647; return st / 2147483647 }
+  const n = 4, t = S / n                                   // 4 x 4 tiles per canvas tile = 0.6 m tiles when repeated 1 per 2.4 m
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const v = 214 + Math.floor(r() * 16)
+    g.fillStyle = `rgb(${v},${v - 6},${v - 18})`; g.fillRect(i * t, j * t, t, t)
+    for (let k = 0; k < 260; k++) { g.fillStyle = `rgba(${150 + r() * 60},${140 + r() * 60},${120 + r() * 50},${0.05 + r() * 0.1})`; g.fillRect(i * t + r() * t, j * t + r() * t, 1 + r() * 3, 1 + r() * 2) }
+  }
+  g.strokeStyle = 'rgba(120,108,92,0.55)'; g.lineWidth = 2
+  for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * t, 0); g.lineTo(i * t, S); g.stroke(); g.beginPath(); g.moveTo(0, i * t); g.lineTo(S, i * t); g.stroke() }
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = 8; return tex
+}
+
 function makeMats(src = {}) {
   const std = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85, ...o })
   return {
@@ -129,12 +167,22 @@ function makeMats(src = {}) {
     skirt: src.WW_Skirting_GAME || std('#efe6d6'),
     ceil: src.WW_Ceiling_Ivory_GAME || std('#f2eadc'),
     ceilR: src.WW_Ceiling_Ivory_GAME || std('#f2eadc'),
-    frame: src.WW_Frame_Bronze_GAME || std('#33211a', { metalness: 0.7, roughness: 0.4 }),
+    frame: src.WW_Frame_Bronze_GAME || std('#111114', { metalness: 0.55, roughness: 0.42 }),     // slim matte-black aluminium
     glass: src.WW_Glass_GAME,
     floorBed: std('#b5aa99', { roughness: 0.98 }),                                    // soft greige wool carpet (placeholder finish)
     floorBath: std('#e4dacb', { roughness: 0.25, envMapIntensity: 0.9 }),            // cream marble (placeholder finish)
     stone: std('#d8cab6', { roughness: 0.55 }),
-    brass: std('#e2b559', { metalness: 1, roughness: 0.28, envMapIntensity: 3.2 }),
+    door: std('#efe5d2', { roughness: 0.55 }),
+    dk: std('#241a15', { roughness: 0.5 }),
+    walnutHi: std('#41322a', { roughness: 0.38 }),                                          // cream satin paint
+    walnut: std('#2c211c', { roughness: 0.42 }),                                          // espresso entrance door
+    limestone: new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }),
+    deckSide: std('#cfc4b2', { roughness: 0.8 }),
+    balGlass: new THREE.MeshStandardMaterial({ color: '#d4ebe8', roughness: 0.05, metalness: 0, transparent: true, opacity: 0.14, depthWrite: false }),
+    black: std('#101012', { metalness: 0, roughness: 0.9, envMapIntensity: 0 }),
+    led: new THREE.MeshBasicMaterial({ color: '#ffc77a', toneMapped: false }),
+    tube: new THREE.MeshBasicMaterial({ color: '#fff1d6', toneMapped: false }),
+    brass: std('#d9b36a', { metalness: 1, roughness: 0.42, envMapIntensity: 2.6 }),       // brushed brass
     downlight: new THREE.MeshBasicMaterial({ color: '#fff0d0', toneMapped: false }),
   }
 }
@@ -142,10 +190,10 @@ function makeMats(src = {}) {
 // ------------------------------------------------------------------ doors
 const HINGE_X = -4.65
 
-const leafParts = (lw) => {
+const leafParts = (lw, panels = [[0.3, 1.3], [1.52, 2.74]]) => {
   const body = [[0, DOOR_H / 2, 0, 0.05, DOOR_H - 0.02, lw]], frame = [], brass = []
   const pw = lw - 0.32
-  for (const sx of [1, -1]) for (const [yb, yt] of [[0.3, 1.3], [1.52, 2.74]]) {
+  for (const sx of [1, -1]) for (const [yb, yt] of panels) {
     const x = sx * 0.0305, t = 0.012, s = 0.045
     frame.push([x, yb + s / 2, 0, t, s, pw], [x, yt - s / 2, 0, t, s, pw], [x, (yb + yt) / 2, -pw / 2 + s / 2, t, yt - yb, s], [x, (yb + yt) / 2, pw / 2 - s / 2, t, yt - yb, s])
     frame.push([sx * 0.0275, (yb + yt) / 2, 0, 0.006, yt - yb - 0.12, pw - 0.12])
@@ -153,23 +201,31 @@ const leafParts = (lw) => {
   return { body, frame, brass }
 }
 
-function Leaf({ lw, dir, hingeZ, M, rotRef, handleSide }) {
+function Leaf({ lw, dir, hingeZ, M, rotRef, mat, hingeX = HINGE_X, hingeY = 0, entrance = false }) {
   const g = useMemo(() => {
-    const p = leafParts(lw)
+    const p = leafParts(lw, entrance ? [[0.3, 1.0], [1.25, 2.75]] : undefined)
     return { body: boxes(p.body), frame: boxes(p.frame) }
-  }, [lw])
+  }, [lw, entrance])
   const brass = useMemo(() => {
     const list = []
     const hz = dir * (lw - 0.1)
+    if (entrance) {                                                                     // long vertical brass pull + thumb latch, peephole, three hinges
+      for (const sx of [1, -1]) {
+        list.push([sx * 0.04, 1.2, hz, 0.014, 0.66, 0.06], [sx * 0.085, 1.2, hz - dir * 0.02, 0.026, 0.52, 0.026], [sx * 0.062, 0.98, hz - dir * 0.02, 0.04, 0.03, 0.03], [sx * 0.062, 1.42, hz - dir * 0.02, 0.04, 0.03, 0.03], [sx * 0.05, 1.05, hz, 0.02, 0.05, 0.05])
+        list.push([sx * 0.029, 1.58, dir * lw / 2, 0.01, 0.034, 0.034])
+      }
+      for (const y of [0.4, 1.5, 2.6]) list.push([0.0, y, 0.0, 0.034, 0.16, 0.034])
+      return boxes(list)
+    }
     for (const sx of [1, -1]) { list.push([sx * 0.062, 1.05, hz, 0.012, 0.05, 0.05]); list.push([sx * 0.08, 1.05 + 0.0, hz - dir * 0.045, 0.034, 0.016, 0.115]) }   // rose + lever
     for (const y of [0.35, 1.5, 2.65]) list.push([0.0, y, 0.0, 0.032, 0.11, 0.032])                                            // hinges
     return boxes(list)
-  }, [lw, dir])
+  }, [lw, dir, entrance])
   return (
-    <group ref={rotRef} position={[HINGE_X, 0, hingeZ]}>
+    <group ref={rotRef} position={[hingeX, hingeY, hingeZ]}>
       <group position={[0, 0, dir * lw / 2]}>
-        <mesh geometry={g.body} material={M.trim} castShadow receiveShadow />
-        <mesh geometry={g.frame} material={M.trim} castShadow receiveShadow />
+        <mesh geometry={g.body} material={mat || M.door} castShadow receiveShadow />
+        <mesh geometry={g.frame} material={entrance ? M.walnutHi : (mat || M.door)} castShadow receiveShadow />
       </group>
       <mesh geometry={brass} material={M.brass} castShadow />
     </group>
@@ -181,7 +237,9 @@ function Door({ d, M }) {
   const l1 = useRef(), l2 = useRef()
   const blockRef = useRef(true)
   const [block, setBlock] = useState(true)
-  const lw = d.w / 2 - 0.004
+  const double = d.type !== 'single'
+  const lw = double ? d.w / 2 - 0.004 : d.w - 0.008
+  const sdir = d.hinge === 'south' ? 1 : -1                                  // single door: -1 = hinged on the +z (north) jamb, leaf extends toward -z
   useEffect(() => {
     const it = {
       id: d.id, label: d.label, x: HINGE_X, z: d.zc, range: 2.7,
@@ -205,20 +263,91 @@ function Door({ d, M }) {
     if (s.target === 0 && s.t > 0.02 && Math.abs(p.x - HINGE_X) < 0.7 && Math.abs(p.z - d.zc) < d.w / 2 + 0.25) s.target = 1   // never close on someone
     const dir = Math.sign(s.target - s.t)
     if (dir) s.t = clamp01(s.t + dir * (world.fastAnim ? dt : Math.min(dt, 0.05)) / 0.9)
-    const a = smooth(s.t) * 1.75
-    if (l1.current) { l1.current.rotation.y = a; l2.current.rotation.y = -a }
+    const a = smooth(s.t) * OPEN_ANGLE
+    if (double) { if (l1.current) { l1.current.rotation.y = a; l2.current.rotation.y = -a } }
+    else if (l1.current) l1.current.rotation.y = sdir === -1 ? a : -a
     const should = s.target === 0 && s.t < 0.04
     if (should !== blockRef.current) { blockRef.current = should; setBlock(should) }
   })
   return (
     <>
-      <Leaf lw={lw} dir={-1} hingeZ={d.zc + d.w / 2 - 0.002} M={M} rotRef={l1} />
-      <Leaf lw={lw} dir={1} hingeZ={d.zc - d.w / 2 + 0.002} M={M} rotRef={l2} />
+      {double ? (
+        <>
+          <Leaf lw={lw} dir={-1} hingeZ={d.zc + d.w / 2 - 0.002} M={M} rotRef={l1} />
+          <Leaf lw={lw} dir={1} hingeZ={d.zc - d.w / 2 + 0.002} M={M} rotRef={l2} />
+        </>
+      ) : (
+        <Leaf lw={lw} dir={sdir} hingeZ={sdir === -1 ? d.zc + d.w / 2 - 0.002 : d.zc - d.w / 2 + 0.002} M={M} rotRef={l1} />
+      )}
       {block && (
         <RigidBody type="fixed" colliders={false}>
           <CuboidCollider args={[0.05, DOOR_H / 2, d.w / 2]} position={[HINGE_X, DOOR_H / 2, d.zc]} collisionGroups={WORLD} />
         </RigidBody>
       )}
+    </>
+  )
+}
+
+// ------------------------------------------------------------------ main entrance (front wall) + "Go Outside" transition placeholder
+// Activating it swings the door open onto a warm light, fades to a placeholder card (see DESTINATIONS in destinations.js) and waits for Enter to come back.
+function Entrance({ M }) {
+  const st = useRef({ t: 0, target: 0, hold: 0 })
+  const rot = useRef(), glow = useRef(), light = useRef()
+  const blockRef = useRef(true)
+  const [block, setBlock] = useState(true)
+  const X0 = 0.58, W = 1.24, Z = 0.33
+  useEffect(() => {
+    const it = {
+      id: 'entrance', label: 'main entrance', x: 1.2, z: -0.2, range: 2.3,
+      prompt: () => '🚪 Go Outside',
+      isOpen: () => st.current.target === 1,
+      toggle: () => {
+        if (camStore.get().transition !== 'idle') return false
+        st.current.target = 1; camStore.set({ transition: 'opening', dest: 'lobby' }); return false
+      },
+    }
+    world.interactables.push(it)
+    world.returnHome = () => { if (camStore.get().transition === 'overlay') { st.current.target = 0; camStore.set({ transition: 'closing' }) } }
+    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); world.returnHome = null }
+  }, [])
+  useFrame((_, dt) => {
+    const s = st.current, step = world.fastAnim ? dt : Math.min(dt, 0.05)
+    const dir = Math.sign(s.target - s.t)
+    if (dir) s.t = clamp01(s.t + dir * step / 1.3)
+    if (rot.current) rot.current.rotation.y = -smooth(s.t) * 1.75               // swings outward (+z) into the light
+    if (light.current) light.current.intensity = 9 * smooth(s.t)
+    if (glow.current) glow.current.visible = s.t > 0.01
+    const tr = camStore.get().transition
+    if (tr === 'opening' && s.t >= 1) { s.hold += step; if (s.hold > 0.5) { s.hold = 0; camStore.set({ transition: 'overlay' }) } }
+    if (tr === 'closing' && s.t <= 0) camStore.set({ transition: 'idle' })
+    const should = s.target === 0 && s.t < 0.04
+    if (should !== blockRef.current) { blockRef.current = should; setBlock(should) }
+  })
+  return (
+    <>
+      <group position={[X0, 0, Z]} rotation={[0, Math.PI / 2, 0]}>
+        <Leaf lw={W} dir={1} hingeZ={0} hingeX={0} M={M} rotRef={rot} mat={M.walnut} entrance />
+      </group>
+      <mesh ref={glow} position={[1.2, 1.7, 2.2]} visible={false}>
+        <planeGeometry args={[5, 4.2]} /><meshBasicMaterial color="#ffd9a0" toneMapped={false} />
+      </mesh>
+      <pointLight ref={light} position={[1.2, 2.0, 0.9]} intensity={0} distance={7} decay={1.4} color="#ffcf94" />
+      {block && (
+        <RigidBody type="fixed" colliders={false}>
+          <CuboidCollider args={[W / 2 + 0.04, DOOR_H / 2, 0.06]} position={[1.2, DOOR_H / 2, Z]} collisionGroups={WORLD} />
+        </RigidBody>
+      )}
+      {/* tall tube sconces either side (frosted warm tube, brass clasp + end caps), centred in the narrow panels */}
+      {[0.06, 2.34].map((x, i) => (
+        <group key={i} position={[x, 2.2, -0.04]}>
+          <mesh material={M.tube}><boxGeometry args={[0.035, 1.3, 0.035]} /></mesh>
+          <mesh material={M.brass}><boxGeometry args={[0.07, 0.2, 0.06]} /></mesh>
+          <mesh material={M.brass} position={[0, 0.67, 0]}><boxGeometry args={[0.05, 0.03, 0.05]} /></mesh>
+          <mesh material={M.brass} position={[0, -0.67, 0]}><boxGeometry args={[0.05, 0.03, 0.05]} /></mesh>
+        </group>
+      ))}
+      <pointLight position={[0.06, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
+      <pointLight position={[2.34, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
     </>
   )
 }
@@ -241,7 +370,7 @@ function Slider({ M }) {
     return { frame, glass: new THREE.PlaneGeometry(PANEL_W - 2 * s, PANEL_H - 2 * r).translate(0, PANEL_H / 2, 0) }
   }, [])
   const handle = useMemo(() => boxes([[0, 1.25, 0.045, 0.026, 0.62, 0.026], [0, 0.97, 0.03, 0.02, 0.02, 0.03], [0, 1.53, 0.03, 0.02, 0.02, 0.03]]), [])
-  const track = useMemo(() => boxes([[(SLIDER.x0 + SLIDER.x1) / 2, 0.012, 0, SLIDER.x1 - SLIDER.x0, 0.024, 0.13]]), [])
+  const track = useMemo(() => boxes([[(SLIDER.x0 + SLIDER.x1) / 2, 0.004, 0, SLIDER.x1 - SLIDER.x0, 0.008, 0.1]]), [])
   useEffect(() => {
     const it = {
       id: 'balcony', label: 'balcony sliding door', x: 0.4, z: SLIDER.z, range: 3.0,
@@ -294,13 +423,56 @@ function Slider({ M }) {
           <CuboidCollider args={[(SLIDER.x1 - SLIDER.split) / 2, 2.05, 0.06]} position={[cx1, 1.75, SLIDER.z]} collisionGroups={GLASS} />
         </RigidBody>
       )}
-      {/* 0.35 m step down to the balcony deck: a stone ramp so the player can walk out and back in */}
-      <group position={[0.4, -0.222, -12.2735]} rotation={[-0.3366, 0, 0]}>
-        <mesh material={M.stone} castShadow receiveShadow><boxGeometry args={[2.0, 0.1, 1.06]} /></mesh>
-      </group>
+    </>
+  )
+}
+
+// ------------------------------------------------------------------ balcony (L-shaped wrap-around, rebuilt flush with the interior floor)
+// The V8 deck sat 0.35 m below the interior floor (V9 hid that with a ramp). Here the deck top is at y = 0 like the herringbone, so the sliding door's
+// track is the only threshold. Pale limestone tiles (0.6 m), slim black aluminium balustrade with a continuous glass infill, every open edge has a collider.
+const BAL = { x0: -4.45, x1: 5.8, zF: -11.79, zB: -13.95, zN: -3.0, xi: 3.61, T: 0.35 }
+function Balcony({ M }) {
+  const g = useMemo(() => {
+    const topGeo = (x0, x1, z0, z1) => {
+      const t = new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2).translate((x0 + x1) / 2, 0, (z0 + z1) / 2)
+      const uv = t.attributes.uv, pos = t.attributes.position
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, pos.getX(i) / 2.4, -pos.getZ(i) / 2.4)
+      return t
+    }
+    const { x0, x1, zF, zB, zN, xi, T } = BAL
+    const top = mergeGeometries([topGeo(x0, x1, zB, zF), topGeo(xi, x1, zF, zN)])
+    const slab = boxes([[(x0 + x1) / 2, -T / 2 - 0.003, (zB + zF) / 2, x1 - x0, T, zF - zB], [(xi + x1) / 2, -T / 2 - 0.003, (zF + zN) / 2, x1 - xi, T, zN - zF]])
+    // balustrade runs: [axis, fixed coord, from, to]
+    const i = 0.07, runs = [['x', zB + i, x0 + i, x1 - i], ['z', x1 - i, zB + i, zN - 0.0], ['x', zN - 0.0, xi, x1 - i], ['z', x0 + i, zB + i, zF]]
+    const glass = [], black = [], cols = [], led = []
+    const H = 1.1
+    for (const [ax, c, a, b] of runs) {
+      const len = b - a, mid = (a + b) / 2
+      const P = (along, y, thick, h, w) => ax === 'x' ? [along, y, c, w, h, thick] : [c, y, along, thick, h, w]
+      glass.push(P(mid, 0.06 + (H - 0.06 - 0.04) / 2, 0.014, H - 0.1, len - 0.04))
+      black.push(P(mid, H - 0.02, 0.05, 0.04, len), P(mid, 0.03, 0.07, 0.06, len))               // slim cap rail + base channel
+      const n = Math.max(1, Math.round(len / 2.1))
+      for (let k = 0; k <= n; k++) { const t = a + (len * k) / n; black.push(ax === 'x' ? [t, H / 2, c, 0.04, H, 0.04] : [c, H / 2, t, 0.04, H, 0.04]) }   // minimal posts
+      led.push(ax === 'x' ? [mid, 0.075, c + (c < -8 ? 0.045 : -0.045), len - 0.1, 0.012, 0.012] : [c + (c > 0 ? -0.045 : 0.045), 0.075, mid, 0.012, 0.012, len - 0.1])
+      cols.push(ax === 'x' ? { p: [mid, H / 2, c], a: [len / 2 + 0.03, H / 2, 0.05] } : { p: [c, H / 2, mid], a: [0.05, H / 2, len / 2 + 0.03] })
+    }
+    return { top, slab: slab, glass: boxes(glass), black: boxes(black), led: boxes(led), cols }
+  }, [])
+  const { x0, x1, zF, zB, zN, xi, T } = BAL
+  return (
+    <>
+      <mesh geometry={g.top} material={M.limestone} receiveShadow name="WW_Balcony_Deck" />
+      <mesh geometry={g.slab} material={M.deckSide} castShadow receiveShadow />
+      <mesh geometry={g.black} material={M.black} castShadow />
+      <mesh geometry={g.glass} material={M.balGlass} renderOrder={2} />
+      <mesh geometry={g.led} material={M.led} />
       <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider args={[1.0, 0.05, 0.53]} position={[0.4, -0.222, -12.2735]} rotation={[-0.3366, 0, 0]} collisionGroups={WORLD} />
+        <CuboidCollider args={[(x1 - x0) / 2, T / 2, (zF - zB) / 2]} position={[(x0 + x1) / 2, -T / 2, (zB + zF) / 2]} collisionGroups={WORLD} />
+        <CuboidCollider args={[(x1 - xi) / 2, T / 2, (zN - zF) / 2]} position={[(xi + x1) / 2, -T / 2, (zF + zN) / 2]} collisionGroups={WORLD} />
+        {g.cols.map((c, i) => <CuboidCollider key={i} args={c.a} position={c.p} collisionGroups={GLASS} />)}
       </RigidBody>
+      <pointLight position={[0.5, 0.6, -13.2]} intensity={1.2} distance={5} decay={1.6} color="#ffc27a" />
+      <pointLight position={[5.2, 0.6, -8]} intensity={1.0} distance={5} decay={1.6} color="#ffc27a" />
     </>
   )
 }
@@ -353,17 +525,18 @@ function Interact() {
   useFrame(() => {
     const p = world.player
     let best = null, bd = 1e9
-    for (const it of world.interactables) {
+    if (camStore.get().transition === 'idle' || !camStore.get().transition) for (const it of world.interactables) {
       const d = Math.hypot(it.x - p.x, it.z - p.z)
       if (d < it.range && d < bd) { best = it; bd = d }
     }
     cur.current = best
-    const text = best ? `${best.isOpen() ? 'close' : 'open'} the ${best.label}` : ''
+    const text = best ? (best.prompt ? best.prompt() : `${best.isOpen() ? 'close' : 'open'} the ${best.label}`) : ''
     if (camStore.get().prompt !== text) camStore.set({ prompt: text })
   })
   useEffect(() => {
     const on = (e) => {
       if (e.code !== 'Enter' || e.repeat || e.metaKey || e.altKey) return
+      if (camStore.get().transition === 'overlay') { e.preventDefault(); world.returnHome && world.returnHome(); return }
       const it = cur.current
       if (!it) return
       e.preventDefault()
@@ -393,6 +566,8 @@ export default function Plan({ mats }) {
       </RigidBody>
       {DOORS.map((d) => <Door key={d.id} d={d} M={M} />)}
       <Slider M={M} />
+      <Entrance M={M} />
+      <Balcony M={M} />
       <BedroomWindow M={M} />
       <RoomLights M={M} />
       <Interact />

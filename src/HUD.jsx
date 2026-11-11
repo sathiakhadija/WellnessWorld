@@ -1,4 +1,6 @@
-import { Fragment } from 'react'
+import { Fragment, useRef } from 'react'
+import { DESTINATIONS } from './destinations.js'
+import { world } from './world.js'
 import { useCam, camStore } from './camStore.js'
 
 const MODES = [
@@ -14,7 +16,8 @@ const HELP = {
     ['Drag, or two-finger scroll', 'orbit around you'],
     ['Pinch, mouse wheel, + / −', 'zoom'],
     ['Q / E', 'rotate camera'],
-    ['Enter', 'open / close the nearest door'],
+    ['Enter', 'open doors · Go Outside'],
+    ['V', 'clean view (hide character + HUD)'],
   ],
   free: [
     ['Arrows / WASD', 'fly (the player stays still)'],
@@ -53,16 +56,26 @@ const css = `
   background:rgba(26,19,30,.58);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,214,170,.18);border-radius:999px;padding:6px 12px}
 .ww-prompt{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);color:#2a1a10;font:600 13px -apple-system,system-ui,sans-serif;pointer-events:none;background:rgba(246,214,170,.92);border-radius:999px;padding:8px 18px;z-index:6;transition:opacity .2s;box-shadow:0 4px 18px rgba(0,0,0,.25)}
 .ww-prompt kbd{font:600 11px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.14);border-radius:4px;padding:1px 6px;margin-right:6px}
+.ww-prompt{transition:opacity .35s ease, transform .35s ease}
+.ww-ov{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;color:#f6e9d6;
+  background:radial-gradient(ellipse at 50% 40%,#4a3322 0%,#1b1410 70%);font:300 15px/1.5 -apple-system,system-ui,sans-serif;transition:opacity .9s ease;padding:24px}
+.ww-ov h2{margin:0;font:300 34px/1.1 Georgia,'Times New Roman',serif;letter-spacing:.04em}
+.ww-ov p{margin:0;max-width:420px;opacity:.8}.ww-ov kbd{font:600 12px ui-monospace,Menlo,monospace;background:rgba(255,255,255,.14);border-radius:4px;padding:2px 8px}
 .ww-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);color:#f4ebe0;font:13px -apple-system,system-ui,sans-serif;pointer-events:none;
   background:rgba(26,19,30,.7);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:999px;padding:8px 16px;z-index:6;transition:opacity .25s}
 `
 
 export default function HUD() {
   const c = useCam()
+  const last = useRef('')
+  if (c.prompt) last.current = c.prompt            // keep the text while the pill fades out
+  const show = !!c.prompt && !c.clean && c.transition === 'idle'
+  const dest = DESTINATIONS[c.dest] || { title: 'Outside', sub: '' }
+  const ov = c.transition === 'overlay'
   return (
     <>
       <style>{css}</style>
-      {c.help ? (
+      {c.clean ? null : c.help ? (
         <div className="ww-hud">
           <h1>Wellness World · Camera</h1>
           <div className="ww-modes">
@@ -83,8 +96,12 @@ export default function HUD() {
       ) : (
         <div className="ww-min" onClick={() => camStore.set({ help: true })}>Controls · H</div>
       )}
-      <div className="ww-prompt" style={{ opacity: c.prompt ? 1 : 0 }}><kbd>Enter</kbd>{c.prompt}</div>
+      <div className="ww-prompt" style={{ opacity: show ? 1 : 0, transform: `translateX(-50%) translateY(${show ? 0 : 6}px)` }}><kbd>Enter</kbd>{last.current}</div>
       <div className="ww-toast" style={{ opacity: c.toast ? 1 : 0 }}>{c.toast}</div>
+      <div className="ww-ov" style={{ opacity: ov ? 1 : 0, pointerEvents: ov ? 'auto' : 'none' }}>
+        <h2>{dest.title}</h2><p>{dest.sub}</p><p><kbd>Enter</kbd> return to the penthouse</p>
+        <button style={{ marginTop: 6, cursor: 'pointer', font: 'inherit', color: 'inherit', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)', borderRadius: 999, padding: '6px 18px' }} onClick={() => world.returnHome && world.returnHome()}>Return</button>
+      </div>
     </>
   )
 }
