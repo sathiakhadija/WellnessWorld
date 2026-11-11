@@ -197,7 +197,7 @@ function buildNeighbourhood() {
   void road
   const plaza = { x0: -125, x1: 80, z0: -150, z1: 62 }
   const park = { cx: 0, cz: 185, w: 240, h: 180 }
-  const carve = [{ x0: -64, x1: 64, z0: 0, z1: 216 }, { x0: -78, x1: 78, z0: 200, z1: 294 }, { x0: -154, x1: -58, z0: 220, z1: 270 }]   // the walkable street-level neighbourhood (src/street)
+  const carve = [{ x0: -134, x1: 90, z0: 0, z1: 134 }]   // the walkable street-level neighbourhood (src/street)
   const modernRects = [{ x0: 135, x1: 330, z0: 50, z1: 280 }, { x0: -330, x1: -135, z0: 50, z1: 280 }]
   const T = (cx, cz, rot) => { const cs = Math.cos(rot), sn = Math.sin(rot); return (lx, y, lz) => V(cx + lx * cs + lz * sn, GROUND_Y + y, cz - lx * sn + lz * cs) }
   const flat = (acc, cx, cz, rot, x0, x1, z0, z1, y, col) => { const P = T(cx, cz, rot); acc.quad(P(x0, y, z1), P(x1, y, z1), P(x1, y, z0), P(x0, y, z0), UV0, shadeColor(col, UP, 1)) }

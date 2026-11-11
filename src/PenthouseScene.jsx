@@ -14,6 +14,8 @@ import Companion from './companion/Companion.jsx'
 import { input } from './input.js'
 import { camStore } from './camStore.js'
 import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
+import Atmosphere from './Atmosphere.jsx'
+import { LIVE, useAtmo, atmoStore } from './atmosphere.js'
 import Plan from './Plan.jsx'
 import CherryTree, { Petals } from './Tree.jsx'
 import { world, OFF } from './world.js'
@@ -175,18 +177,25 @@ function Transit() {
       world.setPlayerYaw && world.setPlayerYaw(Math.PI); world.setFollowYaw && world.setFollowYaw(0)
     }
     world.enterStreet = toStreet; world.enterPenthouse = toPenthouse
+    // The ride is a short, skippable fade (about 1.7 s); with prefers-reduced-motion it is a 0.35 s cut. Space / Enter / Escape / a click skips straight to the arrival.
+    let pending = null
+    const finish = (dir) => {
+      const L = world.liftDoor, reduced = atmoStore.get().reduced; pending = null
+      if (dir === 'down') { toStreet(); if (L) { L.t = 0; L.target = 1; setTimeout(() => { L.target = 0 }, 4500) } }
+      else { toPenthouse(); if (L) L.target = 0 }
+      setTimeout(() => camStore.set({ transition: 'idle', dest: '' }), reduced ? 80 : 700)
+    }
     world.rideLift = (dir) => {
       camStore.set({ transition: 'overlay', dest: dir })
-      const L = world.liftDoor
-      if (dir === 'up' && L) L.target = 1
-      setTimeout(() => {
-        if (dir === 'down') { toStreet(); if (L) { L.t = 0; L.target = 1; setTimeout(() => { L.target = 0 }, 4500) } }
-        else { toPenthouse(); if (L) L.target = 0 }
-        setTimeout(() => camStore.set({ transition: 'idle', dest: '' }), 700)
-      }, 1700)
+      const L = world.liftDoor; if (dir === 'up' && L) L.target = 1
+      pending = { dir, t: setTimeout(() => finish(dir), atmoStore.get().reduced ? 350 : 1700) }
     }
+    world.skipRide = () => { if (pending) { clearTimeout(pending.t); finish(pending.dir) } }
+    const onKey = (e) => { if (pending && (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') && !e.repeat) { e.preventDefault(); world.skipRide() } }
+    const onClick = () => { if (pending) world.skipRide() }
+    window.addEventListener('keydown', onKey); window.addEventListener('pointerdown', onClick)
     if (new URLSearchParams(window.location.search).get('at') === 'street') setTimeout(toStreet, 600)         // dev/test: start on the street
-    return () => { world.rideLift = null; world.enterStreet = world.enterPenthouse = null }
+    return () => { world.rideLift = null; world.skipRide = null; world.enterStreet = world.enterPenthouse = null; window.removeEventListener('keydown', onKey); window.removeEventListener('pointerdown', onClick) }
   }, [])
   return null
 }
@@ -200,17 +209,19 @@ function SunRig({ lightRef, targetRef, fillRef }) {
     const street = world.level === 'street', p = world.player
     if (street) {
       const sx = Math.round(p.x / 6) * 6, sz = Math.round(p.z / 6) * 6
-      T.position.set(sx, GY, sz); T.updateMatrixWorld(); L.position.set(sx + 21, GY + 13, sz - 45)
+      T.position.set(sx, GY, sz); T.updateMatrixWorld(); { const el = LIVE.sunEl + 5.7, az = Math.atan2(LIVE.sunDir.x, -LIVE.sunDir.z); L.position.set(sx + Math.sin(az) * Math.cos(el * 0.01745) * 51, GY + Math.sin(el * 0.01745) * 51, sz - Math.cos(az) * Math.cos(el * 0.01745) * 51) }
       if (mode.current !== 'street') {
         const c = L.shadow.camera; c.left = -60; c.right = 60; c.top = 60; c.bottom = -60; c.near = 1; c.far = 190; c.updateProjectionMatrix()
         L.shadow.bias = -0.0006; L.shadow.normalBias = 0.05; mode.current = 'street'
       }
-    } else if (mode.current !== 'penthouse') {
-      T.position.set(-1, 0, -6); T.updateMatrixWorld(); L.position.set(20, 8, -51)
+    } else {
+      T.position.set(-1, 0, -6); T.updateMatrixWorld(); L.position.set(-1 + LIVE.sunDir.x * 50.2, LIVE.sunDir.y * 50.2, -6 + LIVE.sunDir.z * 50.2)
+    }
+    if (!street && mode.current !== 'penthouse') {
       const c = L.shadow.camera; c.left = -14; c.right = 14; c.top = 14; c.bottom = -14; c.near = 1; c.far = 120; c.updateProjectionMatrix()
       L.shadow.bias = -0.0004; L.shadow.normalBias = 0.03; mode.current = 'penthouse'
     }
-    if (f) f.intensity = street ? 0.55 : 0
+    if (f) f.intensity = street ? (f.userData.k ?? 0.55) : 0
   })
   return null
 }
@@ -238,7 +249,7 @@ function Player({ spawn, bodyRef, meshRef }) {
       const r = (input.down('KeyD') || input.down('ArrowRight') ? 1 : 0) - (input.down('KeyA') || input.down('ArrowLeft') ? 1 : 0)
       const y = rigShared.followYaw                               // walk relative to where the camera looks
       walkDir.set(-Math.sin(y) * f + Math.cos(y) * r, 0, -Math.cos(y) * f - Math.sin(y) * r)
-      if (walkDir.lengthSq() && !world.playerLock) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? (EXPERIMENTAL ? 3.0 : 3.2) : (EXPERIMENTAL ? 1.3 : 1.7) }
+      if (walkDir.lengthSq() && !world.playerLock) { walkDir.normalize(); const fast = input.down('ShiftLeft') || input.down('ShiftRight'); speed = fast && input.down('Space') ? 5.0 : fast ? 3.5 : input.down('KeyZ') ? 1.8 : (world.level === 'street' ? 2.5 : 1.8) }   // sprint 5.0 (Shift+Space) / fast walk 3.5 (Shift) / relaxed stroll 1.8 (Z) / normal 2.5 outdoors, 1.8 indoors
     }
     speedRef.current = speed
     const tp = body.translation(); world.player.x = tp.x; world.player.y = tp.y; world.player.z = tp.z
@@ -247,6 +258,7 @@ function Player({ spawn, bodyRef, meshRef }) {
     }
     const lin = body.linvel()
     body.setLinvel({ x: walkDir.x * speed, y: lin.y, z: walkDir.z * speed }, true)
+    if (meshRef.current) world.heading = meshRef.current.rotation.y
     if ((speed > 0 || world.faceYaw != null) && meshRef.current) {   // turn the model to face its walking direction (or an interaction target)
       const target = speed > 0 ? Math.atan2(walkDir.x, walkDir.z) : world.faceYaw
       let d = target - heading.current
@@ -269,14 +281,15 @@ export default function PenthouseScene() {
   const bodyRef = useRef(null)
   const meshRef = useRef(null)
   const sunTarget = useMemo(() => new THREE.Object3D(), [])
-  const sunRef = useRef(), fillRef = useRef()
+  const sunRef = useRef(), fillRef = useRef(), hemiRef = useRef()
+  const atmo = useAtmo()
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <Canvas shadows camera={{ fov: 50, near: 0.05, far: 700, position: [0, 1.7, 0] }}
               gl={{ toneMapping: TONE[L.tm] ?? THREE.ACESFilmicToneMapping, toneMappingExposure: L.exp }}>
         <fog attach="fog" args={[HAZE, 100, 560]} />
         <SkyDome />
-        <Suspense fallback={null}><SkyEnv /></Suspense>
+        <Suspense fallback={null}><SkyEnv key={atmo.rev} /></Suspense>
         <Skyline />
         {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y). Target = room centre, shadow frustum covers the whole penthouse */}
         <primitive object={sunTarget} position={[-1, 0, -6]} />
@@ -284,10 +297,11 @@ export default function PenthouseScene() {
           shadow-camera-left={-14} shadow-camera-right={14} shadow-camera-top={14} shadow-camera-bottom={-14} shadow-camera-near={1} shadow-camera-far={120}
           shadow-bias={-0.0004} shadow-normalBias={0.03} />
         {/* warm bounce stand-in: sky colour lights upward faces, honey ground colour lights downward faces (ceiling, soffits) */}
-        <hemisphereLight args={[L.hemiSky, L.hemiGround, L.hemi]} />
+        <hemisphereLight ref={hemiRef} args={[L.hemiSky, L.hemiGround, L.hemi]} />
         {/* street-only cool shadow fill (intensity 0 in the penthouse) */}
         <hemisphereLight ref={fillRef} args={['#c9b8de', '#8f6f5e', 0]} />
         <SunRig lightRef={sunRef} targetRef={{ current: sunTarget }} fillRef={fillRef} />
+        <Atmosphere sunRef={sunRef} hemiRef={hemiRef} fillRef={fillRef} />
         {/* cove LED runs along the glazing wall and the right-hand glazing */}
         <AreaLight position={[-0.4, 3.55, -11.1]} target={[-0.4, 3.9, -9.4]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />
         <AreaLight position={[3.0, 3.55, -7.2]} rotationY={Math.PI / 2} target={[0, 0.5, -1.6]} color="#ffc27a" intensity={L.cove} width={8} height={0.25} />

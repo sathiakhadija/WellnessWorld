@@ -8,6 +8,8 @@ import { GROUPS } from '../CameraRig.jsx'
 import { interactionGroups } from '@react-three/rapier'
 import { world } from '../world.js'
 import { camStore } from '../camStore.js'
+import { LIVE } from '../atmosphere.js'
+import { discoStore } from '../discoveries.js'
 import { buildStreet, BX, hash } from './plan.js'
 import { GY } from './geo.js'
 import * as T from './textures.js'
@@ -23,7 +25,7 @@ function makeMaterials() {
   const M = {
     brick: std({ map: T.brickTex() }), ashlar: std({ map: T.ashlarTex() }), plaster: std({ map: T.plasterTex() }),
     trim: std({ roughness: 0.8 }), roof: std({ roughness: 0.78 }), metal: std({ roughness: 0.42, metalness: 0.65 }), wood: std({ roughness: 0.62 }),
-    glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
+    glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: Object.assign(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), { userData: { glow: true } }),
     awning: std({ side: THREE.DoubleSide, roughness: 0.95 }), leaf: std({ roughness: 1 }), trunk: std({ roughness: 1 }),
     sign: std({ map: T.signAtlas(), roughness: 0.65 }),
     grass: std({ map: T.grassTex(), roughness: 1 }),
@@ -94,7 +96,7 @@ export function StreetVisuals() {
   }, [built, M])
 
   const props = useMemo(() => {
-    const mats = { metal: M.metal, glow: M.glow, wood: M.wood, trim: M.trim, leaf: M.leaf }
+    const mats = { metal: M.metal, glow: M.glow, wood: M.wood, trim: M.trim, leaf: M.leaf, glass: M.glass }
     const makeSet = (geos, list) => {
       const arr = []
       for (const [k, g] of Object.entries(geos)) {
@@ -109,6 +111,8 @@ export function StreetVisuals() {
     const sets = [
       ...makeSet(P.lampGeo(4.8), built.inst.lamp), ...makeSet(P.benchGeo(), built.inst.bench), ...makeSet(P.bollardGeo(), built.inst.bollard), ...makeSet(P.pathLightGeo(), built.inst.pathLight),
       ...makeSet(P.tableGeo(), built.inst.table), ...makeSet(P.chairGeo(), built.inst.chair), ...makeSet(P.urnGeo(), built.inst.urn),
+      ...makeSet(P.carGeo('#3a3d44'), built.inst.car1), ...makeSet(P.carGeo('#8b9482'), built.inst.car2), ...makeSet(P.carGeo('#d6cdbc'), built.inst.car3), ...makeSet(P.carGeo('#6a3f46'), built.inst.car4),
+      ...makeSet(P.bikeGeo(), built.inst.bike), ...makeSet(P.shrubGeo(), built.inst.shrub), ...makeSet(P.grassGeo(), built.inst.grass), ...makeSet(P.planterGeo(), built.inst.planter),
     ]
     const palette = ['#7d8a45', '#6f7f3f', '#91893f', '#5f7440', '#a39445', '#6a7a3c', '#87803a']
     let sd = 91; const R = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
@@ -136,7 +140,7 @@ export function StreetVisuals() {
       trees.push(trunk, canopy)
     }
     const poolGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2)
-    const pm = new THREE.InstancedMesh(poolGeo, new THREE.MeshBasicMaterial({ map: pool, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }), Math.max(1, built.pools.length))
+    const pm = new THREE.InstancedMesh(poolGeo, new THREE.MeshBasicMaterial({ map: pool, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, userData: { noTint: true } }), Math.max(1, built.pools.length))
     pm.count = built.pools.length
     const o = new THREE.Object3D()
     built.pools.forEach(([x, z, r, y], i) => { o.position.set(x, (y ?? GY) + 0.06, z); o.scale.set(r * 2, 1, r * 2); o.updateMatrix(); pm.setMatrixAt(i, o.matrix) })
@@ -148,7 +152,7 @@ export function StreetVisuals() {
   const liftGeo = useMemo(() => new THREE.BoxGeometry(0.93, 2.55, 0.05), [])
   const liftMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#8a6d44', roughness: 0.4, metalness: 0.75 }), [])
   const waterMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#4d4a63', roughness: 0.06, metalness: 0.15, transparent: true, opacity: 0.88, normalMap, normalScale: new THREE.Vector2(0.5, 0.5), envMapIntensity: 1.6 }), [normalMap])
-  const jetRefs = useRef([])
+  const jetRefs = useRef([]), haloMat = useRef()
   const last = useRef(-1)
 
   useEffect(() => {
@@ -165,7 +169,8 @@ export function StreetVisuals() {
     normalMap.offset.x = (t * 0.012) % 1; normalMap.offset.y = (t * 0.007) % 1
     jetRefs.current.forEach((m) => { if (!m) return; const s = 0.82 + 0.18 * Math.sin(t * 2.1 + m.userData.k * 1.7); m.scale.y = s; m.position.y = m.userData.y + (s * 1.5) / 2 })
     const onStreet = world.level === 'street'
-    for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i : 0           // (kept in the scene so toggling levels never recompiles shaders)
+    for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * LIVE.lamp : 0
+    if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
       last.current = t
       for (const g of groups.current) {
@@ -191,7 +196,7 @@ export function StreetVisuals() {
       {props.sets.map((m, i) => <primitive key={'s' + i} object={m} />)}
       {props.trees.map((m, i) => <primitive key={'t' + i} object={m} />)}
       <primitive object={props.pm} />
-      <points geometry={props.hg} frustumCulled={false}><pointsMaterial size={3.4} sizeAttenuation={false} map={dot} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></points>
+      <points geometry={props.hg} frustumCulled={false}><pointsMaterial ref={haloMat} userData={{ noTint: true }} size={3.4} sizeAttenuation={false} map={dot} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></points>
       <mesh ref={(m) => { lift.current.l = m }} geometry={liftGeo} material={liftMat} position={[BX - 0.465, GY + 1.3, 4.78]} castShadow />
       <mesh ref={(m) => { lift.current.r = m }} geometry={liftGeo} material={liftMat} position={[BX + 0.465, GY + 1.3, 4.78]} castShadow />
       {built.waters.map((w, i) => (
@@ -215,7 +220,7 @@ export function StreetPhysics() {
     const out = [...built.colliders]
     const add = (list, hx, hy, tag) => list.forEach(([x, y, z]) => out.push({ x, y: y + hy, z, hx, hy, hz: hx, rot: 0, tag }))
     for (const k of ['plane', 'ornamental', 'clipped']) add(built.inst[k], k === 'clipped' ? 0.12 : 0.26, 2.0, 'trunk')
-    add(built.inst.lamp, 0.2, 2.0, 'lamp'); add(built.inst.bollard, 0.14, 0.4, 'bollard'); add(built.inst.pathLight, 0.1, 0.4, 'pathlight')
+    add(built.inst.lamp, 0.2, 2.0, 'lamp'); for (const k of ['car1', 'car2', 'car3', 'car4']) built.inst[k].forEach(([x, y, z, ry]) => out.push({ x, y: y + 0.7, z, hx: 0.95, hy: 0.7, hz: 2.1, rot: ry, tag: 'car' })); built.inst.planter.forEach(([x, y, z, ry]) => out.push({ x, y: y + 0.35, z, hx: 0.55, hy: 0.35, hz: 0.4, rot: ry, tag: 'planter' })); add(built.inst.bollard, 0.14, 0.4, 'bollard'); add(built.inst.pathLight, 0.1, 0.4, 'pathlight')
     return out
   }, [built])
   useEffect(() => {
@@ -225,13 +230,19 @@ export function StreetPhysics() {
       isOpen: () => !!(world.liftDoor && world.liftDoor.target === 1),
       toggle: () => { if (camStore.get().transition !== 'idle') return false; world.rideLift && world.rideLift('up'); return false },
     }
-    world.interactables.push(it)
+    const ds = built.discoveries.map((d) => ({
+      id: 'disc-' + d.id, label: d.label, level: 'street', x: d.x, z: d.z, range: 2.2,
+      prompt: () => (discoStore.has(d.id) ? '✨ ' + d.label + ' (found)' : '✨ Look closer'),
+      isOpen: () => discoStore.has(d.id),
+      toggle: () => (discoStore.add(d.id) ? '✨ Found ' + d.label : false),
+    }))
+    world.interactables.push(it, ...ds)
     world.streetColliders = cols.length
-    return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1) }
+    return () => { for (const x of [it, ...ds]) { const i = world.interactables.indexOf(x); if (i >= 0) world.interactables.splice(i, 1) } }
   }, [cols])
   return (
     <RigidBody type="fixed" colliders={false}>
-      <CuboidCollider args={[160, 1, 232]} position={[0, GY - 1, 76]} collisionGroups={WORLDG} />
+      <CuboidCollider args={[110, 1, 140]} position={[-22, GY - 1, -10]} collisionGroups={WORLDG} />
       {cols.map((c, i) => c.cyl
         ? <CylinderCollider key={i} args={[c.hy, c.r]} position={[c.x, c.y, c.z]} collisionGroups={WORLDG} />
         : <CuboidCollider key={i} args={[c.hx, c.hy, c.hz]} position={[c.x, c.y, c.z]} {...(c.q ? { quaternion: c.q } : { rotation: [0, c.rot || 0, 0] })} collisionGroups={WORLDG} />)}

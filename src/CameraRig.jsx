@@ -29,8 +29,8 @@ const FREE0 = { pos: [-1.3, 1.65, -0.6], yaw: 0, pitch: -0.05 }
 const SIMS_BOUNDS = { x: [-10.2, 5.8], z: [-14, 0.3] }
 const FREE_BOUNDS = { x: [-10.4, 6.4], y: [0.35, 3.5], z: [-14.8, 1.6] }
 // down on the street the same three camera modes work over the whole neighbourhood (world coordinates are 1:1 there)
-const STREET_FREE = { x: [-150, 150], y: [GY + 0.35, GY + 140], z: [-150, 302] }
-const STREET_SIMS = { x: [-150, 150], z: [-150, 302] }
+const STREET_FREE = { x: [-129, 85], y: [GY + 0.35, GY + 140], z: [-153, 127] }
+const STREET_SIMS = { x: [-129, 85], z: [-153, 127] }
 const onStreet = () => shared.level === 'street'
 
 function makeState() {

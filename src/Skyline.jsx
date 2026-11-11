@@ -53,20 +53,18 @@ void main(){
   #include <colorspace_fragment>
 }`
 
+// One shared set of sky uniforms: the dome, the image-based light and the river all read these, so a time-of-day change (atmosphere.js) updates them together.
+export const SKY_U = {
+  cZenith: { value: C(0.56, 0.58, 0.78) }, cUpper: { value: C(0.70, 0.67, 0.85) }, cMid: { value: C(0.88, 0.78, 0.82) },
+  cPink: { value: C(0.93, 0.75, 0.76) }, cHorizon: { value: C(0.80, 0.66, 0.68) }, cBelow: { value: C(0.45, 0.42, 0.52) },
+  cSunGlow: { value: C(0.55, 0.36, 0.22) }, cCloudHi: { value: C(1.0, 0.80, 0.78) }, cCloudLo: { value: C(0.70, 0.64, 0.80) },
+  uSun: { value: new THREE.Vector3(Math.sin((SUN_AZ_DEG * Math.PI) / 180) * Math.cos((SUN_EL_DEG * Math.PI) / 180), Math.sin((SUN_EL_DEG * Math.PI) / 180), -Math.cos((SUN_AZ_DEG * Math.PI) / 180) * Math.cos((SUN_EL_DEG * Math.PI) / 180)) },
+  uTime: { value: 0 },
+}
 export function makeSkyMaterial() {
-  const sun = new THREE.Vector3(
-    Math.sin((SUN_AZ_DEG * Math.PI) / 180) * Math.cos((SUN_EL_DEG * Math.PI) / 180),
-    Math.sin((SUN_EL_DEG * Math.PI) / 180),
-    -Math.cos((SUN_AZ_DEG * Math.PI) / 180) * Math.cos((SUN_EL_DEG * Math.PI) / 180))
   return new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false, toneMapped: false,
-    uniforms: {
-      cZenith: { value: C(0.56, 0.58, 0.78) }, cUpper: { value: C(0.70, 0.67, 0.85) }, cMid: { value: C(0.88, 0.78, 0.82) },
-      cPink: { value: C(0.93, 0.75, 0.76) }, cHorizon: { value: C(0.80, 0.66, 0.68) }, cBelow: { value: C(0.45, 0.42, 0.52) },
-      cSunGlow: { value: C(0.55, 0.36, 0.22) }, cCloudHi: { value: C(1.0, 0.80, 0.78) }, cCloudLo: { value: C(0.70, 0.64, 0.80) },
-      uSun: { value: sun }, uTime: { value: 0 },
-    },
-    vertexShader: skyVert, fragmentShader: skyFrag,
+    uniforms: { ...SKY_U }, vertexShader: skyVert, fragmentShader: skyFrag,
   })
 }
 
@@ -74,7 +72,7 @@ export function SkyDome() {
   const mat = useMemo(makeSkyMaterial, [])
   const { camera } = useThree()
   const ref = useMemo(() => ({ current: null }), [])
-  useFrame(({ clock }) => { if (ref.current) ref.current.position.copy(camera.position); mat.uniforms.uTime.value = clock.elapsedTime })
+  useFrame(({ clock }) => { if (ref.current) ref.current.position.copy(camera.position); SKY_U.uTime.value = clock.elapsedTime })
   return <mesh ref={(m) => (ref.current = m)} material={mat} renderOrder={-10} frustumCulled={false}><sphereGeometry args={[600, 48, 32]} /></mesh>
 }
 
@@ -123,12 +121,13 @@ const VARIANTS = {
   dusk:   { lit: 0.30, base: '#3b3a52', glassTop: [118, 100, 128], glassBottom: [58, 54, 84], warm: [255, 210, 140], seed: 17 },      // mauve-reflecting glass
 }
 const HERO_STYLE = { 'One Canada Sq': 'steel', '25 Canada Sq (Citi) main': 'blue', '25 Canada Sq shoulder': 'blue', '8 Canada Sq (HSBC)': 'dusk', 'Barclays slab': 'steel', 'west low tower': 'dusk', 'west block A': 'blue', 'west block B': 'glassD', 'narrow tower': 'dusk', 'east tower': 'glass' }
+export const GLOW = { value: 0.0 }          // emissive boost on lit windows (night / blue hour)
 export const LIT = { value: 0.45 }          // fraction of lit windows that are switched on (ramps up slowly: the city "comes alive" over ~4 minutes)
 export function patchLitWindows(mat, cells) {
   mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uLit = LIT
+    sh.uniforms.uLit = LIT; sh.uniforms.uGlow = GLOW
     sh.uniforms.uCells = { value: new THREE.Vector2(...cells) }
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform float uLit; uniform vec2 uCells;\nvoid main() {')
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform float uLit, uGlow; uniform vec2 uCells; float gLit = 0.0;\nvoid main() {')
       .replace('#include <map_fragment>', `
         #ifdef USE_MAP
           vec4 sd = texture2D(map, vMapUv);
@@ -137,8 +136,10 @@ export function patchLitWindows(mat, cells) {
           float hh = fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453);
           float on = 1.0 - smoothstep(uLit - 0.04, uLit + 0.04, hh);
           sd.rgb = mix(sd.rgb, vec3(0.16, 0.16, 0.24) * (0.7 + 0.3 * hh), litM * (1.0 - on));
+          gLit = litM * on;
           diffuseColor *= sd;
         #endif`)
+      .replace('#include <opaque_fragment>', '#include <opaque_fragment>\n  gl_FragColor.rgb += gLit * uGlow * vec3(1.0, 0.74, 0.42);')
   }
   return mat
 }
@@ -163,10 +164,10 @@ export function buildFacadeGeometries(layout, filter = () => true) {
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler()
   for (const b of layout) {
     if (!filter(b)) continue
-    const key = HERO_STYLE[b.name] || (b.style === 'stone' ? 'stone' : (b.shade ?? 0.5) > 0.55 ? 'glassD' : 'glass')
+    const key = b.tex || HERO_STYLE[b.parent || b.name] || (b.style === 'stone' ? 'stone' : (b.shade ?? 0.5) > 0.55 ? 'glassD' : 'glass')
     const floors = b.h / 3.9
     const bq = new THREE.Quaternion().setFromEuler(e.set(0, -b.rot + TWIST, 0))
-    const base = new THREE.Matrix4().compose(new THREE.Vector3(b.x, -EYE_ABOVE_WATER, b.z), bq, new THREE.Vector3(1, 1, 1))
+    const base = new THREE.Matrix4().compose(new THREE.Vector3(b.x, -EYE_ABOVE_WATER + (b.y0 || 0), b.z), bq, new THREE.Vector3(1, 1, 1))
     for (const f of FACE_DEFS) {
       const fw = f.useW ? b.w : b.d
       const g = new THREE.PlaneGeometry(fw, b.h)
@@ -183,7 +184,7 @@ export function buildFacadeGeometries(layout, filter = () => true) {
       const col = new Float32Array(g.attributes.position.count * 3)
       const pos = g.attributes.position
       for (let i = 0; i < pos.count; i++) {   // vertex y is already in tower-local space + base offset
-        const t = THREE.MathUtils.clamp((pos.getY(i) + EYE_ABOVE_WATER) / b.h, 0, 1)
+        const t = THREE.MathUtils.clamp((pos.getY(i) + EYE_ABOVE_WATER - (b.y0 || 0)) / b.h, 0, 1)
         const k = tint * (0.62 + 0.34 * t)
         col[i * 3] = k * 1.03; col[i * 3 + 1] = k; col[i * 3 + 2] = k * 0.97
       }
@@ -220,7 +221,8 @@ function PyramidCap({ b }) {
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: C(0.70, 0.64, 0.66), toneMapped: false }), [])
   return (
     <group position={[b.x, -EYE_ABOVE_WATER, b.z]} rotation={[0, -b.rot + TWIST, 0]}>
-      <mesh position={[0, b.h + b.capH / 2, 0]} rotation={[0, Math.PI / 4, 0]} material={mat}><coneGeometry args={[b.w * 0.72, b.capH, 4, 1]} /></mesh>
+      <mesh position={[0, b.h + (b.crownH || 0) + b.capH / 2, 0]} rotation={[0, Math.PI / 4, 0]} material={mat}><coneGeometry args={[b.w * 0.64, b.capH, 4, 1]} /></mesh>
+      <mesh position={[0, b.h + (b.crownH || 0) + b.capH + 22, 0]}><sphereGeometry args={[2.2, 8, 6]} /><meshBasicMaterial color={C(1.0, 0.18, 0.1)} toneMapped={false} /></mesh>
     </group>
   )
 }
@@ -296,6 +298,7 @@ void main(){
 function litColumns(layout) {
   const N = 2048, data = new Uint8Array(N)
   for (const b of layout) {
+    if (b.part) continue
     const aDeg = (Math.atan2(b.x, -b.z) * 180) / Math.PI
     const D = Math.hypot(b.x, b.z)
     const half = ((Math.atan(b.w / 2 / D) * 180) / Math.PI) * 1.1
@@ -313,7 +316,7 @@ function River({ layout }) {
   const { camera } = useThree()
   const cols = useMemo(() => litColumns(layout), [layout])
   const mat = useMemo(() => {
-    const sky = makeSkyMaterial().uniforms
+    const sky = SKY_U
     return new THREE.ShaderMaterial({
       transparent: true, depthWrite: false, fog: false, toneMapped: false,
       uniforms: {
@@ -355,7 +358,7 @@ export function Skyline() {
     g.current.scale.setScalar(s); g.current.position.set(0, street ? 0 : 1.7, street ? 0 : -0.4); world.extScale = s
   })
   return (
-    <group ref={g} position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
+    <group ref={g} name="exterior" position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
       <FacadeMeshes geoms={geoms} />
       <FacadeMeshes geoms={rearGeoms} />
       {!OFF.has('hood') && <Neighbourhood />}

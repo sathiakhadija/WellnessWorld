@@ -39,6 +39,38 @@ export const PYRAMID_APEX_PX = 331
 
 function seeded(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
 
+
+// Rooflines: real towers do not end in a flat lid. Each hero tower gets its own crown (set-backs, plant rooms, masts) and the lesser buildings get plant boxes or
+// stepped tops, so the skyline reads as composed architecture rather than a row of boxes. Parts are extra stacked volumes (y0 = height above the waterline).
+function addCrowns(out) {
+  const R = seeded(404), extra = []
+  const part = (b, tag, sw, sd, h, y0, o = {}) => {
+    const th = -b.rot + TWIST, c = Math.cos(th), s = Math.sin(th), dx = o.dx || 0, dz = o.dz || 0
+    extra.push({ name: b.name + ':' + tag, parent: b.name, style: b.style, shade: b.shade, hero: b.hero, band: b.band, part: true, tex: o.tex, x: b.x + dx * c + dz * s, z: b.z - dx * s + dz * c, w: sw, d: sd, h, y0, rot: b.rot })
+    return y0 + h
+  }
+  for (const b of out) {
+    if (b.part) continue
+    if (b.hero) {
+      switch (b.name) {
+        case 'One Canada Sq': { b.crownH = 6; part(b, 'c1', b.w * 0.94, b.d * 0.94, 6, b.h, { tex: 'steel' }); part(b, 'mast', 1.5, 1.5, 22, b.h + 6 + b.capH - 2, { tex: 'steel' }); break }
+        case '25 Canada Sq (Citi) main': { let y = part(b, 'n1', b.w * 0.86, b.d * 0.86, 5, b.h); y = part(b, 'n2', b.w * 0.6, b.d * 0.6, 7, y); part(b, 'm', 1.2, 1.2, 14, y); break }
+        case '25 Canada Sq shoulder': part(b, 'n1', b.w * 0.8, b.d * 0.8, 4, b.h); break
+        case '8 Canada Sq (HSBC)': { let y = part(b, 'n1', b.w * 0.9, b.d * 0.9, 4, b.h); y = part(b, 'n2', b.w * 0.68, b.d * 0.68, 6, y); part(b, 'm', 1.1, 1.1, 26, y); break }
+        case 'Barclays slab': { let y = part(b, 'n1', b.w * 0.96, b.d * 0.9, 3, b.h); y = part(b, 'n2', b.w * 0.55, b.d * 0.7, 6, y, { dx: b.w * 0.12 }); part(b, 'm', 1.0, 1.0, 12, y, { dx: b.w * 0.12 }); break }
+        case 'narrow tower': { const y = part(b, 'n1', b.w * 0.8, b.d * 0.8, 5, b.h); part(b, 'm', 0.9, 0.9, 24, y); break }
+        case 'west low tower': case 'west block A': case 'west block B': case 'small block': case 'east tower': { const y = part(b, 'n1', b.w * 0.78, b.d * 0.78, 4 + R() * 3, b.h); part(b, 'p', b.w * 0.3, b.d * 0.3, 3, y, { dx: (R() - 0.5) * b.w * 0.2 }); break }
+        default: break
+      }
+      continue
+    }
+    if (b.band) { if (R() < 0.45) part(b, 'p', b.w * 0.45, b.d * 0.45, 2.5 + R() * 3, b.h, { dx: (R() - 0.5) * b.w * 0.25, dz: (R() - 0.5) * b.d * 0.25 }); continue }
+    if (R() < 0.6) part(b, 'p', b.w * 0.42, b.d * 0.42, 3 + R() * 5, b.h, { dx: (R() - 0.5) * b.w * 0.3, dz: (R() - 0.5) * b.d * 0.3 })
+    if (b.h > 60 && R() < 0.4) { const y = part(b, 's1', b.w * 0.82, b.d * 0.82, 5, b.h); part(b, 's2', b.w * 0.55, b.d * 0.55, 6 + R() * 4, y) }
+  }
+  out.push(...extra)
+}
+
 export function buildLayout() {
   const out = []
   for (const [name, x0, x1, ytop, D, style] of HERO) {
@@ -89,5 +121,6 @@ export function buildLayout() {
     else if (bz >= -150 && bz < -90) bz = -90 + rnd() * 60                                      // on the near bank, but not on the embankment/promenade strip
     out.push({ name: 'bg' + i, style: rnd() > 0.7 ? 'stone' : 'glass', hero: false, x: D * Math.sin(a), z: bz, w, d: w * (0.7 + rnd() * 0.6), h, rot: a + (rnd() - 0.5) * 0.6, shade: rnd() })
   }
+  addCrowns(out)
   return out
 }

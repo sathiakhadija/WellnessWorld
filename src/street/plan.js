@@ -10,13 +10,13 @@
 //   z -124  ├──────── Riverside piazza → ramps / stair ───────┤
 //   z -146  └──────── Thames terrace (balustrade, skyline) ───┘
 import * as THREE from 'three'
-import { Chunk, frame, rng, C, GY, GROUND_Y, TERRACE_Y, rowWall } from './geo.js'
-import { PAL, strip, pane, railing } from './facade.js'
+import { Chunk, frame, rng, C, GY, GROUND_Y, TERRACE_Y, rowWall, toWorld, dirWorld } from './geo.js'
+import { PAL, strip, pane, railing, sash, balconette } from './facade.js'
 import { townhouse, modernBlock, shopBuilding } from './buildings.js'
 
 export const BX = 1.2                                   // penthouse entrance axis
 export const TERR_H = TERRACE_Y - GY                    // terrace height above street level (≈4.4)
-export const BOUNDS = { x0: -148, x1: 148, z0: -148, z1: 300 }
+export const BOUNDS = { x0: -130, x1: 86, z0: -150, z1: 128 }
 const col = (h) => new THREE.Color(h)
 const G = { road: '#6b6a6d', slab: '#dbd2c2', sett: '#bdb0a0', grass: '#8aa356', gravel: '#d3c8b3', paint: '#ece6d8', dark: '#9b8f84' }
 
@@ -26,7 +26,7 @@ const pickR = (R, a) => a[Math.floor(R() * a.length) % a.length]
 
 export function buildStreet() {
   const chunks = {}, mk = (n) => chunks[n] || (chunks[n] = new Chunk(n, rng(hash(n))))
-  const inst = { plane: [], ornamental: [], clipped: [], lamp: [], bench: [], bollard: [], pathLight: [], table: [], chair: [], urn: [] }
+  const inst = { plane: [], ornamental: [], clipped: [], lamp: [], bench: [], bollard: [], pathLight: [], table: [], chair: [], urn: [], car1: [], car2: [], car3: [], car4: [], bike: [], shrub: [], grass: [], planter: [] }
   const put = (k, x, z, ry = 0, s = 1, y = GY) => inst[k].push([x, y, z, ry, s])
   const pools = [], halos = [], waters = [], jets = [], lightsAt = []
   const pois = {}
@@ -34,7 +34,8 @@ export function buildStreet() {
   const W0 = frame(0, 0, 0, GY)
 
   // ---------- small helpers
-  const surf = (ch, key, x0, x1, z0, z1, c, su, sv, layer = 1, y = GY) => ch.flat(frame(0, 0, 0, y + layer * 0.012), x0, x1, z0, z1, 0, col(c), layer >= 2 && key !== 'paint' && key !== 'grass' ? key + '2' : key, su, sv)
+  const mapSurf = [], mapRib = []
+  const surf = (ch, key, x0, x1, z0, z1, c, su, sv, layer = 1, y = GY) => (y === GY && mapSurf.push([key, x0, x1, z0, z1, layer]), ch.flat(frame(0, 0, 0, y + layer * 0.012), x0, x1, z0, z1, 0, col(c), layer >= 2 && key !== 'paint' && key !== 'grass' ? key + '2' : key, su, sv))
   const wall = (ch, x0, x1, z0, z1, h = 1.1, o = {}) => {
     ch.box(W0, x0, x1, 0, h, z0, z1, col(o.col || PAL.limestone), o.key || 'ashlar', 'fulrb', o.key === 'brick' ? 0.9 : 2.4, o.key === 'brick' ? 1 : 1.2)
     if (!o.nocap) ch.box(W0, x0 - 0.05, x1 + 0.05, h, h + 0.1, z0 - 0.05, z1 + 0.05, col('#e6decd'), 'trim', 'fulrb')
@@ -68,112 +69,228 @@ export function buildStreet() {
     ch.box(F, -len / 2 - 0.1, len / 2 + 0.1, h, h + 0.22, -t, 0.35, stone, 'trim', 'fulrd'); ch.box(F, -len / 2 - 0.15, len / 2 + 0.15, h + 0.22, h + 0.4, -t, 0.5, stone, 'trim', 'fulrd')
     ch.solid(F, -len / 2, len / 2, 0, h + 6, -t, 0.25, 'podium')
   }
-  podium(frame((-62 + BX - 5.5) / 2, 4, 0), (BX - 5.5) - (-62))                                                                                    // south face, west of the lobby
-  podium(frame((BX + 5.5 + 32) / 2, 4, 0), 32 - (BX + 5.5))                                                                                        // south face, east of the lobby
-  podium(frame(32, -42, Math.PI / 2), 92); podium(frame(-62, -42, -Math.PI / 2), 92); podium(frame(-15, -88, Math.PI), 94)                           // east, west, river faces
-
   // =====================================================================================================================================
-  // 2. LOBBY PAVILION + LIFT (the vertical connection to the penthouse)
+  // 2. WELLNESS HOUSE: residential lobby building (lift, concierge, seating) closing the north end of the private courtyard
+  //    Local frame FL: origin on the facade plane (z = 14) at the entrance axis, +z out into the courtyard, x across (-17.25..17.25 = world -16.05..18.45)
   // =====================================================================================================================================
+  const CX0 = BX - 15, CX1 = BX + 15, CZ0 = 14, CZ1 = 49                     // courtyard 30 x 35 m
+  const HX0 = CX0 - 2.25, HX1 = CX1 + 2.25                                   // residential facade planes either side (their 2.25 m front gardens face the courtyard)
+  const mass = (ch, x0, x1, z0, z1, h, c = PAL.stock, key = 'brick') => {
+    ch.box(W0, x0, x1, 0, h, z0, z1, col(c), key, 'flrb', 0.9, 1)
+    ch.box(W0, x0 - 0.1, x1 + 0.1, h, h + 0.35, z0 - 0.1, z1 + 0.1, col('#d9cfba'), 'trim', 'fulrbd')
+    ch.box(W0, x0 + 0.4, x1 - 0.4, h + 0.35, h + 0.4, z0 + 0.4, z1 - 0.4, col(PAL.slate), 'roof', 'u')
+    ch.solid(W0, x0, x1, 0, h + 3, z0, z1, 'mass')
+  }
   {
-    const ch = mk('pavilion'), FP = frame(BX, 4, 0), stone = col('#e1d7c2'), trav = col('#d9ccb2'), bronze = col('#8b6f47')
-    const hw = 5.2, depth = 9, H = 4.8
-    // floor
-    ch.box(FP, -hw, hw, -0.01, 0.04, 0.9, depth, col('#e6dcc8'), 'slab', 'u', 1.8, 1.2)
-    ch.box(FP, -hw + 0.4, hw - 0.4, 0.04, 0.045, 1.2, depth - 0.4, col('#c9bca4'), 'slab', 'u', 1.8, 1.2, 0)
-    // back (lift) wall: stone cladding with a recessed opening for the lift
-    const FB = frame(BX, 4.9, 0)
-    rowWall(ch, FB, -hw, hw, 0, H, [{ x0: -0.95, x1: 0.95, sill: 0, head: 2.6 }], 0.9, trav, 'ashlar', 2.4, 1.2)
+    const ch = mk('lobby'), FL = frame(BX, 14, 0, GY), FP = frame(BX, 4, 0, GY)
+    const lim = col(PAL.limestone), brickC = col('#b77a58'), bronze = col('#5b4731'), brass = col(PAL.brass), walnut = col('#5a3d2a')
+    const gh = 5.2, fh = 3.3, nf = 3, H = gh + nf * fh, t = 0.45, hw = 17.25
+    // ---- ground floor: limestone with a deep glazed central bay (the lobby) and two stone wings with recessed windows
+    const wingOps = []
+    for (const s of [-1, 1]) for (const cx of [10.6, 14.4]) wingOps.push({ x0: s * cx - 0.8, x1: s * cx + 0.8, sill: 0.95, head: 4.0 })
+    wingOps.push({ x0: -7, x1: 7, sill: 0, head: 4.7 })
+    rowWall(ch, FL, -hw, hw, 0, gh, wingOps.sort((a, b) => a.x0 - b.x0), t, lim, 'ashlar', 2.4, 1.2)
+    for (const o of wingOps) if (o.x1 - o.x0 < 3) { sash(ch, FL, (o.x0 + o.x1) / 2, o.sill, o.x1 - o.x0, o.head - o.sill, t, { style: 'plate', lit: R() < 0.5, stone: lim }) }
+    // string course, then three brick floors of sash windows with a stone cornice
+    ch.box(FL, -hw - 0.05, hw + 0.05, gh, gh + 0.2, -t, 0.14, lim, 'trim', 'fulrd')
+    const nb = 10, bw = (2 * hw) / nb
+    for (let f = 0; f < nf; f++) {
+      const y0 = gh + 0.2 + f * fh, y1 = y0 + fh, ops = []
+      for (let b = 0; b < nb; b++) { const cx = -hw + (b + 0.5) * bw; ops.push({ x0: cx - 0.6, x1: cx + 0.6, sill: 0.55, head: 0.55 + (f === 0 ? 2.25 : 2.0) }) }
+      rowWall(ch, FL, -hw, hw, y0, y1, ops, t, brickC, 'brick', 0.9, 1)
+      ops.forEach((o) => sash(ch, FL, (o.x0 + o.x1) / 2, y0 + o.sill, 1.2, o.head - o.sill, t, { lit: R() < 0.34, stone: lim }))
+      if (f === 0) for (let b = 0; b < nb; b++) { const cx = -hw + (b + 0.5) * bw; if (b % 2 === 0) balconette(ch, FL, cx, y0 + 0.55, 1.2, {}) }
+    }
+    ch.box(FL, -hw - 0.15, hw + 0.15, H - 0.1, H + 0.3, -t, 0.5, lim, 'trim', 'fulrbd'); ch.box(FL, -hw - 0.2, hw + 0.2, H + 0.3, H + 0.55, -t, 0.62, lim, 'trim', 'fulrbd')
+    // ---- bronze shopfront-style glazing frame + entrance portal at the centre
+    const zf = -0.08
+    for (const x of [-7, -5.2, -3.4, -1.45, 1.45, 3.4, 5.2, 7]) ch.box(FL, x - 0.05, x + 0.05, 0, 4.7, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
+    for (const y of [2.55, 4.7]) ch.box(FL, -7, 7, y - 0.06, y + 0.06, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
+    for (const s of [-1, 1]) ch.box(FL, s * 1.45 - 0.09, s * 1.45 + 0.09, 0, 3.2, zf - 0.12, zf + 0.14, bronze, 'metal', 'fulrb', 1, 1, 0)
+    ch.box(FL, -1.55, 1.55, 3.2, 3.38, zf - 0.12, zf + 0.14, bronze, 'metal', 'fulrb', 1, 1, 0)
+    ch.box(FL, -1.2, 1.2, 3.38, 3.5, zf - 0.02, zf + 0.04, brass, 'metal', 'fu', 1, 1, 0)
+    for (const x of [-4.2, 4.2]) ch.box(FL, x - 0.3, x + 0.3, 2.62, 4.6, zf - 0.02, zf, col('#ffe2b0'), 'glow', 'f', 1, 1, 0)                // warm glow behind the upper lobby glazing
+    ch.solid(FL, -7, -1.55, 0, 4.7, -0.3, 0.0, 'lobbyglass'); ch.solid(FL, 1.55, 7, 0, 4.7, -0.3, 0.0, 'lobbyglass')
+    // wing masses + back-of-house
+    for (const s of [-1, 1]) { ch.box(FL, s > 0 ? 7.2 : -hw, s > 0 ? hw : -7.2, 0, H, -10, -t, col(PAL.stock), 'brick', 'lrb', 0.9, 1); ch.solid(FL, s > 0 ? 7.2 : -hw, s > 0 ? hw : -7.2, 0, H + 3, -10, -t, 'wing') }
+    ch.box(FL, -7.2, 7.2, 4.9, H, -10, -t, col(PAL.stock), 'brick', 'fb', 0.9, 1)
+    ch.box(FL, -hw, hw, H + 0.55, H + 0.6, -10, 0.3, col(PAL.slate), 'roof', 'u')
+    // ---- the lobby interior (FP: lz 0 = the tower wall at z = 4; the lobby is lx -7..7, lz 0.9..9.55; ceiling 4.9)
+    const iw = 7
+    ch.box(FP, -iw, iw, -0.01, 0.04, 0.9, 9.6, col('#e4d8be'), 'slab', 'u', 1.8, 1.2)                                                      // travertine floor
+    ch.box(FP, -iw + 0.5, iw - 0.5, 0.04, 0.05, 1.5, 9.1, col('#d1c3a6'), 'slab', 'u', 1.8, 1.2, 0)                                       // inlaid border
+    ch.box(FP, -1.4, 1.4, 0.05, 0.06, 4.9, 9.55, col('#bba980'), 'trim', 'u', 1, 1, 0)                                                      // entrance runner
+    ch.box(FP, -iw, iw, 4.9, 5.2, 0.9, 9.6, col('#efe6d3'), 'trim', 'fd', 1, 1, 0)                                                          // ceiling
+    for (const s of [-1, 1]) { ch.box(FP, s * 5.6 - 0.15, s * 5.6 + 0.15, 4.84, 4.9, 1.2, 9.4, col('#ffe0b0'), 'glow', 'd', 1, 1, 0); ch.box(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, col('#e2d6bd'), 'ashlar', 'fulrb', 2.4, 1.2); ch.solid(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, 'lobbywall') }
+    ch.box(FP, -iw - 0.1, iw + 0.1, 4.9, 5.0, 0.9, 9.6, col('#e9dfca'), 'trim', 'fulrbd', 1, 1, 0)
+    // back wall: limestone with the lift recess, flanked by walnut panelling
+    const FB = frame(BX, 4.9, 0, GY)
+    rowWall(ch, FB, -iw, iw, 0, 4.9, [{ x0: -0.95, x1: 0.95, sill: 0, head: 2.6 }], 0.9, col('#ddd1b8'), 'ashlar', 2.4, 1.2)
+    for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x0 = s * (1.45 + i * 1.05); ch.box(FB, Math.min(x0, x0 + s * 0.95), Math.max(x0, x0 + s * 0.95), 0.1, 3.6, 0.0, 0.07, walnut.clone().multiplyScalar(0.92 + 0.08 * (i % 2)), 'wood', 'fu', 1, 1, 0) }
     ch.box(FB, -0.95, 0.95, 0, 0.01, -0.9, 0, col('#cdbf9f'), 'trim', 'u')
     ch.acc('glow').quad(...[[-0.9, 0.04, -0.82], [0.9, 0.04, -0.82], [0.9, 2.55, -0.82], [-0.9, 2.55, -0.82]].map(([x, y, z]) => [FB.x + x, FB.y + y, FB.z + z]), col('#ffdca8'), [0, 0, 1], [[0, 0], [1, 0], [1, 1], [0, 1]])
-    for (const s of [-1, 1]) ch.box(FB, s * 1.0 - 0.05, s * 1.0 + 0.05, 0, 2.7, -0.1, 0.06, col(PAL.brass), 'metal+', 'fulr')
-    ch.box(FB, -1.05, 1.05, 2.6, 2.72, -0.1, 0.06, col(PAL.brass), 'metal+', 'fulr')
-    ch.box(FB, -0.12, 0.12, 2.9, 3.0, 0.0, 0.05, col('#ffd9a0'), 'glow', 'f', 1, 1, 0)                                                                 // floor indicator
+    for (const s of [-1, 1]) ch.box(FB, s * 1.0 - 0.05, s * 1.0 + 0.05, 0, 2.7, -0.1, 0.06, bronze, 'metal+', 'fulr')
+    ch.box(FB, -1.05, 1.05, 2.6, 2.72, -0.1, 0.06, bronze, 'metal+', 'fulr')
+    ch.box(FB, -0.14, 0.14, 2.9, 3.0, 0.0, 0.05, col('#ffd9a0'), 'glow', 'f', 1, 1, 0)                                                      // floor indicator
+    ch.box(FB, 1.15, 1.3, 1.0, 1.5, 0.0, 0.04, brass, 'metal+', 'fu')                                                                         // call plate
     pois.lift = { x: BX, z: 4.9, doorZ: 4.9 - 0.12, w: 0.9, h: 2.5, y: GY }
-    // side glass walls (local x runs toward world -z on the +x side, toward +z on the -x side, so the interval flips)
-    for (const s of [-1, 1]) {
-      const FS = frame(BX + s * hw, 4, s * Math.PI / 2), nz = 6, lo = s > 0 ? -depth : 0.9, hi = s > 0 ? -0.9 : depth
-      ch.box(FS, lo, hi, 0, 0.2, -0.3, 0.1, stone, 'ashlar', 'fu', 2.4, 1.2); ch.box(FS, lo, hi, 4.2, H, -0.3, 0.1, stone, 'ashlar', 'fud', 2.4, 1.2)
-      for (let i = 0; i < nz; i++) { const a = lo + (i / nz) * (hi - lo), b = lo + ((i + 1) / nz) * (hi - lo); pane(ch, FS, a + 0.04, b - 0.04, 0.2, 4.2, 0, R() < 0.75); strip(ch, FS, 'metal+', col(PAL.charcoal), b - 0.04, b + 0.04, 0.2, 4.2, 0.03) }
-      ch.solid(FS, lo, hi, 0, H, -0.2, 0.1, 'pavilion')
+    ch.solid(FP, -iw, iw, 0, 4.9, 0, 0.95, 'liftwall')
+    // lift cab beyond the doors (walnut, bronze, a warm light and a control panel); visible when the doors are open
+    {
+      const FC = frame(BX, 4.9, 0, GY)
+      ch.box(FC, -1.1, 1.1, 0, 0.04, -2.7, -0.2, col('#cdbf9f'), 'slab', 'u', 1.8, 1.2); ch.box(FC, -1.1, 1.1, 2.55, 2.7, -2.7, -0.2, col('#efe2c4'), 'trim', 'd', 1, 1, 0)
+      ch.box(FC, -1.1, -1.0, 0, 2.55, -2.7, -0.2, walnut, 'wood', 'r', 1, 1, 0); ch.box(FC, 1.0, 1.1, 0, 2.55, -2.7, -0.2, walnut, 'wood', 'l', 1, 1, 0); ch.box(FC, -1.1, 1.1, 0.04, 2.55, -2.72, -2.6, walnut.clone().multiplyScalar(1.1), 'wood', 'f', 1, 1, 0)
+      ch.box(FC, -1.1, 1.1, 1.0, 1.06, -2.62, -2.58, bronze, 'metal+', 'f', 1, 1, 0)                                                         // handrail
+      ch.box(FC, -0.5, 0.5, 2.5, 2.54, -2.5, -0.5, col('#ffe0b0'), 'glow', 'd', 1, 1, 0)
+      ch.box(FC, 0.58, 0.9, 1.1, 1.62, -0.62, -0.58, bronze, 'metal+', 'f', 1, 1, 0); for (let i = 0; i < 3; i++) ch.box(FC, 0.66, 0.72, 1.18 + i * 0.12, 1.24 + i * 0.12, -0.6, -0.57, col('#ffd9a0'), 'glow', 'f', 1, 1, 0)   // control panel
     }
-    // front: beam + flanking glass, open central bay
-    const FF = frame(BX, 4 + depth, 0)
-    ch.box(FF, -hw - 0.3, hw + 0.3, 4.1, H, -0.3, 0.3, stone, 'ashlar', 'fulrbd', 2.4, 1.2)
-    for (const s of [-1, 1]) { const a = s * 2.75, b = s * (hw - 0.05); for (let k = 0; k < 3; k++) { const x0 = a + (b - a) * k / 3, x1 = a + (b - a) * (k + 1) / 3; pane(ch, FF, Math.min(x0, x1) + 0.03, Math.max(x0, x1) - 0.03, 0.2, 4.1, 0, k !== 1); strip(ch, FF, 'metal+', col(PAL.charcoal), Math.min(x0, x1) - 0.03, Math.min(x0, x1) + 0.03, 0.2, 4.1, 0.02) }; ch.solid(FF, s * 2.7 - 0.05, s * hw, 0, H, -0.15, 0.15, 'pavilion'); ch.box(FF, s * 2.6 - 0.1, s * 2.6 + 0.1, 0, 4.1, -0.1, 0.1, stone, 'ashlar', 'fulrb') }
-    // canopy slab with soffit lights, columns, fascia sign
-    ch.box(FP, -hw - 1.3, hw + 1.3, H, H + 0.5, -0.0, depth + 3.0, stone, 'ashlar', 'fulrbd', 2.4, 1.2)
-    for (const x of [-4.2, 0, 4.2]) for (const z of [11.2, 7.2, 3.2]) ch.box(FP, x - 0.9, x + 0.9, H - 0.02, H, z - 0.12, z + 0.12, col('#ffdcae'), 'glow', 'd', 1, 1, 0)
-    for (const x of [-hw - 0.6, -2.7, 2.7, hw + 0.6]) { ch.box(FP, x - 0.22, x + 0.22, 0, H, depth + 2.2, depth + 2.62, stone, 'ashlar', 'fulrb', 2.4, 1.2); ch.solid(FP, x - 0.22, x + 0.22, 0, H, depth + 2.2, depth + 2.62, 'column') }
-    ch.acc('sign').quad([FP.x - 3.4, GY + H + 0.06, FP.z + depth + 3.01], [FP.x + 3.4, GY + H + 0.06, FP.z + depth + 3.01], [FP.x + 3.4, GY + H + 0.5 - 0.06, FP.z + depth + 3.01], [FP.x - 3.4, GY + H + 0.5 - 0.06, FP.z + depth + 3.01], col('#ffffff'), [0, 0, 1], signQ(8), 1)
-    ch.solid(FP, -hw - 1.3, hw + 1.3, H - 0.1, H + 0.6, 0, depth + 3.0, 'canopy')
-    ch.solid(FP, -hw, hw, 0, H, 0, 0.95, 'liftwall')
-    // furniture inside: two stone benches + urns beside the lift
-    for (const s of [-1, 1]) { ch.box(FP, s * 3.4 - 1.1, s * 3.4 + 1.1, 0.04, 0.5, 5.6, 6.2, col('#cdbf9f'), 'ashlar', 'fulrbd', 2.4, 1.2); ch.solid(FP, s * 3.4 - 1.1, s * 3.4 + 1.1, 0, 0.5, 5.6, 6.2, 'bench'); put('urn', BX + s * 2.0, 4 + 1.6, 0, 1.0) }
-    lightsAt.push({ x: BX, y: GY + 3.6, z: 4 + 5.5, color: '#ffcf94', intensity: 7, distance: 17 })
-    halos.push([BX, GY + 4.1, 4 + 3], [BX, GY + 4.1, 4 + 7.5])
-    pois.pavilion = { x: BX, z: 4 + depth + 3 }
-    // steps up to the canopy line? flush: the court is level with the lobby floor
+    // side walls: art. Three framed pieces (muted abstract canvases) on the west wall, one large on the east
+    const art = (lx, lz, w, h, y, c1, c2, side) => {
+      const FA = frame(BX + side * iw, 4 + lz, side * -Math.PI / 2, GY), wx = w
+      ch.box(FA, -wx / 2 - 0.07, wx / 2 + 0.07, y - 0.07, y + h + 0.07, 0, 0.06, bronze, 'metal+', 'fulrb', 1, 1, 0)
+      ch.box(FA, -wx / 2, wx / 2, y, y + h, 0.04, 0.07, c1, 'trim', 'f', 1, 1, 0); ch.box(FA, -wx / 2 + 0.2, wx / 2 - 0.2, y + h * 0.18, y + h * 0.55, 0.07, 0.08, c2, 'trim', 'f', 1, 1, 0)
+    }
+    art(0, 3.3, 1.1, 1.4, 1.5, col('#bfb39b'), col('#8a6a78'), -1); art(0, 5.3, 1.1, 1.4, 1.5, col('#a9b39a'), col('#cbb78d'), -1); art(0, 7.3, 1.1, 1.4, 1.5, col('#d9cdb8'), col('#6d5568'), -1); art(0, 6.0, 2.3, 1.5, 1.4, col('#cbb9a0'), col('#a45f47'), 1)
+    // concierge desk (walnut, stone top) on the east side; seating group on the west
+    ch.box(FP, 2.6, 5.9, 0.04, 1.05, 2.9, 3.7, walnut, 'wood', 'fulrb', 1, 1, 0.05); ch.box(FP, 2.5, 6.0, 1.05, 1.12, 2.8, 3.8, col('#e7dfcf'), 'ashlar', 'fulrbd', 2.4, 1.2); ch.solid(FP, 2.5, 6.0, 0, 1.12, 2.8, 3.8, 'desk')
+    ch.box(FP, 3.2, 5.2, 1.12, 1.18, 3.1, 3.5, col('#2f2a26'), 'trim', 'u', 1, 1, 0); ch.box(FP, 4.0, 4.04, 1.12, 1.55, 3.2, 3.24, brass, 'metal', 'fulrb', 1, 1, 0); ch.box(FP, 3.85, 4.2, 1.55, 1.58, 3.1, 3.4, col('#ffe0b0'), 'glow', 'fu', 1, 1, 0)   // blotter + desk lamp
+    ch.box(FP, 5.6, 6.0, 0.04, 1.9, 1.0, 2.2, walnut.clone().multiplyScalar(0.9), 'wood', 'fulrb', 1, 1, 0.05)                                  // key cabinet
+    const sofa = col('#bdad96'), sofaDk = col('#a18f7b')
+    ch.box(FP, -6.2, -3.4, 0.04, 0.44, 5.6, 7.4, sofa, 'awning', 'fulrb', 1, 1, 0); ch.box(FP, -6.2, -5.7, 0.44, 0.95, 5.6, 7.4, sofaDk, 'awning', 'fulrb', 1, 1, 0); ch.solid(FP, -6.2, -3.4, 0, 0.95, 5.6, 7.4, 'sofa')
+    for (const z of [4.4, 8.6]) { ch.box(FP, -5.4, -4.3, 0.04, 0.42, z - 0.5, z + 0.5, sofa, 'awning', 'fulrb', 1, 1, 0); ch.box(FP, -5.4, -5.0, 0.42, 0.85, z - 0.5, z + 0.5, sofaDk, 'awning', 'fulrb', 1, 1, 0); ch.solid(FP, -5.4, -4.3, 0, 0.85, z - 0.5, z + 0.5, 'armchair') }
+    ch.box(FP, -4.1, -2.9, 0.04, 0.05, 4.9, 6.9, col('#cfc2a8'), 'trim', 'u', 1, 1, 0)                                                      // rug
+    put('table', BX - 3.5, 6.0, 0, 1.0, GY); ch.solid(FP, -3.9, -3.1, 0, 0.75, 5.6, 6.4, 'table')
+    // sculptural pendant: stacked brass rings on a drop rod, warm glow core
+    const FD = frame(BX, 4 + 5.2, 0, GY)
+    ch.prism(FD, 0, 0, 0.012, 0.012, 3.6, 4.9, brass, 'metal', 4)
+    for (let i = 0; i < 5; i++) ch.prism(FD, 0, 0, 0.28 + i * 0.16, 0.28 + i * 0.16, 3.55 - i * 0.14, 3.6 - i * 0.14, brass, 'metal', 20)
+    ch.prism(FD, 0, 0, 0.28, 0.28, 3.0, 3.52, col('#ffe0b0'), 'glow', 12)
+    // restrained greenery: two stone planters at the lift wall, a pair of potted trees by the doors
+    for (const s of [-1, 1]) { put('planter', BX + s * 5.0, 5.7, 0, 1.0, GY); put('shrub', BX + s * 5.0 + 0.2, 5.7, 0, 1.0, GY + 0.62) }
+    for (const s of [-1, 1]) { put('urn', BX + s * 2.7, 8.7, 0, 1.0, GY); put('ornamental', BX + s * 2.7, 8.7, 0, 0.42, GY + 0.9) }
+    lightsAt.push({ x: BX, y: GY + 3.4, z: 4 + 5.2, color: '#ffcf94', intensity: 7, distance: 16 })
+    halos.push([BX, GY + 3.2, 4 + 5.2], [BX, GY + 4.0, 14.6])
+    // door to the courtyard: a clear 2.9 m opening (no leaves, so the arrival is never blocked)
+    pois.lobby = { x: BX, z: 9 }
+    pois.pavilion = { x: BX, z: 14 }
+    // building masses beside + behind the courtyard (brick end elevations / back of house)
+    const bm = mk('masses')
+    mass(bm, -62, -28, 4, 34.75, 14.6); mass(bm, -28, HX0, 4, 14, 14.6); mass(bm, 30.45, 62, 4, 34.75, 14.6); mass(bm, HX1, 30.45, 4, 14, 14.6)
+    // the tower's own south face stays as drawn by the V10 massing; the podium below dresses the remaining faces
   }
 
   // =====================================================================================================================================
-  // 3. PLAZA / FORECOURT / WALKS (ground, lawns, paths, hedges, planting)
+  // 3. PRIVATE COURTYARD (30 x 35 m): signature plane tree with a curved limestone bench, a contemporary rill, layered planting, stone paths, bronze gateway
   // =====================================================================================================================================
   {
-    const g = mk('ground'), P = { x0: -125, x1: 80, z0: -132, z1: 47.2 }
-    surf(g, 'grass', P.x0, P.x1, 4, P.z1, G.grass, 4, 4, 0)                                                         // south lawns (forecourt + wings)
-    surf(g, 'grass', 36, P.x1, -124, 4, G.grass, 4, 4, 0); surf(g, 'grass', P.x0, -62, -124, 4, G.grass, 4, 4, 0)    // east + west walks
-    surf(g, 'slab', P.x0, P.x1, -132, -88, G.slab, 1.8, 1.2, 0)                                                      // riverside piazza
-        // forecourt axis: limestone setts with a shallow reflecting pool
-    surf(g, 'slab', BX - 4.2, BX + 4.2, 13, 47.2, G.slab, 1.8, 1.2, 1)
-    surf(g, 'sett', BX - 4.2, BX + 4.2, 40, 47.2, G.sett, 1.6, 1.6, 2)
-    surf(g, 'slab', BX - 11, BX + 11, 13, 17.5, G.slab, 1.8, 1.2, 1)                                                  // forecourt apron in front of the pavilion
-    surf(g, 'gravel', P.x0, P.x1, 38, 41, G.gravel, 2, 2, 1)                                                          // cross path
-    surf(g, 'slab', 56, 64, -124, 41, G.slab, 1.8, 1.2, 1); surf(g, 'slab', -96, -88, -124, 41, G.slab, 1.8, 1.2, 1)  // walk paths
-    surf(g, 'slab', 28, 56, 20, 23.5, G.slab, 1.8, 1.2, 1); surf(g, 'slab', -88, -34, 20, 23.5, G.slab, 1.8, 1.2, 1)  // connectors from the forecourt to the walks
-    surf(g, 'slab', BX + 4.2, 34, 20, 23.5, G.slab, 1.8, 1.2, 1); surf(g, 'slab', -34, BX - 4.2, 20, 23.5, G.slab, 1.8, 1.2, 1)
-    surf(g, 'gravel', 32.5, 36, -88, 4, G.gravel, 2, 2, 1); surf(g, 'gravel', -66, -62.5, -88, 4, G.gravel, 2, 2, 1)
-    // reflecting pool on the axis (edge is a kerb the player cannot step into)
-    const pool = { x0: BX - 1.4, x1: BX + 1.4, z0: 21, z1: 35 }
-    wall(g, pool.x0 - 0.35, pool.x0, pool.z0 - 0.35, pool.z1 + 0.35, 0.42, { col: '#d8cdb5' }); wall(g, pool.x1, pool.x1 + 0.35, pool.z0 - 0.35, pool.z1 + 0.35, 0.42, { col: '#d8cdb5' })
-    wall(g, pool.x0, pool.x1, pool.z0 - 0.35, pool.z0, 0.42, { col: '#d8cdb5' }); wall(g, pool.x0, pool.x1, pool.z1, pool.z1 + 0.35, 0.42, { col: '#d8cdb5' })
-    g.flat(frame(0, 0, 0, GY + 0.3), pool.x0, pool.x1, pool.z0, pool.z1, 0, col('#2e2a36'), 'trim', 1, 1)
-    waters.push({ x: BX, z: (pool.z0 + pool.z1) / 2, w: pool.x1 - pool.x0, d: pool.z1 - pool.z0, y: GY + 0.32, kind: 'pool' })
-    // lawn edging hedges flanking the axis (with gaps for the connector paths)
-    for (const s of [-1, 1]) {
-      const xa = BX + s * 5.0, xb = BX + s * 6.1
-      for (const [za, zb] of [[17.8, 19.4], [24.4, 37.4], [41.8, 46.4]]) hedge(g, Math.min(xa, xb), Math.max(xa, xb), za, zb, 1.0)
-    }
-    // boundary wall along the south edge of the plaza, with the boulevard gate
-    const gateW = 14.4
-    wall(g, P.x0, BX - 13.25, 46.2, 47.2, 1.5); wall(g, 14.4 + 0.0, P.x1, 46.2, 47.2, 1.5)
-    for (const x of [-13.25, 14.4]) { g.box(W0, x - 0.5, x + 0.5, 0, 2.9, 45.8, 47.6, col(PAL.limestone), 'ashlar', 'fulrb', 2.4, 1.2); g.box(W0, x - 0.62, x + 0.62, 2.9, 3.05, 45.68, 47.72, col('#e6decd'), 'trim', 'fulrb'); g.box(W0, x - 0.2, x + 0.2, 3.05, 3.5, 46.4, 47.0, col('#ffdca2'), 'glow', 'fulrb', 1, 1, 0); g.solid(W0, x - 0.5, x + 0.5, 0, 3.6, 45.8, 47.6, 'gatepier'); halos.push([x, GY + 3.3, 46.7]) }
-    // perimeter: west + east edge of the plaza (stone plinth + hedge), sealed with colliders
-    wall(g, P.x0 - 0.8, P.x0, -132, 47.2, 1.5); wall(g, P.x1, P.x1 + 0.8, -132, 47.2, 1.5)
-    hedge(g, P.x0 + 0.1, P.x0 + 1.6, -132, 47.2, 1.8, '#46583a'); hedge(g, P.x1 - 1.6, P.x1 - 0.1, -132, 47.2, 1.8, '#46583a')
-    // forecourt lighting + trees
-    for (let z = 20; z <= 44; z += 6) for (const s of [-1, 1]) { put('pathLight', BX + s * 4.7, z, 0); pools.push([BX + s * 4.7, z, 3.6]) }
-    for (const [x, z] of [[-18, 26], [-30, 30], [-44, 24], [26, 26], [34, 31], [46, 22], [-38, 12], [40, 14]]) { tree('ornamental', x + (R() - 0.5) * 3, z + (R() - 0.5) * 2, 0.9 + R() * 0.35); }
-    for (let i = 0; i < 12; i++) { const x = -118 + R() * 150, z = 5 + R() * 32; if (Math.abs(x - BX) < 12 || (x > -62 && x < 36 && z < 16)) continue; tree(R() < 0.5 ? 'plane' : 'ornamental', x, z, 0.8 + R() * 0.4) }
-    for (let i = 0; i < 6; i++) { const x = 38 + R() * 38, z = 8 + R() * 28; if (Math.abs(x - 60) < 6) continue; tree(R() < 0.5 ? 'plane' : 'ornamental', x, z, 0.8 + R() * 0.4) }
-    // east + west walks: clipped hedge borders, tree allées, benches, lamps
-    for (const [xc, side] of [[60, 'E'], [-92, 'W']]) {
-      for (const s of [-1, 1]) for (let z = -122; z < 36; z += 18) {
-        if ((z + 122) % 36 === 18) continue
-        hedge(g, xc + s * 4.9, xc + s * 5.9, z, z + 12, 0.9, '#506239')
+    const g = mk('courtyard'), cx = BX, cz = 30.5, G2 = '#d4c8b2'
+    // paving: stone field with a lighter path spine and a paved ring around the tree; planted beds between
+    surf(g, 'grass', CX0 - 2.25, CX1 + 2.25, CZ0, CZ1, '#7f9a58', 4, 4, 0)
+    surf(g, 'slab', CX0, CX1, CZ0, CZ0 + 6.5, G.slab, 1.8, 1.2, 1)                                                 // forecourt apron at the lobby doors
+    surf(g, 'slab', cx - 1.8, cx + 1.8, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1)                                       // path spine to the gate
+    surf(g, 'sett', cx - 8.4, cx + 8.4, cz - 8.4, cz + 8.4, G.sett, 1.6, 1.6, 1)                                      // setts square under the tree (the "room")
+    surf(g, 'slab', cx - 6.6, cx + 6.6, cz - 6.6, cz + 6.6, G.slab, 1.8, 1.2, 2)
+    surf(g, 'slab', CX0, CX0 + 2.4, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', CX1 - 2.4, CX1, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1)     // side paths along the house gardens
+    surf(g, 'slab', cx - 8.4, CX0 + 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', cx + 8.4, CX1 - 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1)   // cross paths
+    // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
+    put('plane', cx, cz, 0.3, 1.5)
+    g.prism(frame(cx, cz, 0, GY), 0, 0, 2.3, 2.3, 0, 0.06, col('#6f655a'), 'gravel', 20); g.prism(frame(cx, cz, 0, GY), 0, 0, 0.9, 0.9, 0.0, 0.07, col('#3b3530'), 'metal', 16)
+    const arc = (a0, a1, r = 3.6) => {
+      const n = 11
+      for (let i = 0; i < n; i++) {
+        const a = a0 + ((i + 0.5) / n) * (a1 - a0), seg = ((a1 - a0) / n) * r * 1.04, rot = Math.atan2(-Math.cos(a), -Math.sin(a)), F = frame(cx + Math.cos(a) * r, cz + Math.sin(a) * r, rot, GY)
+        g.box(F, -seg / 2, seg / 2, 0, 0.46, -0.32, 0.32, col('#e0d6c0'), 'ashlar', 'fulrb', 2.4, 1.2, 0.02); g.box(F, -seg / 2 - 0.02, seg / 2 + 0.02, 0.46, 0.52, -0.36, 0.36, col('#ebe3d1'), 'trim', 'fulrbd')
+        g.solid(F, -seg / 2, seg / 2, 0, 0.52, -0.36, 0.36, 'bench')
       }
-      for (let z = -112; z < 30; z += 14 + R() * 3) for (const s of [-1, 1]) tree(R() < 0.3 ? 'plane' : 'ornamental', xc + s * (9 + R() * 2.5), z + (R() - 0.5) * 3, 0.9 + R() * 0.4)
-      for (let z = -100; z < 36; z += 40) { bench(xc - 4.2, z, Math.PI / 2); bench(xc + 4.2, z + 20, -Math.PI / 2) }
-      for (let z = -118; z < 36; z += 24) lamp(xc + (side === 'E' ? 4.4 : -4.4), z, 0)
     }
-    // west lawn grove (denser, parkier) + east lawn
-    for (let i = 0; i < 26; i++) { const x = -122 + R() * 56, z = -120 + R() * 118; if (Math.abs(x + 92) < 7) continue; tree(R() < 0.55 ? 'plane' : 'ornamental', x, z, 0.85 + R() * 0.45) }
-    for (let i = 0; i < 12; i++) { const x = 38 + R() * 40, z = -120 + R() * 118; if (Math.abs(x - 60) < 7) continue; tree(R() < 0.5 ? 'plane' : 'ornamental', x, z, 0.85 + R() * 0.4) }
-    // piazza: tree grates under the tower + stone planters
-    for (let x = -100; x <= 62; x += 18) { grate(g, x, -96); tree('ornamental', x, -96, 0.95); if (Math.abs(x - BX) > 2) lamp(x + 9, -94.5, 0) }
-    for (let x = -112; x <= 72; x += 20) { grate(g, x, -121); tree('plane', x, -121, 0.9 + R() * 0.2); if (x < 40 && x > -100) bench(x + 10, -118, 0) }
-    for (let x = -108; x <= 70; x += 36) { hedge(g, x - 6, x + 6, -107.2, -106.2, 0.7, '#506239') }
-    pois.plaza = { x: 60, z: 30 }
+    arc(-1.15, 1.15); arc(Math.PI - 1.15, Math.PI + 1.15)
+    // contemporary water feature: a long black-granite rill with a standing stone spill at the north end (calm, no jets)
+    const rx = cx + 9.9, rz0 = cz - 4.5, rz1 = cz + 4.5
+    g.box(W0, rx - 0.55, rx + 0.55, 0, 0.3, rz0 - 0.3, rz1 + 0.3, col('#34322f'), 'trim', 'fulrb', 1, 1, 0.02)
+    g.solid(W0, rx - 0.55, rx + 0.55, 0, 0.3, rz0 - 0.3, rz1 + 0.3, 'rill')
+    g.box(W0, rx - 0.3, rx + 0.3, 0.3, 0.32, rz0, rz1, col('#1e1d22'), 'trim', 'u', 1, 1, 0)
+    waters.push({ x: rx, z: (rz0 + rz1) / 2, w: 0.6, d: rz1 - rz0, y: GY + 0.34, kind: 'pool' })
+    g.box(W0, rx - 0.35, rx + 0.35, 0.3, 1.5, rz0 - 0.9, rz0 - 0.3, col('#ddd2bb'), 'ashlar', 'fulrb', 2.4, 1.2, 0.02); g.solid(W0, rx - 0.35, rx + 0.35, 0.3, 1.5, rz0 - 0.9, rz0 - 0.3, 'spill')
+    // layered planting: clipped hedge walls along the garden railings, shrub mounds, ornamental grasses, a few restrained blush flowers
+    for (const [xa, xb] of [[CX0 + 0.1, CX0 + 0.9], [CX1 - 0.9, CX1 - 0.1]]) { for (let z = CZ0 + 8; z < CZ1 - 4; z += 7) { hedge(g, xa, xb, z, z + 5.5, 0.9, '#4e6139') } }
+    const R2 = rng(77)
+    for (const [bx0, bx1, bz0, bz1] of [[CX0 + 3, cx - 9.2, CZ0 + 8, cz - 3], [CX0 + 3, cx - 9.2, cz + 3, CZ1 - 3], [cx + 9.2, CX1 - 3, CZ0 + 8, cz - 8], [cx + 9.2, CX1 - 3, cz + 6, CZ1 - 3]]) {
+      for (let i = 0; i < 14; i++) { const x = bx0 + R2() * (bx1 - bx0), z = bz0 + R2() * (bz1 - bz0); if (R2() < 0.55) put('shrub', x, z, R2() * 6, 0.7 + R2() * 0.5); else put('grass', x, z, R2() * 6, 0.9 + R2() * 0.5) }
+      for (let i = 0; i < 4; i++) { const x = bx0 + R2() * (bx1 - bx0), z = bz0 + R2() * (bz1 - bz0); g.prism(frame(x, z, 0, GY), 0, 0, 0.3, 0.22, 0.0, 0.34, col(['#cfa9ad', '#e4d9cb', '#b7a5c4'][i % 3]), 'leaf', 8) }
+    }
+    for (const [x, z] of [[cx - 4.6, CZ0 + 2.0], [cx + 4.6, CZ0 + 2.0]]) { put('planter', x, z, 0, 1.0) }
+    put('ornamental', CX0 + 4.5, CZ0 + 14, 0, 0.8); put('ornamental', CX1 - 4.5, CZ0 + 17, 1, 0.85); put('ornamental', CX0 + 4.5, CZ1 - 6, 2, 0.8); put('ornamental', CX1 - 4.5, CZ1 - 8, 3, 0.8)
+    // discreet lighting: low path lights along the spine, two lamps at the gate, soft pools
+    for (let z = CZ0 + 8; z <= CZ1 - 2; z += 5.2) for (const s of [-1, 1]) { put('pathLight', cx + s * 2.3, z, 0); pools.push([cx + s * 2.3, z, 3.2]) }
+    pools.push([cx, cz, 9]); halos.push([cx + 2.4, GY + 2.6, cz - 1])
+    pois.courtyard = { x: BX, z: 30 }
+
+    // ---- bronze gateway on the lane (z 49 .. 50): stone piers, a bronze arch + railings either side, 3.2 m opening on the axis
+    const FG = frame(BX, 49.6, 0, GY), bronze = col('#5b4731'), lim = col(PAL.limestone), hw = (HX1 - HX0) / 2
+    for (const s of [-1, 1]) {
+      const px = s * 2.2
+      g.box(FG, px - 0.45, px + 0.45, 0, 3.0, -0.45, 0.45, lim, 'ashlar', 'fulrb', 2.4, 1.2); g.box(FG, px - 0.55, px + 0.55, 3.0, 3.15, -0.55, 0.55, col('#e6decd'), 'trim', 'fulrbd')
+      g.box(FG, px - 0.12, px + 0.12, 3.15, 3.55, -0.12, 0.12, col('#ffd9a0'), 'glow', 'fulrb', 1, 1, 0)                                                // gate lantern
+      g.solid(FG, px - 0.45, px + 0.45, 0, 3.1, -0.45, 0.45, 'gatepier')
+      const a = s * 2.65, b = s * hw
+      g.box(FG, Math.min(a, b), Math.max(a, b), 0, 0.55, -0.28, 0.28, lim, 'ashlar', 'fulrb', 2.4, 1.2)                                                  // stone plinth
+      railing(g, FG, Math.min(a, b), Math.max(a, b), 0, 0.55, 1.85, { col: bronze, sp: 0.12 }); g.solid(FG, Math.min(a, b), Math.max(a, b), 0, 2.4, -0.28, 0.28, 'gaterail')
+    }
+    g.box(FG, -2.2, 2.2, 3.55, 3.7, -0.06, 0.06, bronze, 'metal', 'fulrb', 1, 1, 0)                                                                    // arch header
+    for (let i = 0; i < 9; i++) { const x = -1.8 + i * 0.45, h = 3.55 + Math.sin((i / 8) * Math.PI) * 0.35; g.box(FG, x - 0.012, x + 0.012, 3.15, h, -0.02, 0.02, bronze, 'metal+', 'fl', 1, 1, 0) }
+    g.box(FG, -0.6, 0.6, 3.72, 3.94, -0.04, 0.04, col('#f1e8d6'), 'trim', 'fu', 1, 1, 0)
+    pois.gate = { x: BX, z: 50 }
+  }
+
+  // =====================================================================================================================================
+  // 4. RIVERSIDE GARDENS + THE TWO PATHS DOWN TO THE THAMES (Thames Row west of the tower, East Walk east of it)
+  // =====================================================================================================================================
+  const ribbon = (ch, key, pts, w, c, su = 1.8, sv = 1.2, layer = 1, y = GY) => {
+    if (y === GY) mapRib.push([key, pts.map((p) => [+p[0].toFixed(2), +p[1].toFixed(2)]), w])
+    const yy = y + layer * 0.012, k = layer >= 2 ? key + '2' : key
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x0, z0] = pts[i], [x1, z1] = pts[i + 1], dx = x1 - x0, dz = z1 - z0, L = Math.hypot(dx, dz) || 1, nx = -dz / L * w / 2, nz = dx / L * w / 2
+      const A = [x0 + nx, yy, z0 + nz], B = [x1 + nx, yy, z1 + nz], Cc = [x1 - nx, yy, z1 - nz], D = [x0 - nx, yy, z0 - nz]
+      ch.acc(k).quad(A, B, Cc, D, col(c), [0, 1, 0], [[A[0] / su, A[2] / sv], [B[0] / su, B[2] / sv], [Cc[0] / su, Cc[2] / sv], [D[0] / su, D[2] / sv]])
+    }
+  }
+  const curve = (pts, n = 10) => {                       // Catmull-Rom through control points
+    const o = []
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)]
+      for (let k = 0; k < n; k++) { const t = k / n, t2 = t * t, t3 = t2 * t; o.push([0, 1].map((a) => 0.5 * ((2 * p1[a]) + (-p0[a] + p2[a]) * t + (2 * p0[a] - 5 * p1[a] + 4 * p2[a] - p3[a]) * t2 + (-p0[a] + 3 * p1[a] - 3 * p2[a] + p3[a]) * t3))) }
+    }
+    o.push(pts[pts.length - 1]); return o
+  }
+  const WEST = -126.5, EAST = 82, SOUTH = 124
+  {
+    const g = mk('gardens')
+    surf(g, 'grass', WEST, EAST, -132, SOUTH, G.grass, 4, 4, 0)                                                      // one continuous lawn base under everything
+    // riverside piazza in front of the grand stair (formal approach) + a long walk along the tower's river face
+    surf(g, 'slab', BX - 11, BX + 11, -132, -88, G.slab, 1.8, 1.2, 1); surf(g, 'slab', -64, 34, -97, -92, G.slab, 1.8, 1.2, 1)
+    surf(g, 'gravel', BX - 8, BX - 6.5, -131, -97, G.gravel, 2, 2, 1); surf(g, 'gravel', BX + 6.5, BX + 8, -131, -97, G.gravel, 2, 2, 1)
+    for (const s of [-1, 1]) for (let z = -128; z < -98; z += 6) { hedge(g, BX + s * 8.6 - 0.45, BX + s * 8.6 + 0.45, z, z + 3.6, 0.8, '#4e6139') }
+    for (let z = -126; z < -98; z += 9) for (const s of [-1, 1]) { put('shrub', BX + s * 9.8, z, 0, 0.9 + R() * 0.3); put('grass', BX + s * 10.6, z + 1.5, R() * 6, 1.1) }
+    for (const s of [-1, 1]) for (const z of [-124, -112, -100]) { tree('clipped', BX + s * 11.5, z, 1.0, Math.PI / 2); grate(g, BX + s * 11.5, z, 1.5) }
+    // paths from the ramps' feet to the two side routes
+    surf(g, 'slab', -90, -64, -97, -92, G.slab, 1.8, 1.2, 1); surf(g, 'slab', 34, 70, -97, -92, G.slab, 1.8, 1.2, 1)
+    surf(g, 'slab', -87, -77, -105, -92, G.slab, 1.8, 1.2, 1); surf(g, 'slab', 47, 57, -105, -92, G.slab, 1.8, 1.2, 1)         // ramp approaches (ramps start at z = -102)
+    // THAMES ROW (west) and EAST WALK: tree-lined stone walks with clipped hedges, lamps and benches, from the lane to the river
+    for (const [xc, side] of [[-86, 'W'], [67, 'E']]) {
+      const hw2 = xc === -86 ? 4 : 3.5
+      surf(g, 'slab', xc - hw2, xc + hw2, -97, 50, G.slab, 1.8, 1.2, 1)
+      for (const s of [-1, 1]) for (let z = -90; z < 44; z += 12) if (!(side === 'W' && Math.abs(z + 0) < 0)) hedge(g, xc + s * (hw2 + 0.6) - 0.4, xc + s * (hw2 + 0.6) + 0.4, z, z + 8.4, 0.9, '#4e6139')
+      for (let z = -88; z < 46; z += 11) for (const s of [-1, 1]) { tree(R() < 0.45 ? 'plane' : 'ornamental', xc + s * (hw2 + 2.6), z + (R() - 0.5) * 2, 0.9 + R() * 0.3) }
+      for (let z = -84; z < 46; z += 22) { bench(xc - hw2 + 0.8, z, Math.PI / 2); bench(xc + hw2 - 0.8, z + 11, -Math.PI / 2) }
+      for (let z = -92; z < 46; z += 20) lamp(xc + (z % 40 === 0 ? -1 : 1) * (hw2 - 0.5), z, 0)
+    }
+    // lawn groves: soft, layered, never dense enough to hide the architecture
+    const grove = (x0, x1, z0, z1, n) => { for (let i = 0; i < n; i++) { const x = x0 + R() * (x1 - x0), z = z0 + R() * (z1 - z0); const k = R(); if (k < 0.45) tree('plane', x, z, 0.85 + R() * 0.4); else if (k < 0.8) tree('ornamental', x, z, 0.85 + R() * 0.35); else put('shrub', x, z, R() * 6, 0.9 + R() * 0.6) } }
+    grove(-124, -92, -128, -100, 9); grove(-124, -92, -90, 44, 16); grove(-80, -64, -128, 44, 12); grove(34, 62, -128, -100, 7); grove(34, 62, -90, 44, 7); grove(72, 80, -128, 44, 6)
+    // west + east boundary of the neighbourhood (a stone plinth with a tall clipped hedge) so the world has a clear edge
+    wall(g, WEST - 0.6, WEST, -132, SOUTH, 1.2); hedge(g, WEST + 0.0, WEST + 1.4, -132, SOUTH, 2.2, '#46583a'); wall(g, EAST, EAST + 0.6, -132, SOUTH, 1.2); hedge(g, EAST - 1.4, EAST, -132, SOUTH, 2.2, '#46583a')
+    wall(g, WEST, EAST, SOUTH, SOUTH + 0.8, 2.4, { col: PAL.stock, key: 'brick' })
+    pois.riverside = { x: BX, z: -112 }
   }
 
   // =====================================================================================================================================
@@ -196,9 +313,9 @@ export function buildStreet() {
       const n = Math.max(1, Math.round((xb - xa) / 0.28)); for (let i = 0; i <= n; i++) { const x = xa + (i / n) * (xb - xa); ch.prism(FT, x, z, 0.06, 0.06, H + 0.16, H + 0.9, stone, 'trim+', 4, false) }
       for (let x = xa; x <= xb; x += 4) ch.box(FT, x - 0.14, x + 0.14, H + 0.16, H + 1.0, z - 0.14, z + 0.14, stone, 'trim', 'fulrb')
     }
-    bal(x0, x1, zr + 0.35)
+    bal(x0, -50, zr + 0.35); bal(-40, x1, zr + 0.35)                                                                         // gap = the reserved ferry landing
     let cur = x0; for (const [a, b] of gaps.slice().sort((p, q) => p[0] - q[0])) { if (a > cur) bal(cur, a, zw - 0.4); cur = b } if (cur < x1) bal(cur, x1, zw - 0.4)
-    ch.solid(FT, x0, x1, H, H + 1.1, zr + 0.15, zr + 0.55, 'rail')
+    ch.solid(FT, x0, -50, H, H + 1.1, zr + 0.15, zr + 0.55, 'rail'); ch.solid(FT, -40, x1, H, H + 1.1, zr + 0.15, zr + 0.55, 'rail')
     cur = x0; for (const [a, b] of gaps.slice().sort((p, q) => p[0] - q[0])) { if (a > cur) ch.solid(FT, cur, a, H, H + 1.1, zw - 0.6, zw - 0.2, 'rail'); cur = b } if (cur < x1) ch.solid(FT, cur, x1, H, H + 1.1, zw - 0.6, zw - 0.2, 'rail')
     for (const x of [x0, x1]) ch.solid(FT, x - 0.4, x + 0.4, H, H + 1.6, zr - 0.2, zw, 'endwall')
     // ramps (gentle, 8°) and the grand stair on the axis
@@ -218,186 +335,320 @@ export function buildStreet() {
       for (const s of [-1, 1]) ch.solid(F, s * w / 2 - 0.2, s * w / 2 + 0.2, 0, 2.4, 0, n * tread, 'stairwall')
       pois.stair = { x: BX, z: -122 }
     }
-    // furniture on the terrace
-    for (let x = -2400 + 22 * Math.ceil((x0 + 2400) / 22); x <= x1; x += 22) { put('lamp', x, zr + 1.2, 0, 1.0, TERRACE_Y); pools.push([x, zr + 1.2, 7.5, TERRACE_Y]); halos.push([x, TERRACE_Y + 4.9, zr + 1.2]) }
-    for (let x = -112; x < 78; x += 31) { put('bench', x, zr + 3.2, 0, 1.0, TERRACE_Y); ch.solid(frame(x, zr + 3.2, 0, TERRACE_Y), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench') }
-    for (let x = -118; x < 78; x += 16 + R() * 4) { grate(ch, x, -139, 1.3); put('plane', x, -139, R() * 6, 0.85 + R() * 0.3, TERRACE_Y) }
+    // lamps along the balustrade; benches + trees are placed per zone in the promenade section below
+    for (let x = -118; x <= x1; x += 22) { put('lamp', x, zr + 1.2, 0, 1.0, TERRACE_Y); pools.push([x, zr + 1.2, 7.5, TERRACE_Y]); halos.push([x, TERRACE_Y + 4.9, zr + 1.2]) }
     pois.terrace = { x: BX, z: -139 }
     pois.river = { x: BX, z: -143.5 }
   }
 
   // =====================================================================================================================================
-  // 5. GRAND BOULEVARD: carriageway, pavements, plane trees, lamps, crossings; Elegant Quarter (W) and Modern Quarter (E)
+  // 5b. THAMES PROMENADE ZONES on the terrace: A peaceful riverside (west-centre), B signature sunset viewpoint (centre, kept clear), C social waterfront (east), D romantic corner (west end), ferry landing reserved
   // =====================================================================================================================================
   {
-    const g = mk('boulevard'), Z0 = 47.2, Z1 = 210, xw = -12, xe = 14.4, rw = -5.8, re = 8.2
-    surf(g, 'road', rw, re, Z0, Z1, G.road, 4, 4, 1)
-    surf(g, 'slab', xw, rw, Z0, Z1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', re, xe, Z0, Z1, G.slab, 1.8, 1.2, 1)
-    for (const x of [rw, re]) g.box(W0, x - 0.15, x + 0.15, 0, 0.1, Z0, Z1, col('#cfc4b0'), 'ashlar', 'fulr', 2.4, 1.2, 0.02)       // kerb stones (visual)
-    for (let z = Z0 + 3; z < Z1 - 6; z += 9) surf(g, 'paint', BX - 0.07, BX + 0.07, z, z + 3, G.paint, 1, 1, 2)
-    for (const zc of [100, 160]) for (let x = rw + 0.5; x < re - 0.3; x += 1.0) surf(g, 'paint', x, x + 0.5, zc - 2, zc + 2, G.paint, 1, 1, 2)
-    // side streets (asphalt cross-roads that end in walls with a gate), west and east
-    const sideW = [[99, 111], [157, 169]], sideE = [[95, 107], [155, 167]]
-    for (const [a, b] of sideW) {
-      surf(g, 'slab', -62, xw, a, a + 1.8, G.slab, 1.8, 1.2, 1); surf(g, 'slab', -62, xw, b - 1.8, b, G.slab, 1.8, 1.2, 1); surf(g, 'road', -62, rw, a + 1.8, b - 1.8, G.road, 4, 4, 2)
-      wall(g, -62.8, -27.25, a - 0.6, a, 3.2, { col: PAL.stock, key: 'brick' }); wall(g, -62.8, -27.25, b, b + 0.6, 3.2, { col: PAL.stock, key: 'brick' }); wall(g, -62.8, -62, a - 0.6, b + 0.6, 3.4, { col: PAL.stock, key: 'brick' })
-      lamp(-40, a + 2.2, 0); lamp(-12.4, b - 0.9, 0)
-      g.box(W0, -62.4, -62.0, 0, 3.0, (a + b) / 2 - 1.2, (a + b) / 2 + 1.2, col('#3e3b44'), 'wood', 'fr'); tree('plane', -67, (a + b) / 2 + 3, 0.9)
+    const ch = mk('promenade'), T = TERRACE_Y, FT = frame(0, 0, 0, T), stone = col(PAL.limestone), timber = col('#6a4d3a'), bronze = col('#4b3c2b')
+    const hedgeT = (x0, x1, z0, z1, h = 1.0) => { ch.box(FT, x0, x1, 0, h, z0, z1, col('#4e6139'), 'leaf', 'fulrb', 1, 1, 0.1); ch.box(FT, x0 + 0.05, x1 - 0.05, h, h + 0.12, z0 + 0.05, z1 - 0.05, col('#586d41'), 'leaf', 'u', 1, 1, 0.1); ch.solid(FT, x0, x1, 0, h + 0.1, z0, z1, 'hedge') }
+    // ---- Zone B: a stone dais on the axis with framing lantern piers and two benches turned to the river (nothing tall in the view)
+    ch.box(FT, BX - 9, BX + 9, 0, 0.14, -145.2, -136.8, col('#e2d8c3'), 'slab', 'fulu', 1.8, 1.2, 0.0)
+    for (const s of [-1, 1]) {
+      const px = BX + s * 10.2
+      ch.box(FT, px - 0.4, px + 0.4, 0, 3.0, -145.9 - 0.4, -145.9 + 0.4, stone, 'ashlar', 'fulrb', 2.4, 1.2); ch.box(FT, px - 0.5, px + 0.5, 3.0, 3.15, -146.3 - 0.1, -145.4 + 0.5, col('#e6decd'), 'trim', 'fulrbd')
+      ch.box(FT, px - 0.14, px + 0.14, 3.15, 3.65, -146.04, -145.76, col('#ffd9a0'), 'glow', 'fulrb', 1, 1, 0); ch.solid(FT, px - 0.4, px + 0.4, 0, 3.2, -146.3, -145.5, 'pier')
+      put('bench', BX + s * 5.5, -139.2, Math.PI, 1.0, T); ch.solid(frame(BX + s * 5.5, -139.2, Math.PI, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench')
     }
-    for (const [a, b] of sideE) {
-      surf(g, 'slab', xe, 64, a, a + 1.8, G.slab, 1.8, 1.2, 1); surf(g, 'slab', xe, 64, b - 1.8, b, G.slab, 1.8, 1.2, 1); surf(g, 'road', re, 64, a + 1.8, b - 1.8, G.road, 4, 4, 2)
-      wall(g, 36.4, 64.8, a - 0.6, a, 3.2, { col: PAL.stock, key: 'brick' }); wall(g, 36.4, 64.8, b, b + 0.6, 3.2, { col: PAL.stock, key: 'brick' }); wall(g, 64, 64.8, a - 0.6, b + 0.6, 3.4, { col: PAL.stock, key: 'brick' })
-      lamp(46, a + 2.2, 0); lamp(14.8, b - 0.9, 0)
-      g.box(W0, 63.6, 64.0, 0, 3.0, (a + b) / 2 - 1.2, (a + b) / 2 + 1.2, col('#3e3b44'), 'wood', 'fl'); tree('plane', 68.5, (a + b) / 2 - 3, 0.9)
+    halos.push([BX - 10.2, T + 3.4, -145.9], [BX + 10.2, T + 3.4, -145.9]); pools.push([BX, -142, 12, T])
+    pois.viewpoint = { x: BX, z: -141 }
+    // ---- Zone C: two waterfront café pavilions with dining terraces (east end)
+    const cafe = (x, w, sign) => {
+      const F = frame(x, -138.2, Math.PI, T), hh = 3.7
+      ch.box(F, -w / 2, w / 2, 0, hh, -5.1, -0.35, col('#dcd1ba'), 'plaster', 'flrb', 3, 3)
+      const n = Math.round(w / 2.2), bw = (w - 0.6) / n
+      for (let i = 0; i <= n; i++) { const px = -w / 2 + 0.3 + i * bw; ch.box(F, px - 0.07, px + 0.07, 0, hh, -0.4, -0.2, timber, 'wood', 'fulrb', 1, 1, 0.03) }
+      for (let i = 0; i < n; i++) { const a = -w / 2 + 0.3 + i * bw + 0.07, b = -w / 2 + 0.3 + (i + 1) * bw - 0.07; pane(ch, F, a, b, 0.45, hh - 0.3, -0.3, i % 4 !== 3) }
+      ch.box(F, -w / 2, w / 2, 0, 0.45, -0.4, -0.2, timber, 'wood', 'fulrb', 1, 1, 0.03); ch.box(F, -w / 2, w / 2, hh - 0.3, hh, -0.4, -0.2, timber, 'wood', 'fulrb', 1, 1, 0.03)
+      ch.box(F, -w / 2 - 0.9, w / 2 + 0.9, hh, hh + 0.28, -5.4, 2.0, col('#cfc4b0'), 'trim', 'fulrbd'); ch.box(F, -w / 2 - 0.6, w / 2 + 0.6, hh - 0.04, hh, -0.6, 1.9, col('#ffe0b0'), 'glow', 'd', 1, 1, 0)
+      ch.box(F, -w / 2 - 0.9, w / 2 + 0.9, hh + 0.28, hh + 0.34, -5.4, 2.0, col(PAL.slate), 'roof', 'u')
+      ch.acc('sign').quad(...[[-w / 2 + 0.5, hh + 0.35, 2.02], [w / 2 - 0.5, hh + 0.35, 2.02], [w / 2 - 0.5, hh + 1.0, 2.02], [-w / 2 + 0.5, hh + 1.0, 2.02]].map(([lx, y, lz]) => { const a = toWorld(F, lx, y, lz); return a }), col('#ffffff'), dirWorld(F, 0, 0, 1), signQ(sign))
+      ch.solid(F, -w / 2, w / 2, 0, hh + 1, -5.1, -0.2, 'cafe')
+      for (let i = 0; i < Math.floor(w / 2.4); i++) { const tx = -w / 2 + 1.4 + i * 2.4; const wp = toWorld(F, tx, 0, 2.2); put('table', wp[0], wp[2], 0, 1.0, T); put('chair', wp[0] - 0.55, wp[2], Math.PI / 2, 1.0, T); put('chair', wp[0] + 0.55, wp[2], -Math.PI / 2, 1.0, T) }
+      lightsAt.push({ x, y: T + 2.8, z: -141, color: '#ffcf94', intensity: 5, distance: 13 })
     }
-    // street trees (planes), lamps, benches
-    const skip = (z, list) => list.some(([a, b]) => z > a - 3 && z < b + 3)
-    for (let z = Z0 + 8; z < Z1 - 6; z += 13 + R() * 1.5) {
-      if (!skip(z, sideW) && Math.abs(z - 100) > 4 && Math.abs(z - 160) > 4) { tree('plane', -8.9, z, 0.9 + R() * 0.3); grate(g, -8.9, z) }
-      if (!skip(z + 3, sideE) && Math.abs(z - 100) > 4 && Math.abs(z - 160) > 4) { tree('plane', 11.3, z + 3, 0.9 + R() * 0.3); grate(g, 11.3, z + 3) }
+    cafe(56, 13, 9); cafe(73, 11, 10)
+    pois.quayCafe = { x: 56, z: -141 }
+    // ---- Zone D: romantic corner (west end): a hedged alcove with two benches, a lantern, a clipped tree and a view straight down the river
+    hedgeT(-123, -108, -134.2, -133.2, 1.5); hedgeT(-123, -122, -145, -134.2, 1.5); hedgeT(-110, -109, -141, -134.2, 1.5)
+    put('bench', -116.5, -140.4, Math.PI, 1.0, T); ch.solid(frame(-116.5, -140.4, Math.PI, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench')
+    put('bench', -121.2, -141.5, -Math.PI / 2, 1.0, T); ch.solid(frame(-121.2, -141.5, -Math.PI / 2, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench')
+    put('lamp', -112.6, -143.6, 0, 1.0, T); pools.push([-112.6, -143.6, 6, T]); halos.push([-112.6, T + 4.9, -143.6]); put('planter', -119, -135.2, 0, 1.0, T)
+    pois.romantic = { x: -117, z: -140 }
+    // ---- reserved ferry landing (x -50..-40): a pier deck over the quay with railings and bollards; no service runs yet
+    {
+      const x0 = -50, x1 = -40, z0 = -153.5, zr = -146.6, F2 = frame(0, 0, 0, T)
+      ch.box(F2, x0, x1, -0.35, 0, z0, zr, col('#cdbfa6'), 'slab', 'fulrbd', 1.8, 1.2, 0)
+      ch.box(F2, x0 - 0.1, x0, -0.35, 0.0, z0, zr, stone, 'ashlar', 'fulrb', 2.4, 1.2)
+      for (const [xa, xb, za, zb] of [[x0, x0 + 0.12, z0, zr], [x1 - 0.12, x1, z0, zr], [x0, x1, z0, z0 + 0.12]]) { ch.box(F2, xa, xb, 0, 1.05, za, zb, bronze, 'metal+', 'fulrb', 1, 1, 0); ch.solid(F2, xa - 0.05, xb + 0.05, 0, 1.1, za, zb, 'pierrail') }
+      for (const x of [x0 + 0.6, x1 - 0.6]) put('bollard', x, z0 + 0.7, 0, 1.0, T)
+      ch.solid(F2, x0, x1, -0.5, 0, z0, zr, 'pierdeck')
+      pois.ferry = { x: (x0 + x1) / 2, z: -150 }
     }
-    for (let z = Z0 + 14; z < Z1 - 6; z += 26) { if (!skip(z, sideW)) lamp(-6.4, z, 0); if (!skip(z + 13, sideE)) lamp(9.0, z + 13, 0) }
-    for (const z of [74, 134, 188]) { bench(-9.9, z, Math.PI / 2); bench(12.4, z + 8, -Math.PI / 2) }
-    for (const zc of [100, 160]) for (const x of [rw - 0.6, re + 0.6]) { put('bollard', x, zc - 2.6, 0); put('bollard', x, zc + 2.6, 0) }
-
-    // ---- Elegant Quarter: west terraces (facade plane at x = -14.25, facing +x) ----
-    const elegant = mk('elegant'), blocksW = [[Z0, 99], [111, 157], [169, 210]]
-    const MAIN = ['#ece3d0', '#decdae', '#e8dcc2', '#d3cab9', '#e0cdbf', '#cdd2c0', '#e6dcc9'], DOORS = ['#34473d', '#4d3548', '#2f3138', '#2d3345', '#5a3a3a', '#44504a', '#6a4d63']
-    for (const [za, zb] of blocksW) {
-      const ws = fit(zb - za, 5.4, 7.0, R); let z = za
-      ws.forEach((w, i) => {
-        const zc = z + w / 2; z += w
-        const F = frame(-14.25, zc, Math.PI / 2), main = pickR(R, MAIN), brickUp = R() < 0.3
-        townhouse(elegant, F, { w, d: 13, floors: R() < 0.12 ? 5 : 4, main, ground: new THREE.Color(main).lerp(new THREE.Color('#9f9482'), 0.28).getStyle(), upper: brickUp ? 'brick' : 'plaster', brick: R() < 0.5 ? PAL.stock : PAL.brick, doorBay: R() < 0.5 ? 0 : (w < 6.15 ? 1 : 2), door: pickR(R, DOORS), litP: 0.24, mansard: 2.1 + R() * 0.7, balc: R() < 0.6, side: PAL.stock, slate: R() < 0.7 ? PAL.slate : '#4a4650' })
-      })
-    }
-    // ---- Modern Quarter: east mid-rises (facade plane at x = 14.4, facing -x) ----
-    const modern = mk('modern'), blocksE = [[Z0, 95], [107, 155], [167, 210]]
-    const MODS = [{ mat: 'ashlar', main: '#e0d6c0', fin: '#d4c9b1' }, { mat: 'plaster', main: '#e9e1d2', fin: '#dcd2c0' }, { mat: 'brick', main: '#bfa386', fin: '#a68a6f' }, { mat: 'ashlar', main: '#d7cdb8', fin: '#c8bda6' }]
-    for (const [za, zb] of blocksE) {
-      const nbk = Math.max(1, Math.round((zb - za) / 44)), ws = fit(zb - za, 36, 50, R); let z = za
-      void nbk
-      ws.forEach((w, i) => {
-        const zc = z + w / 2, spec = pickR(R, MODS); z += w
-        modernBlock(modern, frame(14.4, zc, -Math.PI / 2), { w, d: 22, floors: 6 + ((R() * 4) | 0), mat: spec.mat, main: spec.main, fin: spec.fin, balc: R() < 0.7, setback: R() < 0.65, litP: 0.28, back: '#cfc6b6' })
-      })
-    }
-    pois.boulevard = { x: BX, z: 70 }
-    pois.elegant = { x: -9, z: 130 }
-    pois.modern = { x: 10, z: 128 }
+    // ---- Zone A: peaceful riverside trees (kept off the central view) + benches
+    for (const x of [-104, -92, -80, -68, -56]) { grate(ch, x, -139.5, 1.3); put('plane', x, -139.5, R() * 6, 0.85 + R() * 0.25, T) }
+    for (const x of [-98, -74, -62]) { put('bench', x, -135.2, 0, 1.0, T); ch.solid(frame(x, -135.2, 0, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench') }
+    for (const x of [-12, 14]) for (const z of [-143.2]) { void x; void z }
   }
 
   // =====================================================================================================================================
-  // 6. NEIGHBOURHOOD SQUARE (fountain, lime grid, benches, lamps) + its enclosing frontages
+  // 6. STREETS: Courtyard Lane (quiet, narrow) widening into the Neighbourhood Avenue toward the garden square; houses with real fronts, parked cars
   // =====================================================================================================================================
-  {
-    const g = mk('square'), S = { x0: -50, x1: 50, z0: 210, z1: 282 }, cx = 0, cz = 246
-    surf(g, 'slab', S.x0, S.x1, S.z0, S.z1, G.slab, 1.8, 1.2, 1)
-    // paving ring + radial inlays (setts)
-    const seg = 40
-    for (let i = 0; i < seg; i++) {
-      const a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2, r0 = 8.4, r1 = 10.4
-      const A = [cx + Math.cos(a0) * r0, GY + 0.036, cz + Math.sin(a0) * r0], B = [cx + Math.cos(a0) * r1, GY + 0.036, cz + Math.sin(a0) * r1], Cc = [cx + Math.cos(a1) * r1, GY + 0.036, cz + Math.sin(a1) * r1], D = [cx + Math.cos(a1) * r0, GY + 0.036, cz + Math.sin(a1) * r0]
-      g.acc('sett').quad(A, D, Cc, B, col(G.sett), [0, 1, 0], [[A[0] / 1.6, A[2] / 1.6], [D[0] / 1.6, D[2] / 1.6], [Cc[0] / 1.6, Cc[2] / 1.6], [B[0] / 1.6, B[2] / 1.6]])
-    }
-    for (const a of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) { const F = frame(cx, cz, a, GY + 0.03); g.flat(F, 10.4, 44, -0.6, 0.6, 0, col(G.sett), 'sett', 1.6, 1.6) }
-    // fountain: stepped basin
-    const Fq = frame(cx, cz, 0, GY)
-    g.prism(Fq, 0, 0, 5.4, 5.4, 0, 0.55, col('#d9cdb5'), 'trim', 28, false)
-    for (let i = 0; i < 28; i++) {
-      const a0 = (i / 28) * Math.PI * 2, a1 = ((i + 1) / 28) * Math.PI * 2, r0 = 4.8, r1 = 5.4, y = GY + 0.55
-      g.acc('trim').quad([cx + Math.cos(a0) * r0, y, cz + Math.sin(a0) * r0], [cx + Math.cos(a0) * r1, y, cz + Math.sin(a0) * r1], [cx + Math.cos(a1) * r1, y, cz + Math.sin(a1) * r1], [cx + Math.cos(a1) * r0, y, cz + Math.sin(a1) * r0], col('#e4dac4'), [0, 1, 0])
-    }
-    g.prism(Fq, 0, 0, 1.5, 1.4, 0.3, 0.95, col('#d9cdb5'), 'trim', 16); g.prism(Fq, 0, 0, 0.75, 0.6, 0.95, 1.9, col('#d9cdb5'), 'trim', 12); g.prism(Fq, 0, 0, 2.2, 2.2, 0.95, 1.05, col('#e4dac4'), 'trim', 18)
-    g.solid({ ...Fq }, -5.4, 5.4, 0, 0.6, -5.4, 5.4, 'fountain'); g.cols[g.cols.length - 1].cyl = true; g.cols[g.cols.length - 1].r = 5.4
-    waters.push({ x: cx, z: cz, r: 4.8, y: GY + 0.45, kind: 'fountain' }); jets.push({ x: cx, z: cz, y: GY + 1.9 })
-    // lime grid (clipped crowns), benches facing the fountain, lamps
-    for (const x of [-40, -30, 30, 40]) for (const z of [222, 270]) { tree('clipped', x, z, 1.0, R() < 0.5 ? 0 : Math.PI / 2); grate(g, x, z, 1.5) }
-    for (const x of [-22, 22]) for (const z of [260, 232]) { tree('clipped', x, z, 1.0, 0); grate(g, x, z, 1.5) }
-    for (const x of [-46.5, 46.5]) for (let z = 222; z <= 274; z += 12) { tree('clipped', x, z, 1.0, Math.PI / 2); grate(g, x, z, 1.5) }
-    for (const z of [276]) for (let x = -34; x <= 34; x += 12) { if (Math.abs(x) < 6) continue; tree('clipped', x, z, 1.0, 0); grate(g, x, z, 1.5) }
-    for (const x of [-14, 14]) for (let z = 218; z <= 274; z += 14) { if (Math.abs(z - 246) < 16) continue; tree('clipped', x, z, 1.0, 0); grate(g, x, z, 1.5) }
-    for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + Math.PI / 8, r = 13.2; bench(cx + Math.cos(a) * r, cz + Math.sin(a) * r, -a + Math.PI / 2 + Math.PI) }
-    for (const x of [-46, -24, 0, 24, 46]) for (const z of [214, 278]) lamp(x, z, 0)
-    for (const [x, z] of [[-36, 246], [36, 246]]) lamp(x, z, 0)
-    pois.square = { x: 0, z: 230 }
-    // bounding: south corners, between square and V10 context
-    wall(g, S.x0, -27.4, 209.2, 210.2, 1.2); wall(g, 36.3, S.x1, 209.2, 210.2, 1.2)
-    hedge(g, S.x0 - 0.6, S.x0, 209, 226.7, 1.8, '#46583a'); hedge(g, S.x0 - 0.6, S.x0, 263.3, 285, 1.8, '#46583a'); hedge(g, S.x1, S.x1 + 0.6, 209, 210, 1.8, '#46583a')
-
-    // north side: grand terrace facing south (facade plane z = 282, rot = PI); a taller central house
-    const north = mk('squareN'), ws = fit(100, 6.0, 8.0, R); let x = 50
-    const MAIN = ['#ece3d0', '#decdae', '#e8dcc2', '#d3cab9', '#e0cdbf', '#cdd2c0'], DOORS = ['#34473d', '#4d3548', '#2f3138', '#2d3345', '#5a3a3a']
+  const MAIN = ['#ece3d0', '#decdae', '#e8dcc2', '#d3cab9', '#e0cdbf', '#cdd2c0', '#e6dcc9'], DOORS = ['#34473d', '#4d3548', '#2f3138', '#2d3345', '#5a3a3a', '#44504a', '#6a4d63', '#3b3226']
+  const BRICKS = [PAL.brick, PAL.stock, '#a35b45', '#b0785a', '#8f5b4a']
+  // a terrace of individually composed townhouses along an axis. ax 'x': facade plane at z = plane, centres run along x; ax 'z': plane at x = plane
+  const houseRow = (ch, ax, plane, rot, from, to, o = {}) => {
+    const ws = fit(to - from, o.lo ?? 5.4, o.hi ?? 7.0, R); let p = from
     ws.forEach((w, i) => {
-      const xc = x - w / 2; x -= w
-      const main = pickR(R, MAIN), mid = Math.abs(xc) < 8
-      townhouse(north, frame(xc, 282 + 2.25, Math.PI), { w: mid ? 9 : w, d: 13, floors: mid ? 5 : 4, main, ground: new THREE.Color(main).lerp(new THREE.Color('#9f9482'), 0.28).getStyle(), upper: 'plaster', doorBay: R() < 0.5 ? 0 : 1, door: pickR(R, DOORS), litP: 0.26, mansard: 2.3, balc: true, side: PAL.stock })
+      const c = p + w / 2; p += w
+      const main = pickR(R, MAIN), brickUp = R() < (o.brickP ?? 0.55), tall = R() < 0.14
+      const F = ax === 'x' ? frame(c, plane, rot, GY) : frame(plane, c, rot, GY)
+      townhouse(ch, F, { w, d: o.d ?? 12, floors: o.floors ?? (tall ? 5 : 4), main, ground: new THREE.Color(main).lerp(new THREE.Color('#9f9482'), 0.28).getStyle(), upper: brickUp ? 'brick' : 'plaster', brick: pickR(R, BRICKS), doorBay: R() < 0.5 ? 0 : (w < 6.15 ? 1 : 2), door: pickR(R, DOORS), litP: o.litP ?? 0.26, mansard: 2.1 + R() * 0.7, balc: R() < 0.55, side: PAL.stock, slate: R() < 0.7 ? PAL.slate : '#4a4650' })
     })
-    // east side: two modern mid-rises facing west
-    const eM = mk('squareE')
-    modernBlock(eM, frame(50, 246 - 18, -Math.PI / 2), { w: 36, d: 20, floors: 7, mat: 'ashlar', main: '#ddd2bb', fin: '#cfc3ab', balc: true, setback: true, litP: 0.3 })
-    modernBlock(eM, frame(50, 246 + 20, -Math.PI / 2), { w: 38, d: 20, floors: 6, mat: 'plaster', main: '#e8dfce', fin: '#dacfbb', balc: true, setback: false, litP: 0.3 })
-    // south-east / south-west low frontages flanking the boulevard mouth
-    // (the boulevard terraces already continue to z = 210)
+  }
+  const parked = (x, z, ry, k) => put('car' + (1 + (k % 4)), x, z, ry, 1)
+  const WS0 = -31.8, WS1 = -21.8, ES0 = 33.2, ES1 = 43.2                     // west / east street edges around the garden square (pavement + road + pavement)
+  {
+    const g = mk('streets'), ch = mk('houses'), L0 = -98, L1 = 76
+    // ---- Courtyard Lane: z 50..61, road 6 m, 2.5 m stone pavements; granite kerbs
+    surf(g, 'road', L0, L1, 52.5, 58.5, G.road, 4, 4, 1)
+    surf(g, 'slab', L0, L1, 50, 52.5, G.slab, 1.8, 1.2, 1); surf(g, 'slab', L0, L1, 58.5, 61, G.slab, 1.8, 1.2, 1)
+    for (const z of [52.5, 58.5]) g.box(W0, L0, L1, 0, 0.1, z - 0.15, z + 0.15, col('#cfc4b0'), 'ashlar', 'fulr', 2.4, 1.2, 0.02)
+    // West Street + East Street (one-way, 5 m) wrap the garden square; they leave the lane at junctions with a dropped crossing
+    for (const [a, b] of [[WS0, WS1], [ES0, ES1]]) {
+      const x0 = a + 2.5, x1 = b - 2.5
+      surf(g, 'road', x0, x1, 58.5, 108.75, G.road, 4, 4, 1); surf(g, 'slab', a, x0, 61, 108.75, G.slab, 1.8, 1.2, 1); surf(g, 'slab', x1, b, 61, 108.75, G.slab, 1.8, 1.2, 1)
+      for (const x of [x0, x1]) g.box(W0, x - 0.15, x + 0.15, 0, 0.1, 61, 108.75, col('#cfc4b0'), 'ashlar', 'fulr', 2.4, 1.2, 0.02)
+      for (let x = x0 + 0.4; x < x1 - 0.2; x += 0.9) surf(g, 'paint', x, x + 0.45, 59.2, 60.6, G.paint, 1, 1, 2)                              // zebra bars at the lane junction
+    }
+    surf(g, 'slab', WS0, ES1, 106.5, 108.75, G.slab, 1.8, 1.2, 1)                                                                          // south pavement under the garden terrace
+    // gateway apron: the courtyard gate (z 50) -> garden gate (z 61.5) is one clear axis; a stone crossing marks it
+    surf(g, 'slab', BX - 3, BX + 3, 50, 61, G.slab, 1.8, 1.2, 2); surf(g, 'sett', BX - 3, BX + 3, 52.5, 58.5, G.sett, 1.6, 1.6, 2)
+    // ---- houses. Courtyard sides (they face the courtyard, 2.25 m gardens inside it) + both sides of the lane
+    houseRow(ch, 'z', HX0, Math.PI / 2, 14, 47.7, { d: 12 }); houseRow(ch, 'z', HX1, -Math.PI / 2, 14, 47.7, { d: 12 })
+    houseRow(ch, 'x', 47.75, 0, -80, -28, { d: 12 }); houseRow(ch, 'x', 47.75, 0, 30.45, 62, { d: 12 })                                       // lane, north side (the quiet end: brick, stucco, steps)
+    houseRow(ch, 'x', 63.25, Math.PI, -98, WS0, { d: 10, floors: 4 }); houseRow(ch, 'x', 63.25, Math.PI, ES1, L1, { d: 10, floors: 4 })       // lane, south side
+    mass(mk('masses'), -80, -62, 4, 34.75, 13.5)
+    // ---- a stone end to each end of the lane: brick wall + gate piers + a tree, so the lane reads as a quiet residential street
+    for (const [x, s] of [[L0, -1], [L1, 1]]) {
+      wall(g, x, x + s * 0.8, 50, 61, 2.6, { col: PAL.stock, key: 'brick' })
+      g.box(W0, x + s * 0.1, x + s * 0.7, 0, 2.5, 54.3, 56.7, col('#3e3b44'), 'wood', 'fulr'); tree('plane', x - s * 4.0, 55.5, 1.0, 1)
+    }
+    // street trees (planes in pits) + lamps + benches + cars + bicycles
+    for (let x = -70; x < L1 - 4; x += 13) { if (Math.abs(x - BX) < 6) continue; tree('plane', x, 51.2, 0.9 + R() * 0.15); grate(g, x, 51.2); if (x > -58 && Math.abs(x + 6 - BX) >= 6) { tree('plane', x + 6, 59.8, 0.85 + R() * 0.15); grate(g, x + 6, 59.8) } }
+    for (let x = -92; x < L1 - 2; x += 20) lamp(x, 52.8, 0)
+    for (let x = -88; x < L1 - 2; x += 20) lamp(x + 10, 58.2, 0)
+    let k = 0
+    for (const x of [-72, -58, -44, 22, 36, 50, 64]) parked(x, 53.6, Math.PI / 2, k++)
+    for (const x of [-84, -66, -50, 52, 66]) parked(x, 57.5, -Math.PI / 2, k++)
+    for (const [x, z] of [[-17.5, 50.9], [20, 50.9], [-8, 59.7]]) { put('bike', x, z, Math.PI / 2, 1.0); }
+    for (const z of [68, 84, 99]) for (const [x, ry] of [[(WS0 + 2.5 + WS1 - 2.5) / 2 - 1.2, 0], [(ES0 + 2.5 + ES1 - 2.5) / 2 + 1.2, Math.PI]]) parked(x, z, ry, k++)
+    for (const z of [67, 82, 97]) { lamp(WS1 - 0.5, z, 0); lamp(ES0 + 0.5, z + 7, 0) }
+    for (const z of [72, 92, 102]) { tree('plane', WS0 + 1.2, z, 0.85); tree('plane', ES1 - 1.2, z + 3, 0.85) }
+    pois.lane1 = { x: BX, z: 55.5 }
+    // closing walls at the foot of the two side streets
+    wall(g, WS0, WS1, 108.75, 109.5, 1.0); wall(g, ES0, ES1, 108.75, 109.5, 1.0)
   }
 
   // =====================================================================================================================================
-  // 7. ROMANTIC QUARTER: pedestrian lane west of the square, café / bookshop / florist / boutique + more shops
+  // 7. LONDON GARDEN VILLAGE (55 x 45 m): lawns, curved stone paths, small refined fountain, benches, seating corners, lanterns; framed by houses, a modern block and cafés
   // =====================================================================================================================================
+  const SQ = { x0: -21.8, x1: 33.2, z0: 61.5, z1: 106.5 }
+  const SCX = (SQ.x0 + SQ.x1) / 2, SCZ = 84
   {
-    const g = mk('lane'), ch = mk('laneShops'), zc = 245, hwid = 4.3, LX1 = -50, LX0 = -142
-    surf(g, 'sett', LX0, LX1, zc - hwid, zc + hwid, G.sett, 1.6, 1.6, 1)
-    surf(g, 'slab', LX0, LX1, zc - hwid - 2.0, zc - hwid, G.slab, 1.8, 1.2, 1); surf(g, 'slab', LX0, LX1, zc + hwid, zc + hwid + 2.0, G.slab, 1.8, 1.2, 1)
-    const SHOPS = [
-      { id: 'cafe', sign: 0, w: 9.6, awning: '#6d5568', wall: 'brick', main: PAL.brick, stall: '#2f2a30', door: '#2b2630' },
-      { id: 'books', sign: 1, w: 7.2, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#2f3d36', door: '#2f3d36' },
-      { id: 'florist', sign: 2, w: 6.4, awning: '#d9cdb8', wall: 'plaster', main: '#cfc7b6', stall: '#3b3436', door: '#41584a' },
-      { id: 'boutique', sign: 3, w: 6.8, awning: '#6d5568', wall: 'plaster', main: '#d9c9bf', stall: '#4a3a46', door: '#4a3a46' },
+    const g = mk('square'), bronze = col('#2d2a2e')
+    surf(g, 'grass', SQ.x0, SQ.x1, SQ.z0, SQ.z1, '#86a15a', 4, 4, 1)
+    // gently curved stone paths: north gate -> fountain, west gate (lane mouth) -> fountain, east gate, south gate; a looping path past the seating corners
+    const P_ = (pts, w = 2.2) => ribbon(g, 'slab', curve(pts, 12), w, G.slab, 1.8, 1.2, 2)
+    P_([[BX, SQ.z0], [BX - 1.5, 68], [BX + 2, 76], [SCX, SCZ - 5]]); P_([[SQ.x0, 90.5], [-14, 91.5], [-5, 88.5], [SCX - 5, SCZ + 2]]); P_([[SQ.x1, 85], [28, 86.5], [21, 85], [SCX + 5, SCZ]])
+    P_([[SCX, SCZ + 5], [BX + 3, 94], [BX - 2, 100], [BX, SQ.z1]])
+    P_([[-14, 91.5], [-12, 78], [-6, 68], [4, 65]], 1.8); P_([[21, 85], [26, 94], [22, 101], [14, 103]], 1.8)
+    // fountain: a small refined round basin, one calm central jet (understated); a setts apron ring + low clipped hedge ring with four openings
+    surf(g, 'sett', SCX - 5.2, SCX + 5.2, SCZ - 5.2, SCZ + 5.2, G.sett, 1.6, 1.6, 2)
+    const Fq = frame(SCX, SCZ, 0, GY), stone = '#d9cdb5'
+    g.prism(Fq, 0, 0, 2.5, 2.5, 0, 0.5, col(stone), 'trim', 28, false)
+    for (let i = 0; i < 28; i++) { const a0 = (i / 28) * Math.PI * 2, a1 = ((i + 1) / 28) * Math.PI * 2, r0 = 2.0, r1 = 2.5, y = GY + 0.5; g.acc('trim').quad([SCX + Math.cos(a0) * r0, y, SCZ + Math.sin(a0) * r0], [SCX + Math.cos(a0) * r1, y, SCZ + Math.sin(a0) * r1], [SCX + Math.cos(a1) * r1, y, SCZ + Math.sin(a1) * r1], [SCX + Math.cos(a1) * r0, y, SCZ + Math.sin(a1) * r0], col('#e4dac4'), [0, 1, 0], [[0, 0], [1, 0], [1, 1], [0, 1]]) }
+    g.prism(Fq, 0, 0, 0.5, 0.4, 0.3, 1.25, col(stone), 'trim', 12); g.prism(Fq, 0, 0, 0.8, 0.8, 1.25, 1.33, col('#e4dac4'), 'trim', 14)
+    g.solid(Fq, -2.5, 2.5, 0, 0.55, -2.5, 2.5, 'fountain'); g.cols[g.cols.length - 1].cyl = true; g.cols[g.cols.length - 1].r = 2.5
+    waters.push({ x: SCX, z: SCZ, r: 2.0, y: GY + 0.42, kind: 'fountain' }); jets.push({ x: SCX, z: SCZ, y: GY + 1.35 })
+    pools.push([SCX, SCZ, 11])
+    // perimeter: low stone wall + black railings + clipped hedge with four gates (N on the courtyard axis, W lane mouth, E, S)
+    // (north + south runs are along x; west + east runs along z). Hedge sits inside the wall.
+    const run = (x0, x1, z0, z1, gaps, inward) => {
+      const horiz = z0 === z1, a0 = horiz ? x0 : z0, a1 = horiz ? x1 : z1; let cur = a0
+      const seg = (a, b) => { if (b - a < 0.15) return; if (horiz) { wall(g, a, b, z0 - 0.2, z0 + 0.2, 0.5); hedge(g, a, b, z0 + inward * 0.2 + (inward > 0 ? 0 : -0.9), z0 + inward * 0.2 + (inward > 0 ? 0.9 : 0), 1.1, '#4e6139') } else { wall(g, x0 - 0.2, x0 + 0.2, a, b, 0.5); hedge(g, x0 + inward * 0.2 + (inward > 0 ? 0 : -0.9), x0 + inward * 0.2 + (inward > 0 ? 0.9 : 0), a, b, 1.1, '#4e6139') } }
+      for (const [a, b] of gaps) { seg(cur, a); cur = b }; seg(cur, a1)
+    }
+    run(SQ.x0, SQ.x1, SQ.z0, SQ.z0, [[BX - 1.8, BX + 1.8]], 1); run(SQ.x0, SQ.x1, SQ.z1, SQ.z1, [[BX - 1.5, BX + 1.5]], -1)
+    run(SQ.x0, SQ.x0, SQ.z0, SQ.z1, [[89, 92.5]], 1); run(SQ.x1, SQ.x1, SQ.z0, SQ.z1, [[83.5, 86.5]], -1)
+    for (const [x, z] of [[BX - 1.9, SQ.z0], [BX + 1.9, SQ.z0], [BX - 1.6, SQ.z1], [BX + 1.6, SQ.z1], [SQ.x0, 89], [SQ.x0, 92.5], [SQ.x1, 83.5], [SQ.x1, 86.5]]) { g.box(W0, x - 0.3, x + 0.3, 0, 1.7, z - 0.3, z + 0.3, col(PAL.limestone), 'ashlar', 'fulrb', 2.4, 1.2); g.box(W0, x - 0.36, x + 0.36, 1.7, 1.8, z - 0.36, z + 0.36, col('#e6decd'), 'trim', 'fulrbd'); g.solid(W0, x - 0.3, x + 0.3, 0, 1.8, z - 0.3, z + 0.3, 'pier'); lamp(x, z, 0) }
+    // mature trees (varied silhouettes), planting beds with restrained flowers, grasses, benches and intimate corners
+    for (const [x, z, s] of [[-12, 70, 1.25], [24, 69, 1.2], [-15, 100, 1.2], [26, 100, 1.15]]) tree('plane', x, z, s)
+    for (const [x, z, s] of [[-3, 94, 0.95], [14, 75, 1.0], [8, 98, 0.9], [-9, 82, 0.95], [29, 79, 0.9], [-17, 85, 0.9]]) tree('ornamental', x, z, s)
+    for (const [x, z] of [[BX - 6.5, SCZ - 6.5], [BX + 6.5, SCZ - 6.5], [BX - 6.5, SCZ + 6.5], [BX + 6.5, SCZ + 6.5]]) tree('clipped', x, z, 0.95, 0)
+    const R3 = rng(81)
+    for (const [bx0, bx1, bz0, bz1] of [[-19, -10, 74, 86], [18, 31, 62.5, 70], [20, 31, 91, 104], [-7, 6, 100, 105], [-8, 2, 63, 66.5]]) {
+      for (let i = 0; i < 16; i++) { const x = bx0 + R3() * (bx1 - bx0), z = bz0 + R3() * (bz1 - bz0); if (R3() < 0.5) put('shrub', x, z, R3() * 6, 0.7 + R3() * 0.5); else put('grass', x, z, R3() * 6, 0.9 + R3() * 0.5) }
+      for (let i = 0; i < 5; i++) { const x = bx0 + R3() * (bx1 - bx0), z = bz0 + R3() * (bz1 - bz0); g.prism(frame(x, z, 0, GY), 0, 0, 0.32, 0.22, 0, 0.32, col(['#cfa9ad', '#e4d9cb', '#b7a5c4', '#d9c08a'][i % 4]), 'leaf', 8) }
+    }
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.3, r = 7.4; bench(SCX + Math.cos(a) * r, SCZ + Math.sin(a) * r, -a + Math.PI / 2 + Math.PI) }
+    // seating corners: NW nook (two benches + a table under a plane), SE pergola bench
+    bench(-15.6, 76, 0); bench(-9, 76, Math.PI); put('table', -12.3, 76, 0, 1.0); put('chair', -12.9, 76, 0, 1.0); put('chair', -11.7, 76, Math.PI, 1.0)
+    bench(25.5, 103.4, Math.PI); bench(30.4, 98.4, -Math.PI / 2)
+    for (const [x, z] of [[-14, 92], [-4, 70], [10, 78], [22, 88], [3, 92]]) { lamp(x, z, 0) }
+    pois.square = { x: SCX, z: 72 }; pois.fountain = { x: SCX, z: SCZ }
+
+    // ---- frontages: west = lane mouth (the lane's own shop rows start here), east = modern block, south = houses with two cafés/boutiques at the corners
+    const sh = mk('squareShops'), mo = mk('squareE'), so = mk('squareS')
+    modernBlock(mo, frame(ES1, 90.5, -Math.PI / 2, GY), { w: 29, d: 14, floors: 6, mat: 'ashlar', main: '#ddd2bb', fin: '#cfc3ab', balc: true, setback: true, litP: 0.3, back: '#cfc6b6' })
+    // east side of East Street: a second, lower block of three houses facing the garden would crowd the corner; the lane's south houses already close it
+    houseRow(so, 'x', 111, Math.PI, -8.3, 16.9, { d: 9, floors: 4 })
+    const shopS = (xc, w, sp) => shopBuilding(sh, frame(xc, 108.75 + 0.0, Math.PI, GY), { w, d: 12, floors: 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: sp.side, balc: true, roof: 'hip', side: PAL.stock })
+    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 0, awning: '#6d5568', stall: '#2f2a30', door: '#2b2630', side: 'l' })
+    shopS(-19.0, 7.0, { wall: 'plaster', main: '#d9c9bf', sign: 3, awning: '#8d9a85', stall: '#4a3a46', door: '#4a3a46', side: 'r' })
+    shopS(-11.5, 6.4, { wall: 'plaster', main: '#e0d6c4', sign: 4, awning: '#c9b79a', stall: '#3a3237', door: '#41584a', side: 'l' })
+    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 6, awning: '#37363f', stall: '#2f2a30', door: '#2b2630', side: 'r' })
+    shopS(28, 7.4, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#9a8095', stall: '#2f3d36', door: '#2f3d36', side: 'l' })
+    houseRow(so, 'x', 111, Math.PI, 31.7, ES1, { d: 9, floors: 4 })
+    // café tables on the south pavement (under the garden railings)
+    for (let i = 0; i < 3; i++) { put('table', -27 + i * 2.1, 107.6, 0, 1.0); put('chair', -27.6 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -26.4 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
+    pois.cafeSquare = { x: -26.8, z: 107.5 }
+  }
+
+  // =====================================================================================================================================
+  // 8. THE ROMANTIC LANE (92 x 9 m, pedestrian): café, bookshop, florist, bakery, boutiques; a tucked-away passage to a hidden courtyard; a pocket garden at the end
+  //    Facades at z = 86 (north row, facing +z) and z = 95 (south row, facing -z); setts z 87.5..93.5, 1.5 m stone pavements either side
+  // =====================================================================================================================================
+  const LZ = 90.5, LN = 86, LS = 95, LX1 = WS0, LX0 = -119
+  {
+    const g = mk('lane'), ch = mk('laneShops'), bk = mk('masses')
+    surf(g, 'sett', LX0, LX1, 87.5, 93.5, G.sett, 1.6, 1.6, 2)
+    surf(g, 'slab', LX0, LX1, LN, 87.5, G.slab, 1.8, 1.2, 1); surf(g, 'slab', LX0, LX1, 93.5, LS, G.slab, 1.8, 1.2, 1)
+    surf(g, 'slab', LX1, WS0 + 0.001, 86, 95, G.slab, 1.8, 1.2, 1)
+    const W_ = (a, p) => ({ sign: a, ...p })
+    const NORTH = [
+      { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#2f3d36', door: '#2f3d36' },
+      { w: 6.0, sign: 4, awning: '#c9b79a', wall: 'brick', main: '#b4806e', stall: '#3a3237', door: '#415a4b' },
+      { id: 'bakery', w: 6.6, sign: 5, awning: '#b4806e', wall: 'plaster', main: '#e0d6c4', stall: '#33292b', door: '#5a3a3a' },
+      { w: 5.6, sign: 7, awning: '#9a8095', wall: 'brick', main: PAL.stock, stall: '#2f2a30', door: '#4d3548' },
+      { id: 'boutique', w: 6.8, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9c9bf', stall: '#4a3a46', door: '#4a3a46' },
+      { w: 6.2, sign: 6, awning: '#37363f', wall: 'brick', main: PAL.brick, stall: '#2b2630', door: '#2b2630' },
+      { w: 5.8, sign: 4, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#3b3436', door: '#2f3d36' },
+      { w: 6.6, sign: 7, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#2f3d36', door: '#44504a' },
+      { w: 6.0, sign: 5, awning: '#6d5568', wall: 'plaster', main: '#e6dcc9', stall: '#4a3a46', door: '#6a4d63' },
+      { w: 5.8, sign: 6, awning: '#c9b79a', wall: 'brick', main: PAL.stock, stall: '#3a3237', door: '#34473d' },
+      { w: 6.4, sign: 4, awning: '#b4806e', wall: 'plaster', main: '#d9d1bf', stall: '#2f3d36', door: '#5a3a3a' },
+      { w: 6.2, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#2f2a30', door: '#2d3345' },
     ]
-    const MORE = [{ sign: 4, awning: '#c9b79a' }, { sign: 5, awning: '#b4806e' }, { sign: 6, awning: '#8d9a85' }, { sign: 7, awning: '#9a8095' }, { sign: 4, awning: '#d9cdb8' }, { sign: 5, awning: '#6d5568' }]
-    const WALLS = [['brick', PAL.brick], ['plaster', '#d9d1bf'], ['brick', PAL.stock], ['plaster', '#d9c9bf'], ['plaster', '#cdd2c0'], ['brick', '#b4806e'], ['plaster', '#e0d6c4']]
-    const place = (side, list) => {                                  // side +1 = north (facing -z), -1 = south (facing +z)
-      let x = LX1 + (side > 0 ? 0 : 0), k = 0
+    const SOUTH = [
+      { id: 'cafe', w: 9.4, sign: 0, awning: '#6d5568', wall: 'brick', main: PAL.brick, stall: '#2f2a30', door: '#2b2630' },
+      { id: 'florist', w: 6.4, sign: 2, awning: '#d9cdb8', wall: 'plaster', main: '#cfc7b6', stall: '#3b3436', door: '#41584a' },
+      { w: 6.0, sign: 4, awning: '#9a8095', wall: 'plaster', main: '#d9c9bf', stall: '#4a3a46', door: '#4d3548' },
+      { w: 5.8, sign: 6, awning: '#37363f', wall: 'brick', main: '#b0785a', stall: '#2b2630', door: '#2b2630' },
+      { passage: 2.6 },
+      { w: 6.4, sign: 5, awning: '#c9b79a', wall: 'plaster', main: '#e0d6c4', stall: '#33292b', door: '#5a3a3a' },
+      { w: 6.0, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#2f3d36', door: '#44504a' },
+      { w: 7.0, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9cdbf', stall: '#4a3a46', door: '#6a4d63' },
+      { w: 6.2, sign: 4, awning: '#b4806e', wall: 'brick', main: PAL.stock, stall: '#3a3237', door: '#34473d' },
+      { w: 5.6, sign: 6, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#2f3d36', door: '#41584a' },
+      { w: 6.8, sign: 5, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#3a3237', door: '#2d3345' },
+      { w: 6.0, sign: 7, awning: '#9a8095', wall: 'plaster', main: '#e6dcc9', stall: '#2f2a30', door: '#4d3548' },
+    ]
+    const total = (L) => L.reduce((s, e) => s + (e.passage ?? e.w), 0), len = LX1 - LX0 - 1.2
+    const place = (list, row) => {
+      const k = len / total(list); let x = LX1 - 0.6
       for (const sp of list) {
-        const w = sp.w, xc = x - w / 2; x -= w
-        const F = side > 0 ? frame(xc, zc + hwid + 2.0, Math.PI) : frame(xc, zc - hwid - 2.0, 0)   // note: local +x runs toward world -x on the north side
-        const rotLocal = side > 0
-        shopBuilding(ch, F, { w, d: 12, floors: sp.floors ?? (R() < 0.3 ? 4 : 3), wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: R() < 0.5 ? 'l' : 'r', balc: R() < 0.5, roof: R() < 0.55 ? 'gable' : 'hip', side: PAL.stock })
-        void rotLocal; k++
-        if (sp.id === 'cafe') {                                         // outdoor tables + chairs on the paved forecourt
-          for (let i = 0; i < 4; i++) { const tx = xc + (i - 1.5) * 1.9, tz = zc + side * (hwid - 0.9) + side * 0.0; put('table', tx, tz, 0); put('chair', tx - 0.55, tz, Math.PI / 2); put('chair', tx + 0.55, tz, -Math.PI / 2) }
-        }
-        if (sp.id === 'florist') {                                      // buckets of stems (restrained)
-          for (let i = 0; i < 3; i++) { const fx = xc + (i - 1) * 1.1, fz = zc + side * (hwid + 2.0 - 0.9); ch.prism(frame(fx, fz, 0, GY), 0, 0, 0.2, 0.17, 0, 0.42, col('#6b6a70'), 'metal', 8); for (let j = 0; j < 5; j++) ch.prism(frame(fx, fz, 0, GY), (j - 2) * 0.05, ((j * 37) % 7 - 3) * 0.02, 0.06, 0.07, 0.42, 0.78 + (j % 3) * 0.06, col(['#d9b7c2', '#e8dfd2', '#b9a6c9', '#c9d1b4', '#e6c9b0'][j]), 'leaf', 5) }
-        }
-        if (sp.id === 'books') { ch.box(frame(xc, zc + side * (hwid + 2.0 - 0.9), side > 0 ? Math.PI : 0, GY), -0.6, 0.6, 0, 1.1, -0.25, 0.25, col('#4a3a2c'), 'wood', 'fulrb') }
-        if (sp.id) pois[sp.id] = { x: xc + (side > 0 ? 0 : 0), z: zc + side * (hwid + 0.4) }
+        if (sp.passage) { const px = x - sp.passage * k / 2; pois.passage = { x: px, z: LS + 1 }; x -= sp.passage * k; continue }
+        const w = sp.w * k, xc = x - w / 2; x -= w
+        const F = row > 0 ? frame(xc, LN, 0, GY) : frame(xc, LS, Math.PI, GY)
+        shopBuilding(ch, F, { w, d: 12, floors: R() < 0.3 ? 4 : 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: R() < 0.5 ? 'l' : 'r', balc: R() < 0.5, roof: R() < 0.55 ? 'gable' : 'hip', side: PAL.stock })
+        const zf = row > 0 ? LN : LS, dir = row > 0 ? 1 : -1                                              // dir = into the lane
+        if (sp.id === 'cafe') { for (let i = 0; i < 4; i++) { const tx = xc + (i - 1.5) * 1.9, tz = zf + dir * 2.4; put('table', tx, tz, 0); put('chair', tx - 0.55, tz, Math.PI / 2); put('chair', tx + 0.55, tz, -Math.PI / 2) } put('planter', xc - w / 2 + 0.5, zf + dir * 1.3, 0, 1.0); put('planter', xc + w / 2 - 0.5, zf + dir * 1.3, 0, 1.0) }
+        if (sp.id === 'florist') { for (let i = 0; i < 3; i++) { const fx = xc + (i - 1) * 1.1, fz = zf + dir * 0.9; ch.prism(frame(fx, fz, 0, GY), 0, 0, 0.2, 0.17, 0, 0.42, col('#6b6a70'), 'metal', 8); for (let j = 0; j < 5; j++) ch.prism(frame(fx + (j - 2) * 0.06, fz + ((j % 2) - 0.5) * 0.08, 0, GY), 0, 0, 0.07, 0.05, 0.42, 0.64 + (j % 3) * 0.05, col(['#cfa9ad', '#e4d9cb', '#b7a5c4', '#d9c08a', '#a9b39a'][j]), 'leaf', 6) } }
+        if (sp.id === 'books') { ch.box(frame(xc, zf + dir * 0.9, row > 0 ? 0 : Math.PI, GY), -0.6, 0.6, 0, 1.1, -0.25, 0.25, col('#4a3a2c'), 'wood', 'fulrb'); ch.solid(frame(xc, zf + dir * 0.9, 0, GY), -0.6, 0.6, 0, 1.1, -0.25, 0.25, 'cart') }
+        if (sp.id === 'bakery') { ch.box(frame(xc, zf + dir * 0.9, 0, GY), -0.5, 0.5, 0, 0.95, -0.28, 0.28, col('#6a4d3a'), 'wood', 'fulrb'); ch.box(frame(xc, zf + dir * 0.9, 0, GY), -0.52, 0.52, 0.95, 1.0, -0.3, 0.3, col('#d9c9a0'), 'trim', 'fulrb') }
+        if (sp.id) pois[sp.id] = { x: xc, z: zf + dir * 0.6 }
       }
     }
-    const northList = [SHOPS[0], SHOPS[2], ...fit(40, 5.6, 7.4, R).map((w, i) => ({ w, ...MORE[i % MORE.length], wall: WALLS[i % WALLS.length][0], main: WALLS[i % WALLS.length][1], stall: '#3a3237', door: '#41584a' }))]
-    const southList = [SHOPS[1], SHOPS[3], ...fit(42, 5.6, 7.4, R).map((w, i) => ({ w, ...MORE[(i + 2) % MORE.length], wall: WALLS[(i + 3) % WALLS.length][0], main: WALLS[(i + 3) % WALLS.length][1], stall: '#2f3d36', door: '#2f3138' }))]
-    place(1, northList); place(-1, southList)
-    // closing wall + arched gate at the west end of the lane
-    wall(g, LX0 - 0.8, LX0, zc - hwid - 2, zc + hwid + 2, 3.6, { col: PAL.stock, key: 'brick' })
-    g.box(W0, LX0 - 0.1, LX0 + 0.2, 0, 2.7, zc - 1.2, zc + 1.2, col('#3e3b44'), 'wood', 'fl'); g.box(W0, LX0 - 0.1, LX0 + 0.3, 2.7, 3.0, zc - 1.4, zc + 1.4, col('#e0d6c0'), 'trim', 'fulr')
-    tree('plane', LX0 - 5, zc + 1, 1.1); tree('ornamental', LX0 - 4, zc - 6, 0.9)
-    for (let x = -60; x > LX0 + 8; x -= 22) { lamp(x, zc - hwid + 0.4, 0); lamp(x - 11, zc + hwid - 0.4, 0) }
-    // festoon lights across the lane (strung between facades; points + a thin catenary of boxes)
-    for (const x of [-72, -98, -122]) {
-      const n = 14
-      for (let i = 0; i <= n; i++) { const t = i / n, z = zc - hwid - 1.2 + t * (2 * hwid + 2.4), y = GY + 5.4 - 0.9 * Math.sin(t * Math.PI); halos.push([x, y, z]); if (i < n) { const z2 = zc - hwid - 1.2 + ((i + 1) / n) * (2 * hwid + 2.4), y2 = GY + 5.4 - 0.9 * Math.sin(((i + 1) / n) * Math.PI); ch.box(frame(x, (z + z2) / 2, 0, (y + y2) / 2 - GY), -0.012, 0.012, -0.012, 0.012, -(z2 - z) / 2, (z2 - z) / 2, col('#2b2a30'), 'metal+', 'fulrb', 1, 1, 0) } }
+    place(NORTH, 1); place(SOUTH, -1)
+    // lane furniture: lamps on alternating sides, festoon lights, benches, planters, bicycles
+    for (let x = LX1 - 6; x > LX0 + 6; x -= 16) { lamp(x, 87.0, 0); lamp(x - 8, 94.0, 0) }
+    for (const x of [-48, -74, -100]) { const n = 14; for (let i = 0; i <= n; i++) { const t = i / n, z = LN + 0.3 + t * (LS - LN - 0.6), y = GY + 5.6 - 0.9 * Math.sin(t * Math.PI); halos.push([x, y, z]) } }
+    bench(-52, 87.9, 0); bench(-96, 93.1, Math.PI); put('planter', -39, 87.6, 0, 1.0); put('planter', -108, 93.4, 0, 1.0); put('bike', -34.5, 94.3, 0, 1.0); put('bike', -60.2, 86.4, 0, 1.0)
+    // ---- pocket garden closing the lane (west): a seating corner behind a low brick wall + an old pear tree: the lane ends with something to find
+    surf(g, 'slab', LX0 - 7.3, LX0, 86, 95, G.slab, 1.8, 1.2, 1); surf(g, 'grass', LX0 - 7.3, LX0 - 2.5, 86.2, 94.8, '#86a15a', 4, 4, 2)
+    wall(g, LX0 - 7.5, LX0 - 7.3, 86, 95, 2.4, { col: PAL.stock, key: 'brick' }); wall(g, LX0 - 7.5, LX0, 85.3, 86, 2.4, { col: PAL.stock, key: 'brick' }); wall(g, LX0 - 7.5, LX0, 95, 95.7, 2.4, { col: PAL.stock, key: 'brick' })
+    tree('ornamental', LX0 - 4.5, 90.5, 1.0); bench(LX0 - 6.5, 88.2, -Math.PI / 2); bench(LX0 - 6.5, 92.8, -Math.PI / 2); lamp(LX0 - 2.2, 90.5, 0); put('planter', LX0 - 1.6, 87.2, 0, 1.0); put('planter', LX0 - 1.6, 93.8, 0, 1.0)
+    pois.pocket = { x: LX0 - 4.5, z: 90.5 }
+    // ---- tucked-away passage (south row, between two shops) -> hidden courtyard (x -89..-71, z 107..118): a bench, a small tree, a lantern, a wall fountain
+    {
+      const px = pois.passage.x, hw = 1.3
+      surf(g, 'slab', px - hw, px + hw, LS, 107, G.slab, 1.8, 1.2, 1); surf(g, 'sett', px - 8.5, px + 8.5, 107, 119, G.sett, 1.6, 1.6, 1)
+      for (const s of [-1, 1]) wall(g, px + s * 8.5 - (s > 0 ? 0 : 0.5), px + s * 8.5 + (s > 0 ? 0.5 : 0), 107, 119.6, 3.0, { col: PAL.stock, key: 'brick' })
+      wall(g, px - 9, px + 9, 119.6, 120.4, 3.0, { col: PAL.stock, key: 'brick' })
+      tree('ornamental', px + 3.5, 113, 0.95); bench(px - 6.4, 113, -Math.PI / 2); bench(px, 118.4, Math.PI); lamp(px - 4.5, 109, 0); put('planter', px + 6, 108, 0, 1.0); put('planter', px - 6, 108, 0, 1.0)
+      for (let i = 0; i < 8; i++) { put('shrub', px - 6.5 + R() * 13, 117 + R() * 1.6, R() * 6, 0.8 + R() * 0.5) }
+      g.box(W0, px - 0.8, px + 0.8, 0, 1.4, 119.2, 119.6, col('#ddd2bb'), 'ashlar', 'fulrb', 2.4, 1.2); g.box(W0, px - 0.35, px + 0.35, 1.0, 1.04, 118.7, 119.2, col('#34322f'), 'trim', 'fulrb')
+      waters.push({ x: px, z: 118.9, w: 0.7, d: 0.5, y: GY + 1.06, kind: 'pool' })
+      mass(bk, LX0, px - 8.5, 107.5, 124, 13); mass(bk, px + 8.5, LX1, 107.5, 124, 13)
+      pois.hiddenCourt = { x: px, z: 113 }
     }
-    pois.lane = { x: -78, z: zc }
+    // closing masses behind the north row, between the lane and the lane-1 houses
+    mass(bk, LX0, LX1, 73.3, 74, 12)
+    // lane arch: stone gate piers at the east mouth (from the square) with a bronze arch sign-band
+    for (const z of [LN + 0.4, LS - 0.4]) { g.box(W0, LX1 - 0.3, LX1 + 0.3, 0, 3.4, z - 0.3, z + 0.3, col(PAL.limestone), 'ashlar', 'fulrb', 2.4, 1.2); g.solid(W0, LX1 - 0.3, LX1 + 0.3, 0, 3.4, z - 0.3, z + 0.3, 'pier') }
+    g.box(W0, LX1 - 0.18, LX1 + 0.18, 3.4, 3.8, LN, LS, col('#4a3a2c'), 'wood', 'fulrbd', 1, 1, 0)
+    pois.lane = { x: -76, z: LZ }
+  }
+
+  // =====================================================================================================================================
+  // 9. THE SECRET GARDEN (east, reached by a narrow alley off East Street) + sealing masses so no part of the envelope is an empty void
+  // =====================================================================================================================================
+  {
+    const g = mk('secret'), bm = mk('masses')
+    surf(g, 'slab', ES1, 57.4, 73.45, 74.95, G.slab, 1.8, 1.2, 2)                                                                           // alley floor
+    surf(g, 'grass', 57.2, EAST - 1.4, 73.3, SOUTH - 0.4, '#86a15a', 4, 4, 1); surf(g, 'grass', ES1, 57.2, 106, SOUTH - 0.4, '#86a15a', 4, 4, 1)
+    ribbon(g, 'slab', curve([[57.2, 74.2], [63, 76], [66, 84], [64, 92], [68, 99], [71, 104]], 12), 1.8, G.slab, 1.8, 1.2, 2)
+    // pond with a stone rim and a timber pergola bench
+    const px = 72, pz = 99
+    g.box(W0, px - 3.2, px + 3.2, 0, 0.28, pz - 2.2, pz + 2.2, col('#d9cdb5'), 'ashlar', 'fulrb', 2.4, 1.2); g.solid(W0, px - 3.2, px + 3.2, 0, 0.3, pz - 2.2, pz + 2.2, 'pond')
+    g.box(W0, px - 2.8, px + 2.8, 0.28, 0.3, pz - 1.8, pz + 1.8, col('#2e2a36'), 'trim', 'u', 1, 1, 0); waters.push({ x: px, z: pz, w: 5.6, d: 3.6, y: GY + 0.33, kind: 'pool' })
+    for (const [x, z] of [[66, 105], [70.5, 105], [66, 109], [70.5, 109]]) { g.box(W0, x - 0.1, x + 0.1, 0, 2.6, z - 0.1, z + 0.1, col('#6a4d3a'), 'wood', 'fulrb', 1, 1, 0.02); g.solid(W0, x - 0.1, x + 0.1, 0, 2.6, z - 0.1, z + 0.1, 'post') }
+    for (let i = 0; i < 6; i++) g.box(W0, 65.8, 70.8, 2.6, 2.7, 105 + i * 0.85 - 0.1, 105 + i * 0.85 + 0.05, col('#6a4d3a'), 'wood', 'fulrbd', 1, 1, 0.02)
+    bench(68.3, 108.2, 0); put('lamp', 64.6, 106.5, 0, 1.0); pools.push([64.6, 106.5, 7.5]); halos.push([64.6, GY + 4.9, 106.5])
+    tree('plane', 77, 85, 1.15); tree('ornamental', 62, 112, 1.0); tree('ornamental', 76, 112, 0.95); tree('ornamental', 49, 114, 0.95); tree('plane', 52, 80, 0.5)
+    const R4 = rng(91); for (let i = 0; i < 26; i++) { const x = 49 + R4() * 31, z = 78 + R4() * 44; if (Math.hypot(x - px, z - pz) < 5.5 || (x > 62 && x < 72 && z > 103 && z < 110)) continue; if (R4() < 0.5) put('shrub', x, z, R4() * 6, 0.7 + R4() * 0.6); else put('grass', x, z, R4() * 6, 0.9 + R4() * 0.5) }
+    for (let i = 0; i < 6; i++) g.prism(frame(60 + R4() * 20, 80 + R4() * 38, 0, GY), 0, 0, 0.3, 0.2, 0, 0.3, col(['#cfa9ad', '#e4d9cb', '#b7a5c4'][i % 3]), 'leaf', 8)
+    wall(g, ES1, 57.2, 73.25 - 0.0, 73.4, 3.0, { col: PAL.stock, key: 'brick', nocap: true })                                                // alley wall, house side is the house itself
+    pois.secret = { x: 66, z: 96 }; pois.alley = { x: 50, z: 74.2 }
+    // masses that close the remaining voids (building backs) so the envelope is fully enclosed
+    mass(bm, -98, -31.8, 124, 124.6, 3)
   }
 
   // =====================================================================================================================================
   // finalise: collect colliders, instance lists, lights
   // =====================================================================================================================================
+  // ---- optional discoveries: small keepsakes to find while strolling (no objectives, nothing is required)
+  const discoveries = [
+    { id: 'leaf', label: 'a pressed plane leaf, tucked behind the courtyard bench', x: BX - 4.5, z: 30.5 },
+    { id: 'coin', label: 'a lucky coin in the garden fountain', x: SCX + 3.2, z: SCZ },
+    { id: 'key', label: 'a small brass key in the hidden courtyard', x: pois.hiddenCourt.x + 3.0, z: 117.2 },
+    { id: 'blossom', label: 'a pear blossom in the pocket garden', x: pois.pocket.x + 1.5, z: 91.2 },
+    { id: 'postcard', label: 'a handwritten postcard in the secret garden', x: 68.3, z: 106.6 },
+    { id: 'view', label: 'the best view of the Wharf at sunset', x: BX, z: -142 },
+    { id: 'ferry', label: 'a ferry timetable at the reserved landing', x: pois.ferry.x, z: -149 },
+  ]
+  for (const d of discoveries) halos.push([d.x, (d.id === 'view' || d.id === 'ferry' ? TERRACE_Y : GY) + 1.0, d.z])
   const colliders = []
   for (const c of Object.values(chunks)) colliders.push(...c.cols)
   const stats = {}; for (const [k, c] of Object.entries(chunks)) stats[k] = c.tris
-  return { chunks, inst, pools, halos, waters, jets, lightsAt, colliders, pois, stats }
+  return { chunks, inst, pools, halos, waters, jets, lightsAt, colliders, pois, stats, discoveries, map: { surf: mapSurf, rib: mapRib } }
 }
 
 const rw_ = () => -5.8 - 6.2, re_ = () => 8.2 + 6.2
-const signQ = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 5; return [[u0, v1 - 0.2], [u0 + 0.5, v1 - 0.2], [u0 + 0.5, v1], [u0, v1]] }
+const signQ = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 6; return [[u0, v1 - 1 / 6], [u0 + 0.5, v1 - 1 / 6], [u0 + 0.5, v1], [u0, v1]] }

@@ -2,6 +2,7 @@ import { Fragment, useRef } from 'react'
 import { DESTINATIONS } from './destinations.js'
 import { world } from './world.js'
 import { useCam, camStore } from './camStore.js'
+import { Atmospheres, Minimap } from './HUDExtras.jsx'
 
 const MODES = [
   { id: 'follow', key: '1', label: 'Follow' },
@@ -12,7 +13,8 @@ const MODES = [
 const HELP = {
   follow: [
     ['Arrows / WASD', 'walk (relative to the camera)'],
-    ['Shift', 'run'],
+    ['Shift', 'fast walk · Shift+Space sprint · Z relaxed stroll'],
+    ['M', 'map  ·  [ ]  time of day'],
     ['Drag, or two-finger scroll', 'orbit around you'],
     ['Pinch, mouse wheel, + / −', 'zoom'],
     ['Q / E', 'rotate camera'],
@@ -61,6 +63,7 @@ const css = `
   background:radial-gradient(ellipse at 50% 40%,#4a3322 0%,#1b1410 70%);font:300 15px/1.5 -apple-system,system-ui,sans-serif;transition:opacity .9s ease;padding:24px}
 .ww-ov h2{margin:0;font:300 34px/1.1 Georgia,'Times New Roman',serif;letter-spacing:.04em}
 .ww-ov p{margin:0;max-width:420px;opacity:.8}.ww-ov kbd{font:600 12px ui-monospace,Menlo,monospace;background:rgba(255,255,255,.14);border-radius:4px;padding:2px 8px}
+.ww-ov,.ww-prompt,.wwx-atmo button{}@media (prefers-reduced-motion:reduce){.ww-ov{transition:none!important}.ww-prompt{transition:none!important}}
 .ww-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);color:#f4ebe0;font:13px -apple-system,system-ui,sans-serif;pointer-events:none;
   background:rgba(26,19,30,.7);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:999px;padding:8px 16px;z-index:6;transition:opacity .25s}
 `
@@ -96,10 +99,11 @@ export default function HUD() {
       ) : (
         <div className="ww-min" onClick={() => camStore.set({ help: true })}>Controls · H</div>
       )}
+      <Atmospheres /><Minimap />
       <div className="ww-prompt" style={{ opacity: show ? 1 : 0, transform: `translateX(-50%) translateY(${show ? 0 : 6}px)` }}><kbd>Enter</kbd>{last.current}</div>
       <div className="ww-toast" style={{ opacity: c.toast ? 1 : 0 }}>{c.toast}</div>
       <div className="ww-ov" style={{ opacity: ov ? 1 : 0, pointerEvents: ov ? 'auto' : 'none' }}>
-        <h2>{dest.title}</h2><p>{dest.sub}</p>
+        <h2>{dest.title}</h2><p>{dest.sub}</p><p style={{ opacity: 0.45, fontSize: 12 }}><kbd>Space</kbd> to skip</p>
         {false && <button style={{ marginTop: 6, cursor: 'pointer', font: 'inherit', color: 'inherit', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)', borderRadius: 999, padding: '6px 18px' }} onClick={() => world.returnHome && world.returnHome()}>Return</button>}
       </div>
     </>
