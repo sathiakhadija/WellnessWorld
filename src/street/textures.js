@@ -38,21 +38,27 @@ export const plasterTex = () => mk(256, 256, (g, w, h) => {
   const R = rng(5); g.fillStyle = gray(240); g.fillRect(0, 0, w, h)
   speckle(g, w, h, R, 2600, 38, 3.2)
 })
-// large-format paving slabs: tile = 1.8 m x 1.2 m (2 x 2 slabs of 0.9 x 0.6)
+// large-format paving slabs: tile = 1.8 m x 1.2 m (2 x 2 slabs of 0.9 x 0.6). Natural limestone/sandstone variation: per-slab tint + veining, crisp darker joints.
 export const slabTex = () => mk(512, 256, (g, w, h) => {
-  const R = rng(31); g.fillStyle = gray(176); g.fillRect(0, 0, w, h)
+  const R = rng(31); g.fillStyle = 'rgb(168,160,150)'; g.fillRect(0, 0, w, h)
+  const tints = [[238, 232, 220], [232, 224, 210], [236, 226, 216], [226, 224, 214], [240, 230, 214]]
   for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) {
-    const v = 232 + (R() - 0.5) * 26; g.fillStyle = gray(v); g.fillRect(c * w / 2 + 2, r * h / 2 + 2, w / 2 - 4, h / 2 - 4)
+    const t = tints[(R() * tints.length) | 0], k = 0.94 + R() * 0.08, x0 = c * w / 2 + 2, y0 = r * h / 2 + 2, ww = w / 2 - 4, hh = h / 2 - 4
+    const gr = g.createLinearGradient(x0, y0, x0 + ww, y0 + hh); gr.addColorStop(0, `rgb(${t[0] * k},${t[1] * k},${t[2] * k})`); gr.addColorStop(1, `rgb(${t[0] * k * 0.95},${t[1] * k * 0.95},${t[2] * k * 0.96})`)
+    g.fillStyle = gr; g.fillRect(x0, y0, ww, hh)
+    for (let v = 0; v < 3; v++) { g.strokeStyle = `rgba(150,140,128,${0.08 + R() * 0.08})`; g.lineWidth = 1 + R(); g.beginPath(); g.moveTo(x0 + R() * ww, y0); g.bezierCurveTo(x0 + R() * ww, y0 + hh * 0.3, x0 + R() * ww, y0 + hh * 0.7, x0 + R() * ww, y0 + hh); g.stroke() }
   }
-  speckle(g, w, h, R, 1800, 44, 1.6)
+  speckle(g, w, h, R, 1400, 30, 1.6)
 })
-// granite setts (cobbles): tile = 1.6 m x 1.6 m of 0.1 m setts in staggered rows
+// granite setts (cobbles): tile = 1.6 m x 1.6 m of 0.1 m setts in staggered rows. Each sett has its own warm/cool grey tint, a lit top edge and a dark joint.
 export const settTex = () => mk(512, 512, (g, w, h) => {
-  const R = rng(41); g.fillStyle = gray(150); g.fillRect(0, 0, w, h)
-  const n = 16, s = w / n
+  const R = rng(41); g.fillStyle = 'rgb(96,90,86)'; g.fillRect(0, 0, w, h)
+  const n = 16, s = w / n, hues = [[214, 204, 194], [204, 200, 198], [222, 206, 190], [198, 192, 188], [226, 212, 200], [190, 188, 190], [216, 196, 184]]
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
-    const off = (r % 2) * s / 2, v = 205 + (R() - 0.5) * 70
-    g.fillStyle = gray(v); g.beginPath(); g.roundRect ? g.roundRect(c * s + off + 2, r * s + 2, s - 4, s - 4, 4) : g.rect(c * s + off + 2, r * s + 2, s - 4, s - 4); g.fill()
+    const off = (r % 2) * s / 2, t = hues[(R() * hues.length) | 0], k = 0.82 + R() * 0.26, x = c * s + off + 1.5, y = r * s + 1.5, ww = s - 3, hh = s - 3
+    g.fillStyle = `rgb(${t[0] * k},${t[1] * k},${t[2] * k})`; g.beginPath(); g.roundRect ? g.roundRect(x, y, ww, hh, 5) : g.rect(x, y, ww, hh); g.fill()
+    g.fillStyle = 'rgba(255,255,255,0.10)'; g.fillRect(x + 2, y + 1, ww - 4, 2); g.fillStyle = 'rgba(0,0,0,0.10)'; g.fillRect(x + 2, y + hh - 3, ww - 4, 2)
+    if (R() < 0.25) { g.fillStyle = 'rgba(70,64,58,0.10)'; g.fillRect(x + R() * ww * 0.5, y + R() * hh * 0.5, ww * 0.35, hh * 0.3) }
   }
 })
 // asphalt: tile 4 m. warm dark grey, fine aggregate, matte

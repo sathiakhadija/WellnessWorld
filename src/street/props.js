@@ -176,12 +176,12 @@ export function treeGeo(kind) {
     crown = v3(0, 3.8, 0)
   }
   // leaf-spray cards: clusters on each tip (and a few strays on the way) with soft, crown-radial normals so the canopy shades as one volume
-  const green = [C('#6f8a3c'), C('#82953f'), C('#5e7a38'), C('#9aa045')], tmp = v3(0, 0, 0)
+  const green = [C('#e2efb0'), C('#d2e6a0'), C('#b4d08a'), C('#eef3a6'), C('#a8c890')], tmp = v3(0, 0, 0)
   const card = (cx, cy, cz, size, clusterR) => {
     const n = v3(R() - 0.5, R() - 0.5, R() - 0.5).normalize(), u = new THREE.Vector3().crossVectors(n, Math.abs(n.y) > 0.9 ? v3(1, 0, 0) : v3(0, 1, 0)).normalize(), w = new THREE.Vector3().crossVectors(n, u)
     const rot = R() * 6.28, cu = u.clone().multiplyScalar(Math.cos(rot)).addScaledVector(w, Math.sin(rot)), cw = new THREE.Vector3().crossVectors(n, cu)
     const sn = tmp.set(cx - crown.x, (cy - crown.y) * 0.8 + 0.4, cz - crown.z).normalize().clone()
-    const hRel = Math.max(0, Math.min(1, (cy - (crown.y - 2.5)) / 5)), base = green[(R() * green.length) | 0], k = 0.95 + 0.65 * hRel
+    const hRel = Math.max(0, Math.min(1, (cy - (crown.y - 2.5)) / 5)), base = green[(R() * green.length) | 0], k = 0.72 + 0.7 * hRel * hRel + 0.15 * R()
     const base0 = LP.length / 3
     for (const [a, b, uu, vv] of [[-1, -1, 0, 0], [1, -1, 1, 0], [1, 1, 1, 1], [-1, 1, 0, 1]]) {
       LP.push(cx + (cu.x * a + cw.x * b) * size, cy + (cu.y * a + cw.y * b) * size, cz + (cu.z * a + cw.z * b) * size)
@@ -200,6 +200,12 @@ export function treeGeo(kind) {
 
 // ---- Phase 1-3 additions: parked cars, bicycles, shrubs, planters (all instanced; muted palette, nothing garish)
 export function carGeo(bodyHex) {
+  const g = bakedGeo('car'), tint = C(bodyHex), a = g.carbody.attributes.color
+  for (let i = 0; i < a.count; i++) a.setXYZ(i, a.getX(i) * tint.r, a.getY(i) * tint.g, a.getZ(i) * tint.b)
+  const merged = merge([g.carbody, g.metal].map((x) => { if (!x.attributes.color) throw new Error('no colour'); return x }))
+  return { metal: merged, glass: g.glass, glow: g.glow }
+}
+export function carGeoOld(bodyHex) {
   const c = new Chunk('car', rng(31)), B = C(bodyHex), D = C('#23222a')
   const L = 2.05, W = 0.89
   c.box(F0, -W, W, 0.28, 0.86, -L, L, B, 'metal', 'fulrb', 1, 1, 0.05)                                          // lower body

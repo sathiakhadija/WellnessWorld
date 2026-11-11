@@ -191,6 +191,34 @@ def build_table():
         keep(sweep(f'toe{k}', [(0.05 * math.cos(a), 0.05 * math.sin(a), 0.04), (0.18 * math.cos(a), 0.18 * math.sin(a), 0.03), (0.27 * math.cos(a), 0.27 * math.sin(a), 0.0)], 0.014), 'metal', IRON)
     return finish('table')
 
-LIB['lamp'] = build_lamp(); LIB['bench'] = build_bench(); LIB['urn'] = build_urn(); LIB['chair'] = build_chair(); LIB['table'] = build_table()
+
+# ------------------------------------------------------------------ parked car (generic compact saloon, ~4.1 m): rounded body, glasshouse, wheels, lamps. Body colour is white; the renderer tints it per instance.
+def wheel(name, x, y, r=0.33, wd=0.22):
+    o = lathe(name, [(0.0, -wd / 2), (r * 0.78, -wd / 2), (r, -wd * 0.3), (r, wd * 0.3), (r * 0.78, wd / 2), (0.0, wd / 2)], 14)
+    o.rotation_euler = (0, math.pi / 2, 0); o.location = (x, y, r); return o
+
+def build_car():
+    reset(); PARTS.clear()
+    body = box('lower', -0.89, 0.89, -2.05, 2.05, 0.30, 0.86, 0.16, 3); keep(body, 'carbody', '#ffffff')
+    bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0)       # glasshouse: tapered frustum (narrower and shorter at the roof)
+    for v in bm.verts:
+        top = v.co.z > 0
+        v.co.x = (0.70 if top else 0.82) * (1 if v.co.x > 0 else -1)
+        v.co.y = (-0.62 if v.co.y < 0 else 0.72) if top else (-1.05 if v.co.y < 0 else 1.18)
+        v.co.z = 1.40 if top else 0.84
+    cab = new_obj('cabin', bm); m = cab.modifiers.new('bev', 'BEVEL'); m.width = 0.07; m.segments = 2; keep(cab, 'glass', '#1f2630')
+    keep(box('roof', -0.72, 0.72, -0.66, 0.76, 1.38, 1.43, 0.04, 2), 'carbody', '#ffffff')
+    for sx in (-1, 1):
+        for y in (-0.64, 0.24, 0.74):  # pillars
+            p = box(f'pillar{sx}{y}', sx * 0.78 - 0.02, sx * 0.78 + 0.02, y - 0.03, y + 0.03, 0.86, 1.38, 0.01, 1); keep(p, 'carbody', '#ffffff')
+        keep(wheel(f'wheelF{sx}', sx * 0.78, -1.28), 'metal', '#16151a'); keep(wheel(f'wheelB{sx}', sx * 0.78, 1.28), 'metal', '#16151a')
+        keep(box(f'hl{sx}', sx * 0.55 - 0.18, sx * 0.55 + 0.18, -2.07, -2.03, 0.62, 0.74, 0.01, 1), 'glow', '#fff1cf')
+        keep(box(f'tl{sx}', sx * 0.6 - 0.2, sx * 0.6 + 0.2, 2.03, 2.07, 0.66, 0.76, 0.01, 1), 'glow', '#b23a3a')
+        keep(box(f'mir{sx}', sx * 0.93 - 0.05, sx * 0.93 + 0.05, -0.8, -0.62, 1.0, 1.1, 0.02, 1), 'carbody', '#ffffff')
+    keep(box('bumperF', -0.85, 0.85, -2.1, -2.0, 0.32, 0.5, 0.03, 2), 'metal', '#2a292f'); keep(box('bumperB', -0.85, 0.85, 2.0, 2.1, 0.32, 0.5, 0.03, 2), 'metal', '#2a292f')
+    keep(box('sill', -0.9, 0.9, -1.8, 1.8, 0.28, 0.34, 0.02, 1), 'metal', '#1b1a1f')
+    return finish('car')
+
+LIB['lamp'] = build_lamp(); LIB['bench'] = build_bench(); LIB['urn'] = build_urn(); LIB['chair'] = build_chair(); LIB['table'] = build_table(); LIB['car'] = build_car()
 with open(f'{ROOT}/src/street/baked/props.json', 'w') as f: json.dump(LIB, f, separators=(',', ':'))
 for k, v in LIB.items(): print(k, {b: len(d['p']) // 9 for b, d in v.items()}, 'tris')

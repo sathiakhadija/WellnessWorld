@@ -8,7 +8,7 @@ export const PAL = {
   iron: '#1c1b21', brass: '#b7965a', zinc: '#8a8e92', white: '#f1ece1', ink: '#2b3040', green: '#34473d', cocoa: '#4a3a34',
 }
 const GLASS = [C('#2a2832'), C('#24232d'), C('#312e39'), C('#292b36')]
-const LIT = [C('#e9b676'), C('#f0c28c'), C('#dfa465'), C('#f3cf9f'), C('#e6ad6d')]
+const LIT = [C('#efd0a0'), C('#f3d9b2'), C('#e9c795'), C('#f6e0be'), C('#ecce9f')]
 
 export function strip(ch, F, key, col, x0, x1, y0, y1, z) {
   ch.acc(key).quad(toWorld(F, x0, y0, z), toWorld(F, x1, y0, z), toWorld(F, x1, y1, z), toWorld(F, x0, y1, z), col, dirWorld(F, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])

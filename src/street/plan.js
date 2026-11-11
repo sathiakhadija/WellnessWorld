@@ -18,7 +18,7 @@ export const BX = 1.2                                   // penthouse entrance ax
 export const TERR_H = TERRACE_Y - GY                    // terrace height above street level (≈4.4)
 export const BOUNDS = { x0: -130, x1: 86, z0: -150, z1: 128 }
 const col = (h) => new THREE.Color(h)
-const G = { road: '#6b6a6d', slab: '#dbd2c2', sett: '#bdb0a0', grass: '#8aa356', gravel: '#d3c8b3', paint: '#ece6d8', dark: '#9b8f84' }
+const G = { road: '#6b6a6d', slab: '#e8dfcf', sett: '#d2c7b8', grass: '#8aa356', gravel: '#d3c8b3', paint: '#ece6d8', dark: '#9b8f84' }
 
 export const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) } return h >>> 0 }
 function fit(total, lo, hi, R) { const n = Math.max(1, Math.round(total / ((lo + hi) / 2))); const w = []; let s = 0; for (let i = 0; i < n; i++) { w.push(lo + R() * (hi - lo)); s += w[i] } return w.map((x) => x * total / s) }
@@ -509,11 +509,11 @@ export function buildStreet() {
     // east side of East Street: a second, lower block of three houses facing the garden would crowd the corner; the lane's south houses already close it
     houseRow(so, 'x', 111, Math.PI, -8.3, 16.9, { d: 9, floors: 4 })
     const shopS = (xc, w, sp) => shopBuilding(sh, frame(xc, 108.75 + 0.0, Math.PI, GY), { w, d: 12, floors: 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: sp.side, balc: true, roof: 'hip', side: PAL.stock })
-    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 0, awning: '#6d5568', stall: '#2f2a30', door: '#2b2630', side: 'l' })
-    shopS(-19.0, 7.0, { wall: 'plaster', main: '#d9c9bf', sign: 3, awning: '#8d9a85', stall: '#4a3a46', door: '#4a3a46', side: 'r' })
-    shopS(-11.5, 6.4, { wall: 'plaster', main: '#e0d6c4', sign: 4, awning: '#c9b79a', stall: '#3a3237', door: '#41584a', side: 'l' })
-    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 6, awning: '#37363f', stall: '#2f2a30', door: '#2b2630', side: 'r' })
-    shopS(28, 7.4, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#9a8095', stall: '#2f3d36', door: '#2f3d36', side: 'l' })
+    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 0, awning: '#6d5568', stall: '#d8ceb4', door: '#2b2630', side: 'l' })
+    shopS(-19.0, 7.0, { wall: 'plaster', main: '#d9c9bf', sign: 3, awning: '#8d9a85', stall: '#8f9c86', door: '#4a3a46', side: 'r' })
+    shopS(-11.5, 6.4, { wall: 'plaster', main: '#e0d6c4', sign: 4, awning: '#c9b79a', stall: '#e4d6c2', door: '#41584a', side: 'l' })
+    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 6, awning: '#37363f', stall: '#c9b6a2', door: '#2b2630', side: 'r' })
+    shopS(28, 7.4, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#9a8095', stall: '#4d5e50', door: '#2f3d36', side: 'l' })
     houseRow(so, 'x', 111, Math.PI, 31.7, ES1, { d: 9, floors: 4 })
     // café tables on the south pavement (under the garden railings)
     for (let i = 0; i < 3; i++) { put('table', -27 + i * 2.1, 107.6, 0, 1.0); put('chair', -27.6 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -26.4 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
@@ -532,32 +532,32 @@ export function buildStreet() {
     surf(g, 'slab', LX1, WS0 + 0.001, 86, 95, G.slab, 1.8, 1.2, 1)
     const W_ = (a, p) => ({ sign: a, ...p })
     const NORTH = [
-      { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#2f3d36', door: '#2f3d36' },
-      { w: 6.0, sign: 4, awning: '#c9b79a', wall: 'brick', main: '#b4806e', stall: '#3a3237', door: '#415a4b' },
-      { id: 'bakery', w: 6.6, sign: 5, awning: '#b4806e', wall: 'plaster', main: '#e0d6c4', stall: '#33292b', door: '#5a3a3a' },
-      { w: 5.6, sign: 7, awning: '#9a8095', wall: 'brick', main: PAL.stock, stall: '#2f2a30', door: '#4d3548' },
-      { id: 'boutique', w: 6.8, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9c9bf', stall: '#4a3a46', door: '#4a3a46' },
-      { w: 6.2, sign: 6, awning: '#37363f', wall: 'brick', main: PAL.brick, stall: '#2b2630', door: '#2b2630' },
-      { w: 5.8, sign: 4, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#3b3436', door: '#2f3d36' },
-      { w: 6.6, sign: 7, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#2f3d36', door: '#44504a' },
-      { w: 6.0, sign: 5, awning: '#6d5568', wall: 'plaster', main: '#e6dcc9', stall: '#4a3a46', door: '#6a4d63' },
-      { w: 5.8, sign: 6, awning: '#c9b79a', wall: 'brick', main: PAL.stock, stall: '#3a3237', door: '#34473d' },
-      { w: 6.4, sign: 4, awning: '#b4806e', wall: 'plaster', main: '#d9d1bf', stall: '#2f3d36', door: '#5a3a3a' },
-      { w: 6.2, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#2f2a30', door: '#2d3345' },
+      { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#7a4a56', door: '#2f3d36' },
+      { w: 6.0, sign: 4, awning: '#c9b79a', wall: 'brick', main: '#b4806e', stall: '#b9a78e', door: '#415a4b' },
+      { id: 'bakery', w: 6.6, sign: 5, awning: '#b4806e', wall: 'plaster', main: '#e0d6c4', stall: '#e0d2bd', door: '#5a3a3a' },
+      { w: 5.6, sign: 7, awning: '#9a8095', wall: 'brick', main: PAL.stock, stall: '#6f8071', door: '#4d3548' },
+      { id: 'boutique', w: 6.8, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9c9bf', stall: '#cfc3a8', door: '#4a3a46' },
+      { w: 6.2, sign: 6, awning: '#37363f', wall: 'brick', main: PAL.brick, stall: '#d8ceb4', door: '#2b2630' },
+      { w: 5.8, sign: 4, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#8f9c86', door: '#2f3d36' },
+      { w: 6.6, sign: 7, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#e4d6c2', door: '#44504a' },
+      { w: 6.0, sign: 5, awning: '#6d5568', wall: 'plaster', main: '#e6dcc9', stall: '#c9b6a2', door: '#6a4d63' },
+      { w: 5.8, sign: 6, awning: '#c9b79a', wall: 'brick', main: PAL.stock, stall: '#4d5e50', door: '#34473d' },
+      { w: 6.4, sign: 4, awning: '#b4806e', wall: 'plaster', main: '#d9d1bf', stall: '#7a4a56', door: '#5a3a3a' },
+      { w: 6.2, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#b9a78e', door: '#2d3345' },
     ]
     const SOUTH = [
-      { id: 'cafe', w: 9.4, sign: 0, awning: '#6d5568', wall: 'brick', main: PAL.brick, stall: '#2f2a30', door: '#2b2630' },
-      { id: 'florist', w: 6.4, sign: 2, awning: '#d9cdb8', wall: 'plaster', main: '#cfc7b6', stall: '#3b3436', door: '#41584a' },
-      { w: 6.0, sign: 4, awning: '#9a8095', wall: 'plaster', main: '#d9c9bf', stall: '#4a3a46', door: '#4d3548' },
-      { w: 5.8, sign: 6, awning: '#37363f', wall: 'brick', main: '#b0785a', stall: '#2b2630', door: '#2b2630' },
+      { id: 'cafe', w: 9.4, sign: 0, awning: '#6d5568', wall: 'brick', main: PAL.brick, stall: '#e0d2bd', door: '#2b2630' },
+      { id: 'florist', w: 6.4, sign: 2, awning: '#d9cdb8', wall: 'plaster', main: '#cfc7b6', stall: '#6f8071', door: '#41584a' },
+      { w: 6.0, sign: 4, awning: '#9a8095', wall: 'plaster', main: '#d9c9bf', stall: '#cfc3a8', door: '#4d3548' },
+      { w: 5.8, sign: 6, awning: '#37363f', wall: 'brick', main: '#b0785a', stall: '#d8ceb4', door: '#2b2630' },
       { passage: 2.6 },
-      { w: 6.4, sign: 5, awning: '#c9b79a', wall: 'plaster', main: '#e0d6c4', stall: '#33292b', door: '#5a3a3a' },
-      { w: 6.0, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#2f3d36', door: '#44504a' },
-      { w: 7.0, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9cdbf', stall: '#4a3a46', door: '#6a4d63' },
-      { w: 6.2, sign: 4, awning: '#b4806e', wall: 'brick', main: PAL.stock, stall: '#3a3237', door: '#34473d' },
-      { w: 5.6, sign: 6, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#2f3d36', door: '#41584a' },
-      { w: 6.8, sign: 5, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#3a3237', door: '#2d3345' },
-      { w: 6.0, sign: 7, awning: '#9a8095', wall: 'plaster', main: '#e6dcc9', stall: '#2f2a30', door: '#4d3548' },
+      { w: 6.4, sign: 5, awning: '#c9b79a', wall: 'plaster', main: '#e0d6c4', stall: '#8f9c86', door: '#5a3a3a' },
+      { w: 6.0, sign: 7, awning: '#8d9a85', wall: 'brick', main: PAL.brick, stall: '#e4d6c2', door: '#44504a' },
+      { w: 7.0, sign: 3, awning: '#6d5568', wall: 'plaster', main: '#d9cdbf', stall: '#c9b6a2', door: '#6a4d63' },
+      { w: 6.2, sign: 4, awning: '#b4806e', wall: 'brick', main: PAL.stock, stall: '#4d5e50', door: '#34473d' },
+      { w: 5.6, sign: 6, awning: '#d9cdb8', wall: 'plaster', main: '#cdd2c0', stall: '#7a4a56', door: '#41584a' },
+      { w: 6.8, sign: 5, awning: '#8d9a85', wall: 'brick', main: '#a35b45', stall: '#b9a78e', door: '#2d3345' },
+      { w: 6.0, sign: 7, awning: '#9a8095', wall: 'plaster', main: '#e6dcc9', stall: '#e0d2bd', door: '#4d3548' },
     ]
     const total = (L) => L.reduce((s, e) => s + (e.passage ?? e.w), 0), len = LX1 - LX0 - 1.2
     const place = (list, row) => {

@@ -25,18 +25,18 @@ function makeMaterials() {
   const M = {
     brick: std({ map: T.brickTex() }), ashlar: std({ map: T.ashlarTex() }), plaster: std({ map: T.plasterTex() }),
     trim: std({ roughness: 0.8 }), roof: std({ roughness: 0.78 }), metal: std({ roughness: 0.42, metalness: 0.65 }), wood: std({ roughness: 0.62 }),
-    glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: Object.assign(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), { userData: { glow: true } }),
+    shopin: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: true }), shopglass: new THREE.MeshStandardMaterial({ color: '#cfe0e4', transparent: true, opacity: 0.14, roughness: 0.04, metalness: 0, envMapIntensity: 2.6, depthWrite: false }), glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: Object.assign(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), { userData: { glow: true } }),
     awning: std({ side: THREE.DoubleSide, roughness: 0.95 }), leaf: std({ roughness: 1 }), trunk: std({ roughness: 1 }),
     sign: std({ map: T.signAtlas(), roughness: 0.65 }),
     grass: std({ map: T.grassTex(), roughness: 1 }),
-    slab: std({ map: T.slabTex(), ...off(1) }), sett: std({ map: T.settTex(), ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),
+    slab: std({ map: T.slabTex(), bumpMap: T.slabTex(), bumpScale: 1.2, ...off(1) }), sett: std({ map: T.settTex(), bumpMap: T.settTex(), bumpScale: 2.2, ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),
     slab2: std({ map: T.slabTex(), ...off(2) }), sett2: std({ map: T.settTex(), ...off(2) }), road2: std({ map: T.asphaltTex(), roughness: 0.96, ...off(2) }), gravel2: std({ map: T.gravelTex(), roughness: 1, ...off(2) }),
     paint: std({ roughness: 0.9, ...off(3) }),
   }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'grass']) { M[k].map.repeat.set(1, 1) }
   return M
 }
-const NOSHADOW = new Set(['glow', 'sign', 'paint', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2'])
+const NOSHADOW = new Set(['glow', 'shopin', 'sign', 'paint', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2'])
 const GROUND = new Set(['grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'paint'])
 
 // ---------------------------------------------------------------- water
@@ -85,7 +85,7 @@ export function StreetVisuals() {
         if (!acc.k) continue
         const isDetail = key.endsWith('+'), mk = isDetail ? key.slice(0, -1) : key
         const mat = M[mk] || M.trim
-        meshes.push({ key, geo: acc.geometry(), mat, detail: isDetail, cast: !NOSHADOW.has(mk) && !GROUND.has(mk), receive: mk !== 'glow', order: GROUND.has(mk) ? 0 : 1 })
+        meshes.push({ key, geo: acc.geometry(), mat, detail: isDetail, cast: !NOSHADOW.has(mk) && !GROUND.has(mk), receive: mk !== 'glow' && mk !== 'shopin', order: GROUND.has(mk) ? 0 : 1 })
       }
       if (meshes.length) {
         const all = new THREE.Box3(); meshes.forEach((m) => { m.geo.computeBoundingBox(); all.union(m.geo.boundingBox) })
@@ -114,7 +114,7 @@ export function StreetVisuals() {
       ...makeSet(P.carGeo('#3a3d44'), built.inst.car1), ...makeSet(P.carGeo('#8b9482'), built.inst.car2), ...makeSet(P.carGeo('#d6cdbc'), built.inst.car3), ...makeSet(P.carGeo('#6a3f46'), built.inst.car4),
       ...makeSet(P.bikeGeo(), built.inst.bike), ...makeSet(P.shrubGeo(), built.inst.shrub), ...makeSet(P.grassGeo(), built.inst.grass), ...makeSet(P.planterGeo(), built.inst.planter),
     ]
-    const palette = ['#7d8a45', '#6f7f3f', '#91893f', '#5f7440', '#a39445', '#6a7a3c', '#87803a']
+    const palette = ['#86a84e', '#729a46', '#9ab458', '#63914a', '#a8bb55', '#70a050', '#8cab45']
     let sd = 91; const R = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
     const trees = [], leafTex = P.leafTexture()
     for (const kind of ['plane', 'ornamental', 'clipped']) {
@@ -170,6 +170,7 @@ export function StreetVisuals() {
     normalMap.offset.x = (t * 0.012) % 1; normalMap.offset.y = (t * 0.007) % 1
     jetRefs.current.forEach((m) => { if (!m) return; const s = 0.82 + 0.18 * Math.sin(t * 2.1 + m.userData.k * 1.7); m.scale.y = s; m.position.y = m.userData.y + (s * 1.5) / 2 })
     const onStreet = world.level === 'street'
+    M.shopin.color.setScalar(0.52 + 0.44 * Math.min(1, LIVE.win))                                        // interiors read dim by day, glow at dusk
     for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * LIVE.lamp : 0
     if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
