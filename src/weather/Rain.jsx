@@ -49,7 +49,7 @@ void main() { if (vA < .01) discard; gl_FragColor = vec4(uColor, vA); }`
 
 const splashVS = /* glsl */`
 attribute vec4 aSeed;
-uniform float uTime, uRain, uGround, uLevel;
+uniform float uTime, uRain, uGround;
 uniform vec3 uCenter;
 varying vec2 vUV; varying float vT; varying float vOn;
 ${INSIDE}
@@ -76,6 +76,7 @@ function seeds(n, s) {
 }
 const quad = () => new THREE.PlaneGeometry(1, 1)
 
+const DBG = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('wdbg') : null
 export default function Rain() {
   const { scene } = useThree()
   const wx = useWeather()
@@ -98,6 +99,7 @@ export default function Rain() {
     if (streak.current) streak.current.visible = WX.rain > 0.01
     if (splash.current) splash.current.visible = WX.rain > 0.01 && (street || true)
   })
+  if (DBG === 'norain') return null
   return (
     <>
       <mesh ref={streak} geometry={sg} material={sm} frustumCulled={false} renderOrder={5} />

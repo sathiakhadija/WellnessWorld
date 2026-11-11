@@ -19,6 +19,7 @@ const fogBase = { near: 0, far: 0 }
 
 export default function Atmosphere({ sunRef, hemiRef, fillRef }) {
   const { scene, gl } = useThree()
+  if (typeof window !== 'undefined') window.__scene = scene
   const cur = useRef(null), exterior = useRef(null), last = useRef(''), clock = useRef(0), settled = useRef(true), tintTick = useRef(0)
   useEffect(() => {                                        // initial state = golden hour exactly as before
     const g = PRESETS.golden

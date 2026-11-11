@@ -19,7 +19,7 @@ export function applyWet(m, strength = 1) {
     shader.uniforms.uWetG = WET_U.uWetG
     shader.vertexShader = 'varying vec3 vWPw; varying vec3 vWNw;\n' + shader.vertexShader.replace('#include <project_vertex>',
       '#include <project_vertex>\n#ifdef USE_INSTANCING\n vec4 wwp = modelMatrix * instanceMatrix * vec4(transformed, 1.0);\n#else\n vec4 wwp = modelMatrix * vec4(transformed, 1.0);\n#endif\n vWPw = wwp.xyz; vWNw = normalize(mat3(modelMatrix) * objectNormal);')
-    shader.fragmentShader = NOISE + shader.fragmentShader
+    shader.fragmentShader = NOISE + "\n" + shader.fragmentShader
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
       { float up = smoothstep(.35, .85, normalize(vWNw).y);
         float pud = smoothstep(.56, .70, wn(vWPw.xz * .32) * .62 + wn(vWPw.xz * 1.15) * .38) * ${strength.toFixed(2)};
