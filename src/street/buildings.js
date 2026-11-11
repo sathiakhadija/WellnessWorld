@@ -174,9 +174,10 @@ export function shopBuilding(ch, F, o) {
   // display window: stall riser + glass + transom bar + mullions
   ch.box(F, winX0, winX1, 0.12, 0.78, -0.55, -0.4, stall, 'wood', 'fu')
   const lit = o.shopLit ?? true
-  pane(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.9, -0.5, lit)
+  if (lit) shopInterior(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.35)
+  else pane(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.9, -0.5, lit)
   strip(ch, F, 'trim+', stall, winX0, winX1, ground - 1.0, ground - 0.9, -0.48)
-  pane(ch, F, winX0 + 0.04, winX1 - 0.04, ground - 0.88, ground - 0.35, -0.5, lit)
+  if (!lit) pane(ch, F, winX0 + 0.04, winX1 - 0.04, ground - 0.88, ground - 0.35, -0.5, lit)
   const nm = Math.max(1, Math.round((winX1 - winX0) / 1.0))
   for (let i = 0; i <= nm; i++) { const x = winX0 + (i / nm) * (winX1 - winX0); strip(ch, F, 'trim+', stall, x - 0.035, x + 0.035, 0.78, ground - 0.35, -0.47) }
   // entrance recess: side reveals + door at the back, threshold step
@@ -240,6 +241,39 @@ export function shopBuilding(ch, F, o) {
   for (const [a, b] of piers) ch.solid(F, a, b, 0, ground, -1.1, 0, 'frontage')
   ch.solid(F, -w / 2, w / 2, ground - 0.4, top + 4, -1.1, 0, 'building')
   return { top: top + 0.7, dx }
+}
+
+// Lit shop interior seen through the display window: warm back wall + floor + ceiling glow, shelving / counter / pendants and themed goods
+// (books, loaves, flowers, garments, ceramics) built as small emissive-lit blocks so the window reads as a real, populated room.
+function shopInterior(ch, F, x0, x1, y0, y1) {
+  const R = ch.R, D = 3.4, z0 = -0.62, zb = z0 - D, w = x1 - x0, theme = (R() * 5) | 0
+  const warm = (h, k = 1) => col(h).multiplyScalar(k)
+  // back wall as a vertical gradient of glow strips; floor + ceiling
+  const wallC = ['#d9a868', '#cf9a5c', '#bd8650', '#9c6a3c']
+  const bandH = (y1 - y0) / wallC.length
+  wallC.forEach((c, i) => ch.box(F, x0, x1, y1 - (i + 1) * bandH, y1 - i * bandH, zb - 0.02, zb, warm(c), 'glow', 'f', 1, 1, 0))
+  ch.box(F, x0, x1, y0, y0 + 0.02, zb, z0, warm('#b98a58'), 'glow', 'u', 1, 1, 0)
+  ch.box(F, x0, x1, y1 - 0.02, y1, zb, z0, warm('#e8c28a'), 'glow', 'd', 1, 1, 0)
+  for (const s of [x0, x1]) ch.box(F, s, s + 0.02, y0, y1, zb, z0, warm('#e9c48c'), 'glow', s === x0 ? 'r' : 'l', 1, 1, 0)
+  // pendants
+  const np = Math.max(1, Math.round(w / 1.8))
+  for (let i = 0; i < np; i++) { const px = x0 + (i + 0.5) * w / np; ch.box(F, px - 0.012, px + 0.012, y1 - 0.65, y1, z0 - 1.3, z0 - 1.28, col('#3a2f28'), 'wood', 'f', 1, 1, 0); ch.box(F, px - 0.14, px + 0.14, y1 - 0.8, y1 - 0.62, z0 - 1.44, z0 - 1.16, warm('#fff4d6'), 'glow', 'fulrb', 1, 1, 0) }
+  const dark = col('#4a382c')
+  // shelving along the back wall (dark timber uprights + shelves) carrying themed goods
+  const shelfZ = zb + 0.06, rows = 3
+  for (let i = 0; i <= Math.round(w / 0.9); i++) { const x = x0 + (i / Math.round(w / 0.9)) * (w - 0.04); ch.box(F, x, x + 0.04, y0 + 0.02, y1 - 0.25, shelfZ, shelfZ + 0.32, dark, 'wood', 'fulr', 1, 1, 0) }
+  const palettes = [['#8b3a3a', '#d6c19a', '#3f5f7a', '#c79a3a', '#5a7a4a'], ['#c8884a', '#e0aa62', '#a3622f', '#f0cf94'], ['#e8a0b4', '#f4e4e8', '#8fb56e', '#d46a8a', '#f6d8a0'], ['#7a8f9e', '#d9b9a0', '#a84f4f', '#efe3d0'], ['#e9e1d3', '#b8a38a', '#7d6c58', '#d1c3ad']][theme]
+  for (let r = 0; r < rows; r++) {
+    const sy = y0 + 0.55 + r * ((y1 - y0 - 1.0) / rows)
+    ch.box(F, x0, x1, sy, sy + 0.035, shelfZ, shelfZ + 0.32, dark, 'wood', 'fu', 1, 1, 0)
+    let x = x0 + 0.1
+    while (x < x1 - 0.2) { const bw = 0.05 + R() * 0.12, bh = 0.18 + R() * 0.26; ch.box(F, x, x + bw, sy + 0.035, sy + 0.035 + (theme === 2 ? bh * 0.7 : bh), shelfZ + 0.04, shelfZ + 0.3, warm(palettes[(R() * palettes.length) | 0], 0.9 + R() * 0.3), 'glow', 'f', 1, 1, 0); x += bw + 0.012 + (R() < 0.15 ? 0.2 : 0) }
+  }
+  // counter / display table nearer the glass
+  if (theme === 1 || theme === 4) { ch.box(F, x0 + 0.3, x1 - 0.3, y0, y0 + 0.9, zb + 1.0, zb + 1.7, dark, 'wood', 'fulr', 1, 1, 0); ch.box(F, x0 + 0.3, x1 - 0.3, y0 + 0.9, y0 + 0.94, zb + 0.96, zb + 1.74, warm('#efe4d0'), 'trim', 'fulr', 1, 1, 0)
+    for (let i = 0; i < 6; i++) { const px = x0 + 0.5 + R() * (w - 1.0); ch.box(F, px, px + 0.16, y0 + 0.94, y0 + 1.08, zb + 1.2, zb + 1.5, warm(palettes[(R() * palettes.length) | 0], 1.05), 'glow', 'fulr', 1, 1, 0) } }
+  if (theme === 2) for (let i = 0; i < Math.max(2, Math.round(w / 0.8)); i++) { const px = x0 + 0.3 + (i + 0.5) * (w - 0.6) / Math.max(2, Math.round(w / 0.8)); ch.box(F, px - 0.14, px + 0.14, y0, y0 + 0.5, zb + 1.2, zb + 1.5, col('#5e5a52'), 'metal', 'fulr', 1, 1, 0); for (let k = 0; k < 4; k++) ch.box(F, px - 0.1 + R() * 0.05, px + 0.1, y0 + 0.5, y0 + 0.5 + 0.25 + R() * 0.25, zb + 1.25 + R() * 0.1, zb + 1.45, warm(palettes[(R() * palettes.length) | 0], 1.05), 'glow', 'fulr', 1, 1, 0) }
+  if (theme === 3) { for (let i = 0; i < 3; i++) { const px = x0 + (i + 0.5) * w / 3; ch.box(F, px - 0.12, px + 0.12, y0 + 0.4, y0 + 1.6, zb + 1.3, zb + 1.5, warm(palettes[i % palettes.length], 1.05), 'glow', 'fulr', 1, 1, 0); ch.box(F, px - 0.015, px + 0.015, y0, y0 + 0.4, zb + 1.38, zb + 1.42, dark, 'wood', 'fulr', 1, 1, 0) } }
 }
 const W = (F, x, y, z) => [F.x + x * F.c + z * F.s, F.y + y, F.z - x * F.s + z * F.c]
 const dirW = (F) => [F.s, 0, F.c]
