@@ -47,3 +47,8 @@ Blockers still open: 3 (visual mismatch vs collage, partially), 4 (flat interior
 
 ## Next work
 Penthouse corrections; Blender-modelled townhouse door/window/cornice kits; more tree species + bark; interior depth/bloom; larger skyline; minimap verification; M2 profiling by the user (Safari + devtools) since it can't be measured here.
+
+## Round 3 update (colour/lighting vs collage) — still NOT READY
+Evidence: `docs/acceptance/round3/` (`cmp2.png` = collage crops left, game right; `golden_*.png`; `lane_lighting_grid.png` = golden / street / afternoon / blue).
+Changed: honey brick palette; curtained lit windows; per-shop interior colours; rose awnings + charcoal-bronze frames; black wrought-iron riverside railings with stone posts; deeper peach-pink golden hour (lower sun, purple-to-peach sky) + CSS vignette grade; magenta cast on cobbles then reduced.
+Remaining largest gaps vs collage: (1) facade modelling (no stone window surrounds, arched doors, steps/railings, planted balconies); (2) shop interiors lack the collage's glowing, richly furnished depth; (3) skyline is far smaller than the collage's waterfront (it is anchored to the approved penthouse reference photo — enlarging it would break that match); (4) boxy car; (5) penthouse corrections still not done; (6) minimap still not visually verified.
