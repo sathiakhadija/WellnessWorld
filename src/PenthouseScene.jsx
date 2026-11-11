@@ -151,7 +151,10 @@ function CleanHide({ children }) {
 }
 
 const walkDir = new THREE.Vector3()
-const LEGACY = new URLSearchParams(window.location.search).get('model') === 'legacy'     // ?model=legacy keeps the old primitive placeholder for A/B checks
+// Active visuals: the ORIGINAL pill avatar + geometric cat are the default placeholders. The V12 procedural character/kitten/companion
+// are experimental and OFF unless ?model=v12 is passed (kept in src/character and src/companion for later replacement work).
+const EXPERIMENTAL = new URLSearchParams(window.location.search).get('model') === 'v12'
+const LEGACY = !EXPERIMENTAL
 
 function Player({ spawn, bodyRef, meshRef }) {
   const heading = useRef(0)
@@ -166,7 +169,7 @@ function Player({ spawn, bodyRef, meshRef }) {
       const r = (input.down('KeyD') || input.down('ArrowRight') ? 1 : 0) - (input.down('KeyA') || input.down('ArrowLeft') ? 1 : 0)
       const y = rigShared.followYaw                               // walk relative to where the camera looks
       walkDir.set(-Math.sin(y) * f + Math.cos(y) * r, 0, -Math.cos(y) * f - Math.sin(y) * r)
-      if (walkDir.lengthSq() && !world.playerLock) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.0 : 1.3 }
+      if (walkDir.lengthSq() && !world.playerLock) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? (EXPERIMENTAL ? 3.0 : 3.2) : (EXPERIMENTAL ? 1.3 : 1.7) }
     }
     speedRef.current = speed
     const tp = body.translation(); world.player.x = tp.x; world.player.y = tp.y; world.player.z = tp.z
