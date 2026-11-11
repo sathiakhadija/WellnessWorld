@@ -9,6 +9,7 @@ import * as THREE from 'three'
 import CameraRig, { GROUPS, rigShared } from './CameraRig.jsx'
 import HUD from './HUD.jsx'
 import { Avatar, Cat } from './Avatar.jsx'
+import { LemonGirl, Rabbit, TEMP_PLAYER, TEMP_PET } from './TempModels.jsx'
 import { PlayerModel } from './character'
 import Companion from './companion/Companion.jsx'
 import { input } from './input.js'
@@ -271,7 +272,7 @@ function Player({ spawn, bodyRef, meshRef }) {
     <RigidBody ref={bodyRef} position={[spawn.x, spawn.y + 1, spawn.z]} enabledRotations={[false, false, false]} colliders={false}>
       {/* 1.54 m tall capsule (2 x 0.55 + 2 x 0.22), 0.44 m wide: a real person, not a pill */}
       <CapsuleCollider args={[0.55, 0.22]} position={[0, 0.77, 0]} collisionGroups={interactionGroups([GROUPS.player], [GROUPS.world, GROUPS.glass])} />
-      <group ref={meshRef}>{LEGACY ? <Avatar speedRef={speedRef} /> : <PlayerModel speedRef={speedRef} />}</group>
+      <group ref={meshRef}>{LEGACY ? (TEMP_PLAYER ? <Suspense fallback={<Avatar speedRef={speedRef} />}><LemonGirl speedRef={speedRef} /></Suspense> : <Avatar speedRef={speedRef} />) : <PlayerModel speedRef={speedRef} />}</group>
     </RigidBody>
   )
 }
@@ -314,7 +315,7 @@ export default function PenthouseScene() {
             <LevelGate level="penthouse">
               {!OFF.has('tree') && <CherryTree />}
               {!OFF.has('tree') && <Petals />}
-              {LEGACY ? <CleanHide><Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></CleanHide> : <Companion />}
+              {LEGACY ? <CleanHide>{TEMP_PET ? <Suspense fallback={null}><Rabbit position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></Suspense> : <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />}</CleanHide> : <Companion />}
             </LevelGate>
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>

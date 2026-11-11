@@ -55,3 +55,9 @@ Remaining largest gaps vs collage: (1) facade modelling (no stone window surroun
 
 ## Round 4 (townhouses) — still NOT READY
 Evidence: `docs/acceptance/round4/`. Added stone architraves/keystones/pediments, columned door porticos, cream ground floors, more warm lit windows, steel-blue cars. Still open: skyline scale, shop-interior richness, car model quality, penthouse corrections, minimap visual check, M2 profiling, AI 3D tools.
+
+## Temporary models (added after Round 4)
+- Player: `public/models/limon.glb` ("hot lemon girl", decimated 1.5M→30k tris, 2048² textures), static mesh, procedural bob/sway; scaled to 1.62 m.
+- Pet: `public/models/rabbit.glb` (158k→12k tris), idle hop; 0.34 m.
+- Originals reachable: `?model=pill`, `?pet=cat`; V12 via `?model=v12`.
+- Status: Implemented + visually verified in the penthouse (docs/acceptance/temp_models/). NOT tested in street level, walking, or on M2/Safari. No rig/animation (static pose); rabbit does not follow the player.
