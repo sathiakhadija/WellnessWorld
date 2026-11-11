@@ -9,6 +9,9 @@ import * as THREE from 'three'
 import CameraRig, { GROUPS, rigShared } from './CameraRig.jsx'
 import HUD from './HUD.jsx'
 import { Avatar, Cat } from './Avatar.jsx'
+import Rain from './weather/Rain.jsx'
+import RainAudio from './weather/RainAudio.jsx'
+import { applyWindowRain } from './weather/windowRain.js'
 import { LemonGirl, Rabbit, RabbitPlayer, PLAYER_KIND, TEMP_PLAYER, TEMP_PET } from './TempModels.jsx'
 import { PlayerModel } from './character'
 import Companion from './companion/Companion.jsx'
@@ -51,7 +54,7 @@ const TONE = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neu
 function AreaLight({ position, target, rotationY = 0, color, intensity, width, height }) {
   const ref = useRef()
   useLayoutEffect(() => { ref.current.lookAt(...target) }, [target])
-  return <group position={position} rotation={[0, rotationY, 0]}><rectAreaLight ref={ref} color={color} intensity={intensity} width={width} height={height} /></group>
+  return <group position={position} rotation={[0, rotationY, 0]}><rectAreaLight userData={{ wx: 1 }} ref={ref} color={color} intensity={intensity} width={width} height={height} /></group>
 }
 
 function SkyEnv() {
@@ -116,7 +119,7 @@ function Penthouse({ onSpawn, onMats }) {
         }
         if (m?.name) mats[m.name] = m
         if (m?.name?.includes('Glass')) o.castShadow = false      // shadow maps ignore transparency: glass would block the whole sun
-        if (m?.name?.includes('Glass')) { m.transparent = true; m.opacity = 0.12; m.depthWrite = false; m.side = THREE.DoubleSide }
+        if (m?.name?.includes('Glass')) { applyWindowRain(m); m.transparent = true; m.opacity = 0.12; m.depthWrite = false; m.side = THREE.DoubleSide }
       }
     })
     remove.forEach((o) => o.parent?.remove(o))
@@ -293,6 +296,8 @@ export default function PenthouseScene() {
         <SkyDome />
         <Suspense fallback={null}><SkyEnv key={atmo.rev} /></Suspense>
         <Skyline />
+        <Rain />
+        <RainAudio />
         {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y). Target = room centre, shadow frustum covers the whole penthouse */}
         <primitive object={sunTarget} position={[-1, 0, -6]} />
         <directionalLight ref={sunRef} target={sunTarget} color={L.sunCol} intensity={L.sun} position={[20, 8, -51]} castShadow shadow-mapSize={[4096, 4096]}

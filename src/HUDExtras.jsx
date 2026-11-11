@@ -6,6 +6,7 @@ import { getStreet } from './street/Street.jsx'
 import { BX } from './street/plan.js'
 import { ORDER, PRESETS, atmoStore, useAtmo } from './atmosphere.js'
 import { useDiscoveries } from './discoveries.js'
+import { KINDS, KIND_ORDER, weatherStore, useWeather, setWeather } from './weather/weather.js'
 
 const X0 = -132, X1 = 88, Z0 = -168, Z1 = 130, S = 2.5                      // base map: world metres -> px (river at the top)
 const COL = { road: '#4c4a55', slab: '#d8cfbd', sett: '#b8a893', gravel: '#cfc3ab', grass: '#9bb872', paint: '#e8e1d2' }
@@ -47,7 +48,43 @@ const CSS = `
 .wwx-atmo button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;opacity:.7;transition:all .2s}
 .wwx-atmo button:hover{opacity:1;background:rgba(255,255,255,.1)}.wwx-atmo button.on{opacity:1;background:rgba(236,210,166,.28);box-shadow:0 0 0 1px rgba(236,210,166,.5)}
 .wwx-atmo .lbl{padding:0 8px 0 6px;font-size:11.5px;letter-spacing:.03em;opacity:.9;min-width:112px}.wwx-atmo .auto{font-size:11px;width:auto;padding:0 9px;border-radius:999px}
+
+.wwx-wx{position:fixed;left:16px;bottom:64px;z-index:5;display:flex;flex-direction:column;gap:6px;color:#f4ebe0;font:12px -apple-system,system-ui,sans-serif;background:rgba(26,19,30,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:6px 8px}
+.wwx-wx .row{display:flex;gap:4px;align-items:center}
+.wwx-wx button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;opacity:.7;transition:all .2s}
+.wwx-wx button:hover{opacity:1;background:rgba(255,255,255,.1)}.wwx-wx button.on{opacity:1;background:rgba(160,190,230,.28);box-shadow:0 0 0 1px rgba(170,200,240,.55)}
+.wwx-wx .lbl{padding:0 8px 0 6px;font-size:11.5px;letter-spacing:.03em;opacity:.9;min-width:98px}
+.wwx-wx .set{display:flex;gap:8px;align-items:center;font-size:11px;padding:2px 4px 4px}.wwx-wx .set input[type=range]{width:92px;accent-color:#a9c4ec}
+.wwx-wx .set button{width:auto;height:24px;border-radius:999px;padding:0 9px;font-size:11px}
+.wwx-wx .set select{background:rgba(255,255,255,.1);color:#f4ebe0;border:0;border-radius:8px;padding:2px 4px;font-size:11px}
 `
+
+export function WeatherPanel() {
+  const w = useWeather(), c = useCam(), [open, setOpen] = useState(false)
+  useEffect(() => {
+    const on = (e) => { if (e.metaKey || e.ctrlKey || e.altKey) return; const i = KIND_ORDER.indexOf(weatherStore.get().kind); if (e.key === ';') setWeather(KIND_ORDER[(i + KIND_ORDER.length - 1) % KIND_ORDER.length]); if (e.key === "'") setWeather(KIND_ORDER[(i + 1) % KIND_ORDER.length]) }
+    window.addEventListener('keydown', on); return () => window.removeEventListener('keydown', on)
+  }, [])
+  if (c.clean) return null
+  return (
+    <div className="wwx-wx" role="group" aria-label="Weather">
+      <style>{CSS}</style>
+      <div className="row">
+        {KIND_ORDER.map((k) => <button key={k} className={w.kind === k ? 'on' : ''} title={KINDS[k].label} aria-label={KINDS[k].label} onClick={() => setWeather(k)}>{KINDS[k].icon}</button>)}
+        <span className="lbl">{KINDS[w.kind].label}</span>
+        <button title="Rain sound + quality" aria-label="Weather settings" onClick={() => setOpen(!open)}>{open ? '▾' : '⚙︎'}</button>
+      </div>
+      {open && (
+        <div className="set">
+          <span title="Rain volume">🔊</span>
+          <input type="range" min="0" max="1" step="0.05" value={w.vol} aria-label="Rain volume" onChange={(e) => weatherStore.set({ vol: parseFloat(e.target.value) })} />
+          <button className={w.mute ? 'on' : ''} onClick={() => weatherStore.set({ mute: !w.mute })}>{w.mute ? 'Muted' : 'Mute'}</button>
+          <select aria-label="Weather quality" value={w.quality} onChange={(e) => weatherStore.set({ quality: e.target.value })}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function Atmospheres() {
   const a = useAtmo(), c = useCam()

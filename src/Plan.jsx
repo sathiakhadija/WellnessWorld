@@ -11,6 +11,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { GROUPS } from './CameraRig.jsx'
 import { world, occupied } from './world.js'
 import { camStore, toast } from './camStore.js'
+import { applyWet } from './weather/wet.js'
 import KIT from './baked/interior.json'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
@@ -168,7 +169,7 @@ function makeMats(src = {}) {
     doorHi: std('#d6c4a6', { roughness: 0.5 }),
     walnutHi: std('#41322a', { roughness: 0.38 }),                                          // cream satin paint
     walnut: std('#2c211c', { roughness: 0.42 }),                                          // espresso entrance door
-    limestone: new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }),
+    limestone: (() => { const m = new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }); applyWet(m); return m })(),
     deckSide: std('#cfc4b2', { roughness: 0.8 }),
     balGlass: new THREE.MeshStandardMaterial({ color: '#d4ebe8', roughness: 0.05, metalness: 0, transparent: true, opacity: 0.14, depthWrite: false }),
     black: std('#101012', { metalness: 0, roughness: 0.9, envMapIntensity: 0 }),
@@ -331,8 +332,8 @@ function Entrance({ M }) {
         </RigidBody>
       )}
       {[0.06, 2.34].map((x, i) => <Baked key={i} name="sconce" M={M} position={[x, 1.55, -0.0]} rotY={Math.PI} />)}
-      <pointLight position={[0.06, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
-      <pointLight position={[2.34, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
+      <pointLight userData={{ wx: 1 }} position={[0.06, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
+      <pointLight userData={{ wx: 1 }} position={[2.34, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
     </>
   )
 }
@@ -456,8 +457,8 @@ function Balcony({ M }) {
         <CuboidCollider args={[(x1 - xi) / 2, T / 2, (zN - zF) / 2]} position={[(xi + x1) / 2, -T / 2, (zF + zN) / 2]} collisionGroups={WORLD} />
         {g.cols.map((c, i) => <CuboidCollider key={i} args={c.a} position={c.p} collisionGroups={GLASS} />)}
       </RigidBody>
-      <pointLight position={[0.5, 0.6, -13.2]} intensity={1.2} distance={5} decay={1.6} color="#ffc27a" />
-      <pointLight position={[5.2, 0.6, -8]} intensity={1.0} distance={5} decay={1.6} color="#ffc27a" />
+      <pointLight userData={{ wx: 1 }} position={[0.5, 0.6, -13.2]} intensity={1.2} distance={5} decay={1.6} color="#ffc27a" />
+      <pointLight userData={{ wx: 1 }} position={[5.2, 0.6, -8]} intensity={1.0} distance={5} decay={1.6} color="#ffc27a" />
     </>
   )
 }
@@ -476,11 +477,11 @@ function RoomLights({ M }) {
         <mesh key={i} position={p} rotation={[Math.PI / 2, 0, 0]} material={M.downlight}><circleGeometry args={[0.075, 20]} /></mesh>
       ))}
       {/* warm wash from the brass sconces / cove onto the panelled wall and doors */}
-      <pointLight position={[-3.9, 2.3, -4.43]} intensity={4} distance={6} decay={1.5} color="#ffbf7a" />
-      <pointLight position={[-3.9, 2.3, -8.1]} intensity={3} distance={6} decay={1.5} color="#ffbf7a" />
-      <pointLight position={[-3.9, 2.3, -11.1]} intensity={4} distance={6} decay={1.5} color="#ffbf7a" />
-      <pointLight position={[-7.2, 3.0, -6.0]} intensity={7} distance={9} decay={1.5} color="#ffc486" />
-      <pointLight position={[-6.7, 3.0, -10.05]} intensity={5} distance={7} decay={1.5} color="#ffd2a0" />
+      <pointLight userData={{ wx: 1 }} position={[-3.9, 2.3, -4.43]} intensity={4} distance={6} decay={1.5} color="#ffbf7a" />
+      <pointLight userData={{ wx: 1 }} position={[-3.9, 2.3, -8.1]} intensity={3} distance={6} decay={1.5} color="#ffbf7a" />
+      <pointLight userData={{ wx: 1 }} position={[-3.9, 2.3, -11.1]} intensity={4} distance={6} decay={1.5} color="#ffbf7a" />
+      <pointLight userData={{ wx: 1 }} position={[-7.2, 3.0, -6.0]} intensity={7} distance={9} decay={1.5} color="#ffc486" />
+      <pointLight userData={{ wx: 1 }} position={[-6.7, 3.0, -10.05]} intensity={5} distance={7} decay={1.5} color="#ffd2a0" />
     </>
   )
 }

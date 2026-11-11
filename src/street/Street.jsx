@@ -1,5 +1,6 @@
 // Street level: turns the masterplan (plan.js) into meshes, instanced props, colliders, lights, water and the lift. Everything here lives ~87 m below the
 // penthouse, in the same world coordinates, so the penthouse's rear windows look straight down onto it.
+import { applyWet } from '../weather/wet.js'
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { RigidBody, CuboidCollider, CylinderCollider } from '@react-three/rapier'
@@ -34,6 +35,7 @@ function makeMaterials() {
     paint: std({ roughness: 0.9, ...off(3) }),
   }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'grass']) { M[k].map.repeat.set(1, 1) }
+  for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']) applyWet(M[k])       // rain: darker, glossier, puddles
   return M
 }
 const NOSHADOW = new Set(['glow', 'shopin', 'sign', 'paint', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2'])

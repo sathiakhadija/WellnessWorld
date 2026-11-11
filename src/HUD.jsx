@@ -2,7 +2,7 @@ import { Fragment, useRef } from 'react'
 import { DESTINATIONS } from './destinations.js'
 import { world } from './world.js'
 import { useCam, camStore } from './camStore.js'
-import { Atmospheres, Minimap, Grade } from './HUDExtras.jsx'
+import { Atmospheres, Minimap, Grade, WeatherPanel } from './HUDExtras.jsx'
 
 const MODES = [
   { id: 'follow', key: '1', label: 'Follow' },
@@ -99,7 +99,7 @@ export default function HUD() {
       ) : (
         <div className="ww-min" onClick={() => camStore.set({ help: true })}>Controls · H</div>
       )}
-      <Grade /><Atmospheres /><Minimap />
+      <Grade /><Atmospheres /><WeatherPanel /><Minimap />
       <div className="ww-prompt" style={{ opacity: show ? 1 : 0, transform: `translateX(-50%) translateY(${show ? 0 : 6}px)` }}><kbd>Enter</kbd>{last.current}</div>
       <div className="ww-toast" style={{ opacity: c.toast ? 1 : 0 }}>{c.toast}</div>
       <div className="ww-ov" style={{ opacity: ov ? 1 : 0, pointerEvents: ov ? 'auto' : 'none' }}>
