@@ -61,3 +61,6 @@ Evidence: `docs/acceptance/round4/`. Added stone architraves/keystones/pediments
 - Pet: `public/models/rabbit.glb` (158k→12k tris), idle hop; 0.34 m.
 - Originals reachable: `?model=pill`, `?pet=cat`; V12 via `?model=v12`.
 - Status: Implemented + visually verified in the penthouse (docs/acceptance/temp_models/). NOT tested in street level, walking, or on M2/Safari. No rig/animation (static pose); rabbit does not follow the player.
+
+## Penthouse door/wall correction (round 5)
+Cause of grey-green walls: GRADE multiplied plaster green ×1.12 on a taupe base. Now warm ivory (set), trim/ceiling/skirting cream, warm interior ambient (preset-scaled). Entrance door + casing cream with brass (was espresso walnut/dark linings); 12 cm door-head gap closed. Visually verified (headless, golden hour) in docs/acceptance/penthouse_door_wall/. Not yet verified in other presets; bedroom/bathroom doors still read pink under golden sun; no regression suites re-run.

@@ -173,7 +173,7 @@ function makeMats(src = {}) {
     stone: std('#d8cab6', { roughness: 0.55 }),
     door: std('#efe5d2', { roughness: 0.55 }),
     dk: std('#2d2019', { roughness: 0.5 }),
-    doorHi: std('#e6d9c3', { roughness: 0.5 }),
+    doorHi: std('#d6c4a6', { roughness: 0.5 }),
     walnutHi: std('#41322a', { roughness: 0.38 }),                                          // cream satin paint
     walnut: std('#2c211c', { roughness: 0.42 }),                                          // espresso entrance door
     limestone: new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }),

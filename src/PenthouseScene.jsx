@@ -40,7 +40,7 @@ export const L = {
 // which the real-time renderer does not have, so the surfaces that receive that bounce are lifted and warmed here.
 const GRADE = {
   WW_Parquet_Baked_GAME: { mul: [L.floorR, L.floorG, L.floorB], env: L.floorEnv },
-  WW_Plaster_Ivory_GAME: { set: [0.80, 0.69, 0.55] }      // warm ivory/cream (was a green-biased mul that read sage-grey in shade),
+  WW_Plaster_Ivory_GAME: { set: [0.70, 0.60, 0.47] },      // warm ivory/cream (was a green-biased mul that read sage-grey in shade)
   WW_Ceiling_Ivory_GAME: { set: [0.86, 0.78, 0.66] },
   WW_Trim_Satin_GAME:    { set: [0.86, 0.77, 0.63] },
   WW_Skirting_GAME:      { set: [0.86, 0.77, 0.63] },
@@ -227,7 +227,7 @@ function SunRig({ lightRef, targetRef, fillRef }) {
   return null
 }
 
-const AMB = { morning: 0.35, afternoon: 0.3, golden: 0.3, blue: 0.2, night: 0.1 }   // warm interior bounce so shadowed ivory walls stay cream, not grey-green
+const AMB = { morning: 0.35, afternoon: 0.3, golden: 0.15, blue: 0.2, night: 0.1 }   // warm interior bounce so shadowed ivory walls stay cream, not grey-green
 const walkDir = new THREE.Vector3()
 // Active visuals: the ORIGINAL pill avatar + geometric cat are the default placeholders. The V12 procedural character/kitten/companion
 // are experimental and OFF unless ?model=v12 is passed (kept in src/character and src/companion for later replacement work).
