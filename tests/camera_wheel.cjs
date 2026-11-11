@@ -3,7 +3,7 @@ const d = (a, b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
 (async () => {
   const b = await chromium.launch({ args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'] });
   const p = await b.newPage({ viewport: { width: 900, height: 500 } });
-  await p.goto('http://localhost:4173/');
+  await p.goto((process.env.URL || 'http://localhost:4173/?off=tree,hood'));
   await p.waitForFunction(() => window.__ww && window.__ww.player(), null, { timeout: 60000 });
   await p.waitForTimeout(3000);
   const st = () => p.evaluate(() => ({ cam: window.__ww.cam(), pl: window.__ww.player() }));

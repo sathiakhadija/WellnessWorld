@@ -8,6 +8,7 @@ let snap = {
   invertScroll: false,
   help: true,
   toast: '',
+  prompt: '',          // contextual interaction hint ("Enter - open the bedroom door")
 }
 const subs = new Set()
 

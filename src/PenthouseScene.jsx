@@ -12,6 +12,9 @@ import { Avatar, Cat } from './Avatar.jsx'
 import { input } from './input.js'
 import { camStore } from './camStore.js'
 import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
+import Plan from './Plan.jsx'
+import CherryTree from './Tree.jsx'
+import { world, OFF } from './world.js'
 
 RectAreaLightUniformsLib.init()
 
@@ -51,11 +54,33 @@ function SkyEnv() {
   return <Environment resolution={128} frames={1}><mesh material={mat}><sphereGeometry args={[50, 32, 16]} /></mesh></Environment>
 }
 
-function Penthouse({ onSpawn }) {
+// Remove triangles from a geometry (in place) where pred(pos, a, b, c) is true. Used to cut the V8 left wall / side cells / far glass out of the GLB,
+// because Plan.jsx rebuilds them (wider doors, real bedroom + bathroom, sliding balcony door).
+function dropTris(geom, pred) {
+  const pos = geom.attributes.position, idx = geom.index
+  const n = idx ? idx.count : pos.count
+  const keep = []
+  for (let i = 0; i < n; i += 3) {
+    const a = idx ? idx.getX(i) : i, b = idx ? idx.getX(i + 1) : i + 1, c = idx ? idx.getX(i + 2) : i + 2
+    if (!pred(pos, a, b, c)) keep.push(a, b, c)
+  }
+  geom.setIndex(keep)
+  return geom
+}
+const all3 = (pos, a, b, c, f) => f(pos.getX(a), pos.getY(a), pos.getZ(a)) && f(pos.getX(b), pos.getY(b), pos.getZ(b)) && f(pos.getX(c), pos.getY(c), pos.getZ(c))
+const LEFTWALL = (x) => x <= -4.38                                           // left-wall slab, linings, panelling, skirting, cornice (x -4.85..-4.38)
+const FAR_GLASS_BAY2 = (x, y, z) => x > -1.91 && x < 1.21 && z < -11.78 && z > -11.80   // the middle far glass pane (replaced by the sliding door)
+const FAR_GLASS_COL = (x, y, z) => x > -4.46 && x < 3.62 && z < -11.75 && z > -11.89   // far-wall glass collider (re-created in Plan.jsx with a door gap)
+
+function Penthouse({ onSpawn, onMats }) {
   const { scene } = useGLTF('/wellness_world_penthouse_v8.glb')
-  const { visual, colliders } = useMemo(() => {
+  const { visual, colliders, mats } = useMemo(() => {
     const colliders = []
+    const remove = [], mats = {}
     scene.traverse((o) => {
+      if (o.name?.startsWith('WW_Adjoining') || o.name?.startsWith('WW_Blossom')) { remove.push(o); return }   // old side cells (+ their props) and the old tree: rebuilt in code
+      if (o.isMesh && ['WW_Walls', 'WW_Walls_1', 'WW_Trim_Mouldings', 'WW_Trim_Mouldings_1'].includes(o.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, (x) => LEFTWALL(x)))
+      if (o.isMesh && o.name === 'WW_Window_Glass') dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FAR_GLASS_BAY2))
       if (o.userData?.ww_collider) colliders.push(o)          // exported "extras" from Blender
       if (o.userData?.ww_role === 'player_spawn') onSpawn?.(o.getWorldPosition(new THREE.Vector3()))
       if (o.isMesh && !o.userData?.ww_collider) {
@@ -69,22 +94,29 @@ function Penthouse({ onSpawn }) {
           if (gr.env) m.envMapIntensity = gr.env
           if (gr.rough !== undefined) m.roughness = gr.rough
         }
+        if (m?.name) mats[m.name] = m
         if (m?.name?.includes('Glass')) o.castShadow = false      // shadow maps ignore transparency: glass would block the whole sun
         if (m?.name?.includes('Glass')) { m.transparent = true; m.opacity = 0.12; m.depthWrite = false; m.side = THREE.DoubleSide }
       }
     })
+    remove.forEach((o) => o.parent?.remove(o))
     scene.updateMatrixWorld(true)
     colliders.forEach((c) => {                                    // bake world transform into plain arrays for Rapier
       const g = c.geometry.clone().applyMatrix4(c.matrixWorld)
+      const kind = c.userData.ww_collider_kind
+      if (kind === 'walls') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, (x) => x <= -4.44))                           // left wall + old cells
+      if (kind === 'floor') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, (x) => x <= -4.84))                           // old cell floors
+      if (kind === 'glass') dropTris(g, (pos, a, b, cc) => all3(pos, a, b, cc, FAR_GLASS_COL))
       c.userData.__pos = new Float32Array(g.attributes.position.array)
       c.userData.__idx = new Uint32Array(g.index.array)
       c.visible = false                                           // invisible physics-only meshes
     })
-    return { visual: scene, colliders }
+    return { visual: scene, colliders, mats }
   }, [scene])
   return (
     <>
       <primitive object={visual} />
+      {!OFF.has('plan') && <Plan mats={mats} />}
       {colliders.map((c) => (
         <RigidBody key={c.uuid} type="fixed" colliders={false}>
           <TrimeshCollider
@@ -115,6 +147,7 @@ function Player({ spawn, bodyRef, meshRef }) {
       if (walkDir.lengthSq()) { walkDir.normalize(); speed = input.down('ShiftLeft') || input.down('ShiftRight') ? 3.2 : 1.7 }
     }
     speedRef.current = speed
+    const tp = body.translation(); world.player.x = tp.x; world.player.y = tp.y; world.player.z = tp.z
     const lin = body.linvel()
     body.setLinvel({ x: walkDir.x * speed, y: lin.y, z: walkDir.z * speed }, true)
     if (speed > 0 && meshRef.current) {                           // turn the placeholder to face its walking direction
@@ -161,9 +194,7 @@ export default function PenthouseScene() {
           <Physics gravity={[0, -9.8, 0]}>
             <Penthouse onSpawn={(p) => spawn.current.copy(p)} />
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
-            {[[-6.6, 2.5, -5.6, 3], [-6.6, 2.5, -7.9, 3], [-6.6, 2.5, -10.4, 3.5]].map((l, i) => (
-              <pointLight key={i} position={[l[0], l[1], l[2]]} intensity={l[3]} distance={5.5} decay={1.6} color="#ffc486" />
-            ))}
+            {!OFF.has('tree') && <CherryTree />}
             <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>

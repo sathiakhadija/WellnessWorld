@@ -56,17 +56,16 @@ export function buildLayout() {
 
   // lit low-rise waterfront in front of the tower bases (reference: warm glittering band between towers and river)
   const rb = seeded(21)
-  for (let i = 0; i < 120; i++) {
-    const azDeg = -75 + rb() * 150
-    const D = 1000 + rb() * 100
-    const a = rad(azDeg)
+  for (let i = 0; i < 150; i++) {
+    const zb = -(1020 + rb() * 90), xb = (rb() * 2 - 1) * 3700                       // far bank is a straight embankment (the river runs left-right)
+    const a = Math.atan2(xb, -zb)
     const w = 18 + rb() * 34
-    out.push({ name: 'bank' + i, style: 'stone', band: true, hero: false, x: D * Math.sin(a), z: -D * Math.cos(a), w, d: w * (0.7 + rb() * 0.5), h: 12 + rb() * 26, rot: a + (rb() - 0.5) * 0.5, shade: rb() })
+    out.push({ name: 'bank' + i, style: 'stone', band: true, hero: false, x: xb, z: zb, w, d: w * (0.7 + rb() * 0.5), h: 12 + rb() * 26, rot: a + (rb() - 0.5) * 0.5, shade: rb() })
   }
   // background city: low/mid-rise band all around the river view, plus a few taller clusters off-frame (north dock / east)
   const rnd = seeded(7)
   for (let i = 0; i < 190; i++) {
-    const azDeg = -120 + rnd() * 240
+    const azDeg = -100 + rnd() * 200
     const D = 1350 + rnd() * 1500
     const a = rad(azDeg)
     const tall = (azDeg > 40 && azDeg < 95 && rnd() > 0.55) || (azDeg < -60 && rnd() > 0.93)

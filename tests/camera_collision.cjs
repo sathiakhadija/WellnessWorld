@@ -6,7 +6,7 @@ const f2 = a => a.map(n => n.toFixed(2)).join(', ');
   const b = await chromium.launch({ args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'] });
   const p = await b.newPage({ viewport: { width: 480, height: 270 } });
   const errs = []; p.on('console', m => { if (m.type()==='error') errs.push(m.text()) }); p.on('pageerror', e => errs.push('PAGEERROR '+e.message));
-  await p.goto('http://localhost:4173/');
+  await p.goto((process.env.URL || 'http://localhost:4173/?off=tree,hood'));
   await p.waitForFunction(() => window.__ww && window.__ww.player(), null, { timeout: 60000 });
   await p.waitForTimeout(3000);
   const st = () => p.evaluate(() => ({ mode: window.__ww.mode(), cam: window.__ww.cam(), pl: window.__ww.player() }));

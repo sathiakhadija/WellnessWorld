@@ -14,6 +14,7 @@ const HELP = {
     ['Drag, or two-finger scroll', 'orbit around you'],
     ['Pinch, mouse wheel, + / −', 'zoom'],
     ['Q / E', 'rotate camera'],
+    ['Enter', 'open / close the nearest door'],
   ],
   free: [
     ['Arrows / WASD', 'fly (the player stays still)'],
@@ -50,6 +51,8 @@ const css = `
 .ww-foot b{color:#e9c79b;font-weight:600}
 .ww-min{position:fixed;left:16px;top:16px;z-index:5;cursor:pointer;color:#f4ebe0;font:12px -apple-system,system-ui,sans-serif;
   background:rgba(26,19,30,.58);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,214,170,.18);border-radius:999px;padding:6px 12px}
+.ww-prompt{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);color:#2a1a10;font:600 13px -apple-system,system-ui,sans-serif;pointer-events:none;background:rgba(246,214,170,.92);border-radius:999px;padding:8px 18px;z-index:6;transition:opacity .2s;box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.ww-prompt kbd{font:600 11px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.14);border-radius:4px;padding:1px 6px;margin-right:6px}
 .ww-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);color:#f4ebe0;font:13px -apple-system,system-ui,sans-serif;pointer-events:none;
   background:rgba(26,19,30,.7);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:999px;padding:8px 16px;z-index:6;transition:opacity .25s}
 `
@@ -80,6 +83,7 @@ export default function HUD() {
       ) : (
         <div className="ww-min" onClick={() => camStore.set({ help: true })}>Controls · H</div>
       )}
+      <div className="ww-prompt" style={{ opacity: c.prompt ? 1 : 0 }}><kbd>Enter</kbd>{c.prompt}</div>
       <div className="ww-toast" style={{ opacity: c.toast ? 1 : 0 }}>{c.toast}</div>
     </>
   )

@@ -1,0 +1,10 @@
+// Tiny shared state between the player, the doors and the HUD (plain JS, read every frame).
+export const world = {
+  player: { x: 0, y: 0, z: 0 },   // written by Player every frame
+  fastAnim: false,                // test hook: let door animations use the real frame delta (headless runs render at <1 fps)
+  interactables: [],              // { id, label, x, z, range, isOpen(), toggle() -> message | false }
+}
+
+// ?off=tree,hood,plan switches parts of the scene off (profiling / fast headless tests)
+const Q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
+export const OFF = new Set((Q.get('off') || '').split(',').filter(Boolean))

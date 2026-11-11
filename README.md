@@ -40,3 +40,9 @@ See [`docs/VISUAL_AUDIT_AND_V9_PLAN.md`](docs/VISUAL_AUDIT_AND_V9_PLAN.md) and t
 - Procedural sunset sky, 3D Canary Wharf skyline (pyramid cap, Citi/HSBC/Barclays towers, waterfront band, river streaks) positioned from the reference image; warm hemisphere/cove/sun lighting with Neutral tone mapping; region-mean error vs reference at CAM1 ≈ 0.054.
 - Avatar rebuilt at 1.55 m (capsule collider 1.54 m × 0.44 m, walk 1.7 m/s, run 3.2 m/s) with a seated cat (0.30 m); follow-camera pivot/distance retuned. Adjoining rooms (≈2.5–3.4 m wide × 3.4 m deep × 3.5 m high) get warm interior lights.
 - Verified (headless Chromium/SwiftShader): camera collision + wheel tests pass, no console errors. NOT verified: Safari/trackpad, real-GPU frame rate, Blender 5.2.3 re-export. The side rooms' geometry is still the V8 GLB (flat-colour props); a Blender-side rebuild is not done.
+
+## V9b (architecture, rooms, doors, balcony door, tree, directional exterior)
+See `docs/V9_REPORT.md` (implemented / tested / limitations) and `docs/screens_v9b/`.
+- **Enter** opens/closes the nearest door (bedroom, bathroom, balcony sliding door); prompt appears when you are within range.
+- Tests: `node tests/doors_slider.cjs` (15 checks), `tests/camera_collision.cjs`, `tests/camera_wheel.cjs`. Use `?off=tree,hood` in the URL to switch heavy parts off.
+- Still unverified: Safari/trackpad, real-GPU performance.

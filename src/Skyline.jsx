@@ -3,6 +3,8 @@
 import { useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { Neighbourhood, Boats, rearLayout } from './Neighbourhood.jsx'
+import { OFF } from './world.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { buildLayout, SCALE, EYE_ABOVE_WATER, SUN_AZ_DEG, SUN_EL_DEG, TWIST } from './skylineData.js'
 
@@ -130,7 +132,7 @@ const FACE_DEFS = [   // side faces: [normal angle about Y, local offset axis]
 const SUN_H = new THREE.Vector2(Math.sin((SUN_AZ_DEG * Math.PI) / 180), -Math.cos((SUN_AZ_DEG * Math.PI) / 180))
 
 // Merge every facade into one mesh per texture variant: window repeat is baked into UVs, face shading into vertex colours.
-function buildFacadeGeometries(layout, filter = () => true) {
+export function buildFacadeGeometries(layout, filter = () => true) {
   const lists = { glass: [], glassD: [], stone: [], roof: [] }
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler()
   for (const b of layout) {
@@ -174,7 +176,7 @@ function buildFacadeGeometries(layout, filter = () => true) {
   return out
 }
 
-function FacadeMeshes({ geoms, mirrored = false }) {
+export function FacadeMeshes({ geoms, mirrored = false }) {
   const mats = useMemo(() => {
     const o = {}
     for (const k of Object.keys(geoms)) {
@@ -206,23 +208,19 @@ function Quay() {
     for (let i = 0; i < 150; i++) { g.fillStyle = `rgba(255,${190 + Math.floor(rnd() * 50)},${110 + Math.floor(rnd() * 60)},${0.65 + rnd() * 0.35})`; g.fillRect(Math.floor(rnd() * 508), 3 + Math.floor(rnd() * 9), 3, 3) }
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping; t.repeat.set(10, 1); return t
   }, [])
-  const segs = useMemo(() => Array.from({ length: 48 }, (_, i) => { const a = ((-110 + (i * 220) / 47) * Math.PI) / 180; return { a, x: 1020 * Math.sin(a), z: -1020 * Math.cos(a) } }), [])
+  tex.repeat.set(220, 1)
   return (
-    <>
-      {segs.map((s, i) => (
-        <mesh key={i} position={[s.x, -EYE_ABOVE_WATER + 3, s.z]} rotation={[0, -s.a, 0]}>
-          <boxGeometry args={[(1020 * 2 * Math.PI * 220) / 360 / 47 + 2, 6, 4]} />
-          <meshBasicMaterial map={tex} toneMapped={false} />
-        </mesh>
-      ))}
-    </>
+    <mesh position={[0, -EYE_ABOVE_WATER + 3, -1012]}>
+      <boxGeometry args={[9000, 6, 4]} />
+      <meshBasicMaterial map={tex} toneMapped={false} />
+    </mesh>
   )
 }
 
 // ---------------------------------------------------------------- river
 const waterVert = /* glsl */`varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position,1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`
 const waterFrag = /* glsl */`
-varying vec3 vW; uniform vec3 uCam, cNear, cFar, cGlint; uniform float uAlpha, uSunAz, uInvScale; uniform sampler2D uCols;
+varying vec3 vW; uniform vec3 uCam, cNear, cFar, cGlint; uniform float uAlpha, uSunAz, uInvScale, uTime; uniform sampler2D uCols;
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
@@ -230,7 +228,7 @@ void main(){
   vec3 wr = vW * uInvScale; vec3 rel = wr - uCam * uInvScale; float dist = length(rel.xz);
   vec3 col = mix(cNear, cFar, smoothstep(40., 190., dist));
   // ripples: stretched across the view direction so they read as horizontal streaks
-  float rip = noise(vec2(wr.x*0.9, wr.z*0.18)) * 0.6 + noise(vec2(wr.x*2.6, wr.z*0.5)) * 0.4;
+  float rip = noise(vec2(wr.x*0.9 + uTime*0.35, wr.z*0.18 - uTime*0.12)) * 0.6 + noise(vec2(wr.x*2.6 - uTime*0.5, wr.z*0.5 + uTime*0.2)) * 0.4;
   col *= 0.94 + 0.12*rip;
   // sun glitter column under the sun azimuth
   float azr = atan(rel.x, -rel.z);
@@ -239,7 +237,7 @@ void main(){
   // reflected city lights: vertical dashes (constant azimuth, varying distance) under every lit stretch of skyline
   float aDeg = degrees(azr);
   float lc = texture2D(uCols, vec2((aDeg + 180.) / 360., 0.5)).r;
-  float dash = smoothstep(0.62, 0.95, noise(vec2(aDeg * 7., dist * 0.035)) * 0.6 + noise(vec2(aDeg * 19., dist * 0.09)) * 0.4);
+  float dash = smoothstep(0.62, 0.95, noise(vec2(aDeg * 7., dist * 0.035 + uTime*0.25)) * 0.6 + noise(vec2(aDeg * 19., dist * 0.09 - uTime*0.4)) * 0.4);
   float reach = smoothstep(120., 1000., dist) * (1.0 - smoothstep(1000., 1180., dist));
   col += vec3(1.0, 0.60, 0.24) * lc * dash * reach * 0.62;
   gl_FragColor = vec4(col, uAlpha);
@@ -269,16 +267,16 @@ function River({ layout }) {
   const mat = useMemo(() => new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, fog: false, toneMapped: false,
     uniforms: {
-      uCols: { value: null }, uCam: { value: new THREE.Vector3() }, uInvScale: { value: 1 / SCALE }, uAlpha: { value: 0.78 }, uSunAz: { value: (SUN_AZ_DEG * Math.PI) / 180 },
+      uCols: { value: null }, uCam: { value: new THREE.Vector3() }, uInvScale: { value: 1 / SCALE }, uAlpha: { value: 0.78 }, uTime: { value: 0 }, uSunAz: { value: (SUN_AZ_DEG * Math.PI) / 180 },
       cNear: { value: C(0.52, 0.47, 0.60) }, cFar: { value: C(0.44, 0.38, 0.42) }, cGlint: { value: C(0.55, 0.40, 0.26) },
     },
     vertexShader: waterVert, fragmentShader: waterFrag,
   }), [])
   mat.uniforms.uCols.value = cols
-  useFrame(() => mat.uniforms.uCam.value.copy(camera.position))
+  useFrame(({ clock }) => { mat.uniforms.uCam.value.copy(camera.position); mat.uniforms.uTime.value = clock.elapsedTime })
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -EYE_ABOVE_WATER, -1000]} material={mat} renderOrder={3}>
-      <planeGeometry args={[7000, 3200]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -EYE_ABOVE_WATER, -1700]} material={mat} renderOrder={3}>
+      <planeGeometry args={[9000, 3100]} />
     </mesh>
   )
 }
@@ -287,11 +285,15 @@ export function Skyline() {
   const layout = useMemo(buildLayout, [])
   const geoms = useMemo(() => buildFacadeGeometries(layout), [layout])
   const mirrorGeoms = useMemo(() => buildFacadeGeometries(layout, (b) => b.hero || b.h > 60), [layout])
+  const rearGeoms = useMemo(() => buildFacadeGeometries(rearLayout()), [])
   const one = layout.find((b) => b.name === 'One Canada Sq')
   // the skyline lives in "real metre" space around the CAM1 eye; scale it down and pin it to the room's eye height
   return (
     <group position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
       <FacadeMeshes geoms={geoms} />
+      <FacadeMeshes geoms={rearGeoms} />
+      {!OFF.has('hood') && <Neighbourhood />}
+      {!OFF.has('hood') && <Boats />}
       <PyramidCap b={one} />
       <Quay />
       {/* mirrored copy under the water plane = reflections of the lit towers */}
