@@ -64,3 +64,6 @@ Evidence: `docs/acceptance/round4/`. Added stone architraves/keystones/pediments
 
 ## Penthouse door/wall correction (round 5)
 Cause of grey-green walls: GRADE multiplied plaster green ×1.12 on a taupe base. Now warm ivory (set), trim/ceiling/skirting cream, warm interior ambient (preset-scaled). Entrance door + casing cream with brass (was espresso walnut/dark linings); 12 cm door-head gap closed. Visually verified (headless, golden hour) in docs/acceptance/penthouse_door_wall/. Not yet verified in other presets; bedroom/bathroom doors still read pink under golden sun; no regression suites re-run.
+
+## Round 6: Blender interior kit
+assets/blender/make_interior.py (bpy) → src/baked/interior.json (+ .blend/.glb): stepped door architraves with plinth blocks and 3-layer cornice (1.5 m + 1.1 m), fluted pilaster with capital/base, brass tube sconce (entrance). Wired in Plan.jsx `<InteriorKit/>`; replaces box-built trim. Visually verified headless golden hour (penthouse_door_wall/*_kit.png). Not done: open doors with lit interiors (reference shows them open), bedroom/bathroom door pink cast, other presets, regressions.

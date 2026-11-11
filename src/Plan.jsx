@@ -11,6 +11,8 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { GROUPS } from './CameraRig.jsx'
 import { world, occupied } from './world.js'
 import { camStore, toast } from './camStore.js'
+import KIT from './baked/interior.json'
+import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 const WORLD = interactionGroups([GROUPS.world])
 const GLASS = interactionGroups([GROUPS.glass])
@@ -45,15 +47,7 @@ function buildArch() {
     add('trim', -4.85, -4.45, 0, DOOR_H, a - 0.0, a + 0.02)                 // reveal linings
     add('trim', -4.85, -4.45, 0, DOOR_H, b - 0.02, b + 0.0)
     add('trim', -4.85, -4.45, DOOR_H - 0.02, DOOR_H, a, b)
-    // architrave (main-room face): jambs, head, cap moulding, plinth blocks; same on the room side
-    for (const [xa, xb] of [[-4.45, -4.415], [-4.885, -4.85]]) {
-      add('trim', xa, xb, 0, DOOR_H + 0.14, a - 0.14, a)
-      add('trim', xa, xb, 0, DOOR_H + 0.14, b, b + 0.14)
-      add('trim', xa, xb, DOOR_H, DOOR_H + 0.14, a - 0.14, b + 0.14)
-      add('trim', xa < -4.5 ? xa - 0.012 : xa, xb > -4.5 ? xb + 0.012 : xb, DOOR_H + 0.14, DOOR_H + 0.2, a - 0.2, b + 0.2)
-      add('trim', xa < -4.5 ? xa - 0.01 : xa, xb > -4.5 ? xb + 0.01 : xb, 0, 0.24, a - 0.17, a)
-      add('trim', xa < -4.5 ? xa - 0.01 : xa, xb > -4.5 ? xb + 0.01 : xb, 0, 0.24, b, b + 0.17)
-    }
+    // architraves are Blender-baked meshes (assets/blender/make_interior.py), see <InteriorKit/>
   }
 
   // ---- main-room left wall dressing: skirting, cornice, raised-panel mouldings, fluted pilaster
@@ -74,9 +68,7 @@ function buildArch() {
   }
   {   // fluted pilaster in the bay between the doors
     const [a, b] = segs[1], zc = (a + b) / 2
-    for (let i = -4; i <= 3; i++) add('trim', -4.45, -4.415, 0.25, 3.35, zc + i * 0.075 + 0.0, zc + i * 0.075 + 0.045)
-    add('trim', -4.45, -4.40, 3.35, 3.42, zc - 0.34, zc + 0.34)
-    add('trim', -4.45, -4.40, 0.18, 0.27, zc - 0.34, zc + 0.34)
+    // fluted pilaster = Blender-baked mesh (<InteriorKit/>)
   }
   add('trim', -4.45, -4.36, 3.66, 3.8, -11.79, 0.05); add('trim', -4.45, -4.40, 3.60, 3.66, -11.79, 0.05)   // cornice (as before)
 
@@ -338,15 +330,7 @@ function Entrance({ M }) {
           <CuboidCollider args={[W / 2 + 0.04, DOOR_H / 2, 0.06]} position={[1.2, DOOR_H / 2, Z]} collisionGroups={WORLD} />
         </RigidBody>
       )}
-      {/* tall tube sconces either side (frosted warm tube, brass clasp + end caps), centred in the narrow panels */}
-      {[0.06, 2.34].map((x, i) => (
-        <group key={i} position={[x, 2.2, -0.04]}>
-          <mesh material={M.tube}><boxGeometry args={[0.035, 1.3, 0.035]} /></mesh>
-          <mesh material={M.brass}><boxGeometry args={[0.07, 0.2, 0.06]} /></mesh>
-          <mesh material={M.brass} position={[0, 0.67, 0]}><boxGeometry args={[0.05, 0.03, 0.05]} /></mesh>
-          <mesh material={M.brass} position={[0, -0.67, 0]}><boxGeometry args={[0.05, 0.03, 0.05]} /></mesh>
-        </group>
-      ))}
+      {[0.06, 2.34].map((x, i) => <Baked key={i} name="sconce" M={M} position={[x, 1.55, -0.0]} rotY={Math.PI} />)}
       <pointLight position={[0.06, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
       <pointLight position={[2.34, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
     </>
@@ -554,6 +538,41 @@ function Interact() {
   return null
 }
 
+
+// ------------------------------------------------------------------ Blender-baked interior kit
+const kitCache = {}
+function kitGeo(name) {
+  if (kitCache[name]) return kitCache[name]
+  const o = {}
+  for (const [bucket, d] of Object.entries(KIT[name])) {
+    const n = d.p.length / 3, uv = new Float32Array(n * 2), P = new Float32Array(n * 3)
+    P.set(d.p); for (let i = 0; i < n; i++) { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
+    o[bucket] = toCreasedNormals(g, 0.7)
+  }
+  return (kitCache[name] = o)
+}
+const KIT_MAT = (M) => ({ trim: M.trim, brass: M.brass, tube: M.tube })
+function Baked({ name, M, position, rotY = 0 }) {
+  const g = useMemo(() => kitGeo(name), [name]), mm = KIT_MAT(M)
+  return <group position={position} rotation={[0, rotY, 0]}>{Object.keys(g).map((k) => <mesh key={k} geometry={g[k]} material={mm[k]} castShadow={k !== 'tube'} receiveShadow />)}</group>
+}
+function InteriorKit({ M }) {
+  const segs = useMemo(() => {
+    const edges = [-12.14]
+    for (const d of [...DOORS].sort((a, b) => a.zc - b.zc)) edges.push(d.zc - d.w / 2, d.zc + d.w / 2)
+    edges.push(0.4)
+    return [[edges[0], edges[1]], [edges[2], edges[3]], [edges[4], edges[5]]]
+  }, [])
+  const zc = (segs[1][0] + segs[1][1]) / 2
+  return (
+    <>
+      {DOORS.map((d) => [[-4.45, Math.PI / 2], [-4.85, -Math.PI / 2]].map(([x, r]) => <Baked key={d.id + x} name={d.id === 'bedroom' ? 'arch_bedroom' : 'arch_bathroom'} M={M} position={[x, 0, d.zc]} rotY={r} />))}
+      <Baked name="pilaster" M={M} position={[-4.45, 0.25 - 0.0, zc]} rotY={Math.PI / 2} />
+    </>
+  )
+}
+
 export default function Plan({ mats }) {
   const M = useMemo(() => makeMats(mats), [mats])
   const arch = useMemo(buildArch, [])
@@ -570,6 +589,7 @@ export default function Plan({ mats }) {
         })}
       </RigidBody>
       {DOORS.map((d) => <Door key={d.id} d={d} M={M} />)}
+      <InteriorKit M={M} />
       <Slider M={M} />
       <Entrance M={M} />
       <Balcony M={M} />
