@@ -219,6 +219,36 @@ def build_car():
     keep(box('sill', -0.9, 0.9, -1.8, 1.8, 0.28, 0.34, 0.02, 1), 'metal', '#1b1a1f')
     return finish('car')
 
-LIB['lamp'] = build_lamp(); LIB['bench'] = build_bench(); LIB['urn'] = build_urn(); LIB['chair'] = build_chair(); LIB['table'] = build_table(); LIB['car'] = build_car()
+# ------------------------------------------------------------------ townhouse kit (facade-local: x lateral, y up, front = -Y in Blender = +z in the game; origin = opening centre at sill / threshold)
+def build_surround(ped=True, w=1.12, h=2.78):
+    reset(); PARTS.clear()
+    for sx in (-1, 1):   # architrave strips
+        keep(box(f'arch{sx}', sx * (w / 2 + 0.01) - (0.0 if sx < 0 else 0.0) + (0.0), sx * (w / 2 + 0.13), -0.10, 0.0, 0.0, h + 0.08, 0.012, 1), 'stone', '#ffffff')
+    keep(box('lintel', -w / 2 - 0.16, w / 2 + 0.16, -0.12, 0.0, h, h + 0.12, 0.012, 1), 'stone', '#ffffff')
+    keep(box('cornice', -w / 2 - 0.24, w / 2 + 0.24, -0.20, -0.02, h + 0.12, h + 0.2, 0.012, 1), 'stone', '#ffffff')
+    keep(box('sill', -w / 2 - 0.1, w / 2 + 0.1, -0.17, 0.0, -0.07, 0.0, 0.01, 1), 'stone', '#ffffff')
+    for sx in (-1, 1): keep(box(f'bracket{sx}', sx * (w / 2 + 0.2) - 0.04, sx * (w / 2 + 0.2) + 0.04, -0.14, -0.02, h - 0.1, h + 0.12, 0.008, 1), 'stone', '#ffffff')
+    if ped:
+        bm = bmesh.new()
+        a = bm.verts.new((-w / 2 - 0.2, -0.02, h + 0.2)); b = bm.verts.new((w / 2 + 0.2, -0.02, h + 0.2)); c = bm.verts.new((0, -0.02, h + 0.2 + 0.26))
+        a2 = bm.verts.new((-w / 2 - 0.2, -0.17, h + 0.2)); b2 = bm.verts.new((w / 2 + 0.2, -0.17, h + 0.2)); c2 = bm.verts.new((0, -0.17, h + 0.2 + 0.26))
+        for f in ((a, b, c), (c2, b2, a2), (a, a2, b2, b), (b, b2, c2, c), (c, c2, a2, a)): bm.faces.new(f)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces); keep(new_obj('ped', bm), 'stone', '#ffffff')
+    return finish('surround_ped' if ped else 'surround_flat')
+
+def build_portico():
+    reset(); PARTS.clear()
+    for sx in (-1, 1):
+        c = lathe(f'col{sx}', [(0.13, 0.0), (0.13, 0.12), (0.095, 0.16), (0.09, 2.7), (0.12, 2.76), (0.12, 2.9)], 10); c.location = (sx * 0.95, -0.55, 0.0); keep(c, 'stone', '#ffffff')
+        keep(box(f'pil{sx}', sx * 0.7 - 0.05, sx * 0.7 + 0.05, -0.10, 0.0, 0.0, 3.0, 0.01, 1), 'stone', '#ffffff')
+    keep(box('entab', -1.25, 1.25, -0.72, 0.0, 2.9, 3.12, 0.012, 1), 'stone', '#ffffff')
+    keep(box('cornice', -1.32, 1.32, -0.78, 0.0, 3.12, 3.24, 0.012, 1), 'stone', '#ffffff')
+    keep(box('fanframe', -0.7, 0.7, -0.07, 0.0, 2.98, 3.03, 0.006, 1), 'stone', '#ffffff')
+    # fanlight arch ring (dark ironwork) above the door
+    ring = sweep('fan', [(-0.58 * math.cos(a), -0.05, 2.62 + 0.38 * math.sin(a)) for a in [math.pi * k / 6 for k in range(7)]], 0.012); keep(ring, 'iron', '#26242b')
+    keep(box('base', -1.2, 1.2, -0.75, 0.0, 0.0, 0.1, 0.01, 1), 'stone', '#ffffff')
+    return finish('portico')
+
+LIB['lamp'] = build_lamp(); LIB['bench'] = build_bench(); LIB['urn'] = build_urn(); LIB['chair'] = build_chair(); LIB['table'] = build_table(); LIB['car'] = build_car(); LIB['surround_ped'] = build_surround(True); LIB['surround_flat'] = build_surround(False); LIB['portico'] = build_portico()
 with open(f'{ROOT}/src/street/baked/props.json', 'w') as f: json.dump(LIB, f, separators=(',', ':'))
 for k, v in LIB.items(): print(k, {b: len(d['p']) // 9 for b, d in v.items()}, 'tris')
