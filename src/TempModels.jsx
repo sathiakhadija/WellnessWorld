@@ -8,8 +8,12 @@ import * as THREE from 'three'
 
 const BASE = import.meta.env.BASE_URL || '/'
 const Q = new URLSearchParams(window.location.search)
-export const TEMP_PLAYER = Q.get('model') !== 'pill' && Q.get('model') !== 'v12'
-export const TEMP_PET = Q.get('pet') !== 'cat' && Q.get('model') !== 'v12'
+// Player model: default = the rabbit (playable pet). ?model=lemon brings back the lemon girl, ?model=pill the original pill avatar, ?model=v12 the experimental rig.
+const MODEL = Q.get('model') || 'rabbit'
+export const PLAYER_KIND = ['rabbit', 'lemon', 'pill', 'v12'].includes(MODEL) ? MODEL : 'rabbit'
+export const TEMP_PLAYER = PLAYER_KIND === 'lemon' || PLAYER_KIND === 'rabbit'
+// the standalone idle pet only shows when the player is NOT the rabbit (otherwise there would be two rabbits)
+export const TEMP_PET = PLAYER_KIND !== 'rabbit' && Q.get('pet') !== 'cat' && PLAYER_KIND !== 'v12'
 
 // scale a model to `height` metres, feet on y=0, centred on x/z, then rotate by `faceFix` about y so it faces +z
 function useNormalised(url, height, faceFix) {
@@ -55,4 +59,32 @@ export function Rabbit({ position = [0, 0, 0], rotationY = 0 }) {
     g.current.rotation.z = Math.sin(t * 0.9) * 0.03
   })
   return <group position={position} rotation={[0, rotationY, 0]}><group ref={g}><primitive object={obj} /></group></group>
+}
+
+// The rabbit as the PLAYER: 0.55 m tall, procedural hop gait (static mesh): hops get faster/longer with speed, squash on landing, lean into the run.
+export const RABBIT_PLAYER_HEIGHT = 0.55
+export function RabbitPlayer({ speedRef }) {
+  const obj = useNormalised(`${BASE}models/rabbit.glb`, RABBIT_PLAYER_HEIGHT, 0)
+  const g = useRef(), ph = useRef(0), idle = useRef(0)
+  useFrame((_, dt) => {
+    if (!g.current) return
+    const sp = speedRef?.current ?? 0
+    const k = Math.min(sp / 5, 1)                                  // 0 idle .. 1 full sprint
+    if (sp > 0.05) {
+      ph.current += dt * (6 + sp * 2.6)                              // hop frequency rises with speed (walk ~3 Hz, sprint ~3.2+ Hz)
+      const s = Math.sin(ph.current)
+      const lift = Math.max(0, s)                                    // airborne half of the cycle
+      g.current.position.y = lift * (0.07 + 0.16 * k)                // hop height
+      g.current.rotation.x = 0.1 + 0.22 * k * (s > 0 ? 1 : 0.3)      // lean forward into the hop
+      const land = Math.max(0, -s)                                   // grounded half: squash
+      g.current.scale.set(1 + land * 0.06, 1 - land * 0.1 + lift * 0.06, 1 + land * 0.06)
+    } else {                                                         // idle: slow breathing + occasional small hop
+      idle.current += dt
+      g.current.position.y = Math.max(0, Math.sin(idle.current * 1.1)) ** 8 * 0.05
+      g.current.rotation.x *= 0.85
+      const b = 1 + Math.sin(idle.current * 2.2) * 0.012
+      g.current.scale.set(1, b, 1)
+    }
+  })
+  return <group ref={g}><primitive object={obj} /></group>
 }
