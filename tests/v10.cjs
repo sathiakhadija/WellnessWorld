@@ -18,17 +18,16 @@ const ok = []; const check = (name, cond, extra = '') => { ok.push(cond); consol
 
   // ---- entrance
   await stand(1.2, 0.1, -1.8, Math.PI)                                       // facing +z (the front wall), 1.8 m from the door
-  let pr = await prompt(); check('Go Outside prompt visible near the entrance', /Go Outside/.test(pr.t) && pr.o === 1, JSON.stringify(pr))
+  await p.waitForTimeout(2500); let pr = await prompt(); check('Go Outside prompt visible near the entrance', /Go Outside/.test(pr.t) && pr.o === 1, JSON.stringify(pr))
   let q = await walk('KeyW'); check('closed entrance door blocks (stops in the recess, z < 0.3)', q[2] < 0.3, `z=${q[2].toFixed(2)}`)
-  await stand(0.0, 0.1, -4.5, 0); pr = await prompt(); check('prompt disappears when away from the entrance', pr.o === 0, JSON.stringify(pr))
+  await stand(0.0, 0.1, -4.5, 0); await p.waitForTimeout(1500); pr = await prompt(); check('prompt disappears when away from the entrance', pr.o === 0, JSON.stringify(pr))
   await stand(1.2, 0.1, -1.0, Math.PI); await p.keyboard.press('Enter'); await p.waitForTimeout(9000)
-  let ov = await p.evaluate(() => ({ t: window.__ww.transition?.(), vis: parseFloat(document.querySelector('.ww-ov')?.style.opacity || '0') }))
-  check('entrance sequence reaches the placeholder overlay', ov.vis === 1, JSON.stringify(ov))
-  const before = await pos(); await p.keyboard.down('KeyW'); await p.waitForTimeout(800); await p.keyboard.up('KeyW'); const after = await pos()
-  check('player is frozen while the overlay is up', Math.hypot(after[0] - before[0], after[2] - before[2]) < 0.05)
-  await p.keyboard.press('Enter'); await p.waitForTimeout(6000)
-  ov = await p.evaluate(() => ({ vis: parseFloat(document.querySelector('.ww-ov')?.style.opacity || '0') }))
-  check('Enter returns to the penthouse', ov.vis === 0, JSON.stringify(ov))
+  await p.waitForFunction(() => window.__ww.game().level === 'street', null, { timeout: 60000 }).catch(() => {})
+  await p.waitForTimeout(3500)
+  check('entrance sequence takes the lift down to the street level', (await p.evaluate(() => window.__ww.game().level)) === 'street')
+  await stand(1.2, -86.8 + 0.1, 7.4, Math.PI); await p.waitForTimeout(1500)
+  await p.keyboard.press('Enter'); await p.waitForFunction(() => window.__ww.game().level === 'penthouse', null, { timeout: 60000 }).catch(() => {}); await p.waitForTimeout(3500)
+  check('lift returns to the penthouse', (await p.evaluate(() => window.__ww.game().level)) === 'penthouse')
 
   // ---- balcony: open slider, walk out, walk along every open edge
   await stand(0.4, 0.1, -10.0, 0); await p.keyboard.press('Enter'); await p.waitForTimeout(12000)
