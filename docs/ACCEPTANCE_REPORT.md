@@ -52,3 +52,6 @@ Penthouse corrections; Blender-modelled townhouse door/window/cornice kits; more
 Evidence: `docs/acceptance/round3/` (`cmp2.png` = collage crops left, game right; `golden_*.png`; `lane_lighting_grid.png` = golden / street / afternoon / blue).
 Changed: honey brick palette; curtained lit windows; per-shop interior colours; rose awnings + charcoal-bronze frames; black wrought-iron riverside railings with stone posts; deeper peach-pink golden hour (lower sun, purple-to-peach sky) + CSS vignette grade; magenta cast on cobbles then reduced.
 Remaining largest gaps vs collage: (1) facade modelling (no stone window surrounds, arched doors, steps/railings, planted balconies); (2) shop interiors lack the collage's glowing, richly furnished depth; (3) skyline is far smaller than the collage's waterfront (it is anchored to the approved penthouse reference photo — enlarging it would break that match); (4) boxy car; (5) penthouse corrections still not done; (6) minimap still not visually verified.
+
+## Round 4 (townhouses) — still NOT READY
+Evidence: `docs/acceptance/round4/`. Added stone architraves/keystones/pediments, columned door porticos, cream ground floors, more warm lit windows, steel-blue cars. Still open: skyline scale, shop-interior richness, car model quality, penthouse corrections, minimap visual check, M2 profiling, AI 3D tools.
