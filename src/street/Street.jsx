@@ -6,7 +6,7 @@ import { RigidBody, CuboidCollider, CylinderCollider } from '@react-three/rapier
 import * as THREE from 'three'
 import { GROUPS } from '../CameraRig.jsx'
 import { interactionGroups } from '@react-three/rapier'
-import { world } from '../world.js'
+import { world, OFF } from '../world.js'
 import { camStore } from '../camStore.js'
 import { LIVE } from '../atmosphere.js'
 import { discoStore } from '../discoveries.js'
@@ -63,6 +63,7 @@ export const getStreet = () => {
   return _built
 }
 const _v = new THREE.Vector3(), _s = new THREE.Vector3()
+const TREE_DIST = 95        // street metres: trees beyond this are not drawn (the neighbourhood is ~210 x 270 m; distant crowns are lost in fog / haze)
 
 // ---------------------------------------------------------------- visuals: mounted INSIDE the Skyline's exterior group so it shares its transform
 // (scale 1/6 + eye offset seen from the penthouse, 1:1 at the origin when the player is on the street)
@@ -75,6 +76,7 @@ export function StreetVisuals() {
   const uTime = useRef({ value: 0 })
   const lift = useRef({ l: null, r: null, t: 0, target: 0 })
   const lightRefs = useRef([])
+  const treeRoot = useRef(null)
   const normalMap = useMemo(rippleNormal, [])
 
   const chunkMeshes = useMemo(() => {
@@ -116,7 +118,7 @@ export function StreetVisuals() {
     ]
     const palette = ['#86a84e', '#729a46', '#9ab458', '#63914a', '#a8bb55', '#70a050', '#8cab45']
     let sd = 91; const R = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
-    const trees = [], leafTex = P.leafTexture()
+    const trees = [], treeSets = [], leafTex = P.leafTexture()
     for (const kind of ['plane', 'ornamental', 'clipped']) {
       const list = built.inst[kind]; if (!list.length) continue
       const g = P.treeGeo(kind), trunk = new THREE.InstancedMesh(g.trunk, M.trunk, list.length), canopy = new THREE.InstancedMesh(g.canopy, null, list.length)
@@ -132,11 +134,13 @@ export function StreetVisuals() {
             transformed.z += cos(uTime * 0.75 + ph * 1.3) * 0.06 * sw;`)
       }
       canopy.material = cm
-      const o = new THREE.Object3D(), c = new THREE.Color()
+      canopy.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: leafTex, alphaTest: 0.5 })   // leaf-shaped shadows, not card-shaped
+      const o = new THREE.Object3D(), mats = [], cols = []
       list.forEach(([x, y, z, ry, s], i) => {
-        o.position.set(x, y, z); o.rotation.set(0, ry, 0); o.scale.setScalar(s); o.updateMatrix(); trunk.setMatrixAt(i, o.matrix); canopy.setMatrixAt(i, o.matrix)
-        canopy.setColorAt(i, c.set(palette[(R() * palette.length) | 0]).multiplyScalar(0.86 + R() * 0.3))
+        o.position.set(x, y, z); o.rotation.set(0, ry, 0); o.scale.setScalar(s); o.updateMatrix(); mats.push(o.matrix.clone()); trunk.setMatrixAt(i, o.matrix); canopy.setMatrixAt(i, o.matrix)
+        const cc = new THREE.Color(palette[(R() * palette.length) | 0]).multiplyScalar(0.86 + R() * 0.3); cols.push(cc); canopy.setColorAt(i, cc)
       })
+      treeSets.push({ trunk, canopy, list, mats, cols, order: list.map((_, i) => i) })
       for (const m of [trunk, canopy]) { m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false }
       trees.push(trunk, canopy)
     }
@@ -147,7 +151,7 @@ export function StreetVisuals() {
     built.pools.forEach(([x, z, r, y], i) => { o.position.set(x, (y ?? GY) + 0.06, z); o.scale.set(r * 2, 1, r * 2); o.updateMatrix(); pm.setMatrixAt(i, o.matrix) })
     pm.frustumCulled = false; pm.renderOrder = 2
     const hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.Float32BufferAttribute(built.halos.flat(), 3))
-    return { sets, trees, pm, hg }
+    return { sets, trees, treeSets, pm, hg }
   }, [built, M, pool])
 
   const liftGeo = useMemo(() => new THREE.BoxGeometry(0.93, 2.55, 0.05), [])
@@ -175,6 +179,16 @@ export function StreetVisuals() {
     if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
       last.current = t
+      if (treeRoot.current) {                                                                      // tree LOD: draw only the trees within TREE_DIST of the camera, nearest first
+        treeRoot.current.worldToLocal(_v.copy(camera.position)); const sc = treeRoot.current.getWorldScale(_s).x, lim = (world.level === 'street' ? TREE_DIST : 45) ** 2
+        for (const ts of props.treeSets) {
+          const d = ts.list.map(([x, , z]) => (x - _v.x) ** 2 + (z - _v.z) ** 2)
+          ts.order.sort((a, b) => d[a] - d[b]); let n = 0
+          ts.order.forEach((src, k) => { ts.trunk.setMatrixAt(k, ts.mats[src]); ts.canopy.setMatrixAt(k, ts.mats[src]); ts.canopy.setColorAt(k, ts.cols[src]); if (d[src] < lim) n = k + 1 })
+          ts.trunk.count = ts.canopy.count = n; ts.trunk.instanceMatrix.needsUpdate = ts.canopy.instanceMatrix.needsUpdate = true; ts.canopy.instanceColor.needsUpdate = true
+        }
+        void sc
+      }
       for (const g of groups.current) {
         if (!g) continue
         const c = g.userData.sph, sc = g.getWorldScale(_s).x
@@ -190,13 +204,13 @@ export function StreetVisuals() {
 
   return (
     <>
-      {chunkMeshes.map((c, i) => (
+      {!OFF.has('schunks') && chunkMeshes.map((c, i) => (
         <group key={c.name} ref={(g) => { if (g) { g.userData.sph = c.sph; groups.current[i] = g } }}>
           {c.meshes.map((m) => <mesh key={m.key} geometry={m.geo} material={m.mat} castShadow={m.cast} receiveShadow={m.receive} userData={{ detail: m.detail }} renderOrder={m.order} />)}
         </group>
       ))}
-      {props.sets.map((m, i) => <primitive key={'s' + i} object={m} />)}
-      {props.trees.map((m, i) => <primitive key={'t' + i} object={m} />)}
+      {!OFF.has('sprops') && props.sets.map((m, i) => <primitive key={'s' + i} object={m} />)}
+      <group ref={treeRoot}>{!OFF.has('strees') && props.trees.map((m, i) => <primitive key={'t' + i} object={m} />)}</group>
       <primitive object={props.pm} />
       <points geometry={props.hg} frustumCulled={false}><pointsMaterial ref={haloMat} userData={{ noTint: true }} size={3.4} sizeAttenuation={false} map={dot} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></points>
       <mesh ref={(m) => { lift.current.l = m }} geometry={liftGeo} material={liftMat} position={[BX - 0.465, GY + 1.3, 4.78]} castShadow />

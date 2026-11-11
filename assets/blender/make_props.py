@@ -102,13 +102,13 @@ def build_lamp(h=4.8):
     reset(); PARTS.clear()
     base = [(0.30, 0), (0.30, 0.06), (0.25, 0.10), (0.25, 0.22), (0.19, 0.30), (0.17, 0.44), (0.20, 0.50), (0.14, 0.56), (0.11, 0.66), (0.105, 0.78),
             (0.135, 0.80), (0.135, 0.86), (0.095, 0.90)]
-    keep(lathe('plinth', base, 12), "metal", IRON)
+    keep(lathe('plinth', base, 8), "metal", IRON)
     # fluted shaft: tapering lathe + four thin fins
     shaft = [(0.095, 0.90), (0.075, 1.4), (0.062, 2.8), (0.058, h - 0.78)]
-    keep(lathe('shaft', shaft, 10), 'metal', IRON)
+    keep(lathe('shaft', shaft, 8), 'metal', IRON)
     for z, r in ((1.35, 0.1), (2.7, 0.085), (h - 0.84, 0.095)):
-        keep(lathe(f'collar{z}', [(r - 0.03, z - 0.04), (r, z - 0.02), (r, z + 0.02), (r - 0.03, z + 0.04)], 14), 'metal', BRASS if z > 2 else IRON)
-    keep(lathe('neck', [(0.058, h - 0.78), (0.11, h - 0.72), (0.15, h - 0.66), (0.19, h - 0.62)], 14), 'metal', IRON)
+        keep(lathe(f'collar{z}', [(r - 0.03, z - 0.04), (r, z - 0.02), (r, z + 0.02), (r - 0.03, z + 0.04)], 8), 'metal', BRASS if z > 2 else IRON)
+    keep(lathe('neck', [(0.058, h - 0.78), (0.11, h - 0.72), (0.15, h - 0.66), (0.19, h - 0.62)], 8), 'metal', IRON)
     # ladder bar + two scrolled brackets
     keep(box('bar', -0.34, 0.34, -0.015, 0.015, h - 1.4, h - 1.375, 0.004, 1), 'metal', IRON)
     for s in (-1, 1):
@@ -148,10 +148,10 @@ def build_bench():
         keep(sweep(f'scroll{sx}', [(sx, -0.22, 0.5), (sx, -0.13, 0.55), (sx, -0.07, 0.5), (sx, -0.12, 0.46)], 0.010), 'metal', IRON)
         keep(box(f'foot{sx}a', sx - 0.035, sx + 0.035, 0.20, 0.32, 0, 0.018, 0.006, 1), 'metal', IRON)
         keep(box(f'foot{sx}b', sx - 0.035, sx + 0.035, -0.30, -0.18, 0, 0.018, 0.006, 1), 'metal', IRON)
-    for i in range(5): keep(box(f'seat{i}', -0.87, 0.87, -0.23 + i * 0.095, -0.23 + i * 0.095 + 0.08, 0.45, 0.49, 0.01, 2), 'wood', OAK)
+    for i in range(5): keep(box(f'seat{i}', -0.87, 0.87, -0.23 + i * 0.095, -0.23 + i * 0.095 + 0.08, 0.45, 0.49, 0.0, 1), 'wood', OAK)
     for i in range(3):
         z = 0.58 + i * 0.13; y = 0.20 + (z - 0.5) * 0.18
-        keep(box(f'back{i}', -0.87, 0.87, y, y + 0.025, z, z + 0.09, 0.008, 2), 'wood', OAK)
+        keep(box(f'back{i}', -0.87, 0.87, y, y + 0.025, z, z + 0.09, 0.0, 1), 'wood', OAK)
     return finish('bench')
 
 # ------------------------------------------------------------------ urn / planter

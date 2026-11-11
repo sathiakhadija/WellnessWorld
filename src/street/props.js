@@ -150,12 +150,13 @@ export function treeGeo(kind) {
   const bend = (dir, amt) => dir.clone().add(v3((R() - 0.5) * amt, (R() - 0.5) * amt * 0.6, (R() - 0.5) * amt)).normalize()
   const grow = (p, dir, len, rad, depth, maxD, spec) => {
     const pts = [p.clone()]; let q = p.clone(), d = dir.clone()
-    for (let i = 1; i <= 3; i++) { d = bend(d, 0.35 - depth * 0.06).lerp(v3(0, 0.25 * spec.lift, 0), 0.12).normalize(); q = q.clone().addScaledVector(d, len / 3); pts.push(q) }
-    tube(pts, rad, rad * (depth === maxD ? 0.55 : 0.62), depth === 0 ? 7 : 5)
+    const segs = depth >= 2 ? 2 : 3
+    for (let i = 1; i <= segs; i++) { d = bend(d, 0.35 - depth * 0.06).lerp(v3(0, 0.25 * spec.lift, 0), 0.12).normalize(); q = q.clone().addScaledVector(d, len / segs); pts.push(q) }
+    tube(pts, rad, rad * (depth === maxD ? 0.55 : 0.62), depth === 0 ? 6 : depth === 1 ? 5 : 3)
     if (depth === maxD) { tips.push({ p: q.clone(), d: d.clone(), len }); return }
     const kids = spec.kids[depth]
     for (let k = 0; k < kids; k++) {
-      const at = pts[1 + ((k + (R() < 0.5 ? 0 : 1)) % 3)].clone(), ang = (k / kids) * Math.PI * 2 + R() * 1.3, spread = spec.spread * (0.75 + R() * 0.5)
+      const at = pts[1 + ((k + (R() < 0.5 ? 0 : 1)) % (pts.length - 1))].clone(), ang = (k / kids) * Math.PI * 2 + R() * 1.3, spread = spec.spread * (0.75 + R() * 0.5)
       const nd = d.clone().multiplyScalar(0.55).add(v3(Math.cos(ang) * spread, 0.25 + R() * 0.35, Math.sin(ang) * spread)).normalize()
       grow(at, nd, len * (spec.shrink + R() * 0.12), rad * 0.6, depth + 1, maxD, spec)
     }
@@ -189,7 +190,7 @@ export function treeGeo(kind) {
     }
     LI.push(base0, base0 + 1, base0 + 2, base0, base0 + 2, base0 + 3)
   }
-  const per = kind === 'plane' ? 11 : kind === 'ornamental' ? 9 : 1, size = kind === 'plane' ? 1.3 : kind === 'ornamental' ? 1.05 : 0.8
+  const per = kind === 'plane' ? 8 : kind === 'ornamental' ? 7 : 1, size = kind === 'plane' ? 1.3 : kind === 'ornamental' ? 1.05 : 0.8
   for (const t of tips) for (let i = 0; i < per; i++) card(t.p.x + (R() - 0.5) * 2.4, t.p.y + (R() - 0.35) * 1.6, t.p.z + (R() - 0.5) * 2.4, size * (0.8 + R() * 0.5))
   const mk = (P, Nn, Cc, U, I, norm) => {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(Cc, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I)
