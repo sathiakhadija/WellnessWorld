@@ -6,3 +6,4 @@ Evidence: `evidence/s12_shopping_street.jpg` (BEFORE p.51 / TARGET p.52 / LOCALH
 - Gaps vs p.52: shopfront interiors shallow, no Blender master yet, trees at the lane end sparse, no bloom on lamps.
 
 UPDATE: Blender planting kit (lavender/hydrangea/shrub) now sits at the foot of both lane facades every ~1 m alternating; pavements remain clear (evidence/s12_game_planting.png). Headless blue hour; not M2-verified; triangle cost not re-measured.
+UPDATE: shop interiors tint amber-gold at dusk (blue-green channels pulled down with window-glow factor) to move closer to p.52's warm windows (evidence/s12_game_amber.png). Still open vs p.52: overhead leafy canopy framing the lane, richer window-display merchandise, wet reflective cobbles, chalkboard menus, lane-end trees. Headless only.
