@@ -134,6 +134,7 @@ export function bookInterior(ch, F, c, L) {
   ch.box(F, x1 - 0.52, x1 - 0.48, 2.85, 2.95, z0 + 0.3, -1.5, col('#b58a4d'), 'metal', 'l', 1, 1, 0)                                     // ladder rail
   // glazed street wall left: tall bronze mullions reading as library windows is the front glazing already; left-hand reading lounge: two oxblood leather chairs + brass lamp
   baked(ch, F, 'club_chair', x0 + 0.75, -3.0, -Math.PI / 2, { leather: '#592B37', brass: '#b58a4d' }); baked(ch, F, 'club_chair', x0 + 0.75, -5.0, -Math.PI / 2, { leather: '#592B37', brass: '#b58a4d' })
+  baked(ch, F, 'globe', x1 - 1.2, -2.6, 0.6, { brass: '#b58a4d', trim: '#4a6a7a' }, FL, 1.5)    // floor globe (Bible p.60)
   ch.prism(F, x0 + 0.5, -4.0, 0.2, 0.2, FL, FL + 0.6, col('#38261F'), 'wood', 12); baked(ch, F, 'brass_lamp', x0 + 0.5, -4.0, 0, { brass: '#b58a4d', glow: '#ffe0b0' }, FL + 0.6)
   // central circular book island with lit lower shelf
   ch.prism(F, 0, -6.5, 1.0, 1.0, FL, FL + 0.9, col('#38261F'), 'wood', 28); ch.prism(F, 0, -6.5, 1.04, 1.04, FL + 0.9, FL + 0.95, col('#b58a4d'), 'metal', 28); ch.prism(F, 0, -6.5, 1.02, 1.02, FL + 0.28, FL + 0.32, col('#ffd9b0'), 'glow', 28, false)

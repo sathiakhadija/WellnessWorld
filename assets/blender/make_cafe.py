@@ -63,8 +63,16 @@ def pendant(r=0.26):
     keep(lathe('glow', [(0.0, 0.31), (r - 0.02, 0.305), (0.0, 0.3)], 24), 'glow', C)
     return finish('pendant')
 
+def globe():
+    reset(); PARTS.clear()
+    keep(lathe('foot', [(0.0, 0.0), (0.12, 0.0), (0.12, 0.02), (0.03, 0.05), (0.025, 0.2), (0.0, 0.2)], 20), 'brass', C)
+    prof = [(0.0 + 0.2 * math.sin(a), 0.42 - 0.2 * math.cos(a)) for a in [i * math.pi / 16 for i in range(17)]]
+    keep(lathe('sphere', prof, 24), 'trim', C)
+    keep(lathe('ring', [(0.205, 0.2), (0.215, 0.2), (0.215, 0.64), (0.205, 0.64)], 24, False), 'brass', C)
+    return finish('globe')
+
 LIB['bistro_chair'] = bistro_chair(); LIB['bistro_table'] = bistro_table(); LIB['armchair'] = armchair(); LIB['club_chair'] = armchair(0.92, 0.9, 0.92, 'leather')
-LIB['brass_lamp'] = brass_lamp(); LIB['stool'] = stool(); LIB['pendant'] = pendant()
+LIB['brass_lamp'] = brass_lamp(); LIB['stool'] = stool(); LIB['pendant'] = pendant(); LIB['globe'] = globe()
 os.makedirs(f'{ROOT}/src/baked', exist_ok=True)
 for v in LIB.values():
     for b in v.values(): b.pop('c', None)
