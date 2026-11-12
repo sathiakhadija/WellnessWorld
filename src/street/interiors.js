@@ -20,7 +20,7 @@ function bakedGeo(name) {
   return (GEO[name] = o)
 }
 const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'awning', seat: 'awning', leather: 'awning', marble: 'slab', glow: 'glow' }
-function baked(ch, F, name, x, z, rot = 0, colors = {}, y = FL, scale = 1) {
+export function baked(ch, F, name, x, z, rot = 0, colors = {}, y = FL, scale = 1) {
   const cr = Math.cos(rot), sr = Math.sin(rot), geos = bakedGeo(name)
   for (const [bucket, g] of Object.entries(geos)) {
     const a = ch.acc(BUCKET_KEY[bucket] || 'trim'), pos = g.attributes.position, nor = g.attributes.normal, uvs = g.attributes.uv, col = col_(colors[bucket] || '#ffffff'), idx = g.index

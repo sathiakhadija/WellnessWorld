@@ -13,7 +13,7 @@ import * as THREE from 'three'
 import { Chunk, frame, rng, C, GY, GROUND_Y, TERRACE_Y, rowWall, toWorld, dirWorld } from './geo.js'
 import { PAL, strip, pane, railing, sash, balconette } from './facade.js'
 import { townhouse, modernBlock, shopBuilding } from './buildings.js'
-import { cafeInterior, bookInterior } from './interiors.js'
+import { cafeInterior, bookInterior, baked } from './interiors.js'
 
 export const BX = 1.2                                   // penthouse entrance axis
 export const TERR_H = TERRACE_Y - GY                    // terrace height above street level (≈4.4)
@@ -182,7 +182,7 @@ export function buildStreet() {
       ch.prism(FP, 5.0, 3.0, 0.06, 0.06, 1.12, 1.3, col('#e8e0d6'), 'trim', 10); ch.prism(FP, 5.0, 3.0, 0.2, 0.2, 1.3, 1.62, col('#c98f9f'), 'awning', 10)
     }
     // upholstered cream barrel chair + brass side table
-    ch.prism(FP, -4.7, 2.7, 0.46, 0.46, 0.05, 0.42, col('#eadfd0'), 'awning', 20); ch.box(FP, -5.2, -4.2, 0.42, 0.95, 2.2, 2.45, col('#eadfd0'), 'awning', 'fulrb', 1, 1, 0.01); ch.prism(FP, -4.7, 2.7, 0.44, 0.44, 0.42, 0.5, col('#cfa7a0'), 'awning', 20)
+    baked(ch, FP, 'armchair', -4.7, 2.9, 0.3, { fabric: '#eadfd0', brass: '#b58a4d' }, 0.04, 1.1)
     ch.solid(FP, -5.2, -4.2, 0, 0.95, 2.2, 3.2, 'armchair')
     ch.prism(FP, -3.7, 2.7, 0.22, 0.22, 0.05, 0.56, brass, 'metal', 14); ch.prism(FP, -3.7, 2.7, 0.26, 0.26, 0.56, 0.6, col('#efe6da'), 'slab', 14); ch.prism(FP, -3.7, 2.7, 0.12, 0.1, 0.6, 0.8, col('#c98f9f'), 'awning', 10); ch.solid(FP, -3.95, -3.45, 0, 0.8, 2.45, 2.95, 'table')
     // deliberately placed rug between lift, counter and door
