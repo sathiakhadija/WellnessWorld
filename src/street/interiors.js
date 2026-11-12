@@ -70,7 +70,7 @@ function posy(ch, F, x, z, y, s = 1, tones = ['#9b7bb8', '#b894c8', '#e9dff0', '
 }
 // hanging wisteria strands from the ceiling
 function wisteria(ch, F, x, z, len = 0.9, s = 1) {
-  for (let k = 0; k < 5; k++) { const dx = (k - 2) * 0.07 * s, dz = ((k * 7) % 3 - 1) * 0.05 * s, l = len * (0.7 + (k % 3) * 0.15); ch.prism(F, x + dx, z + dz, 0.035 * s, 0.012 * s, CE - l, CE - 0.04, col(k % 2 ? '#a78bcb' : '#8e6fb4'), 'leaf', 6) }
+  for (let k = 0; k < 11; k++) { const dx = (k - 5) * 0.075 * s, dz = ((k * 7) % 5 - 2) * 0.06 * s, l = len * (0.55 + ((k * 5) % 7) * 0.08); ch.prism(F, x + dx, z + dz, 0.05 * s, 0.014 * s, CE - l, CE - 0.04, col(['#a78bcb', '#8e6fb4', '#b79bd6', '#6f9a55'][k % 4]), 'leaf', 6) }
 }
 export function cafeInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
