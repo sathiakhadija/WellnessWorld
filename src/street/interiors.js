@@ -152,6 +152,9 @@ export function bookInterior(ch, F, c, L) {
   ch.box(F, -1.02, 1.02, 2.7, 2.78, z0 + 0.1, z0 + 0.2, col('#b58a4d'), 'metal', 'fulrbd', 1, 1, 0)
   ch.box(F, -0.9, 0.9, FL + 1.1, FL + 1.8, z0 + 0.04, z0 + 0.06, col('#ffd9b0'), 'glow', 'f', 1, 1, 0)                                      // lit reading room beyond (glow panel)
   ch.box(F, -0.5, 0.5, FL, FL + 0.7, z0 + 0.06, z0 + 0.5, col('#592B37'), 'awning', 'fulrb', 1, 1, 0)                                    // armchair seen through the arch
+  // layered crown mouldings along both side walls and a picture-rail bead (Bible s14 p.60: coffered ceiling depth)
+  for (const [a, b] of [[x0, x0 + 0.2], [x1 - 0.2, x1]]) { ch.box(F, a, b, CE - 0.18, CE, z0 + 0.02, -1.15, col('#e6d3b6'), 'trim', 'fud', 1, 1, 0); ch.box(F, a < 0 ? a : b - 0.09, a < 0 ? a + 0.09 : b, CE - 0.3, CE - 0.18, z0 + 0.02, -1.15, col('#cdb590'), 'trim', 'fud', 1, 1, 0) }
+  ch.box(F, x0, x1, CE - 0.3, CE - 0.26, z0 + 0.02, z0 + 0.1, col('#cdb590'), 'trim', 'fud', 1, 1, 0)
   // ceiling: cream coffers + brass chandelier
   for (const z of [-3, -5.5, -8]) for (const x of [-1.8, 0, 1.8]) ch.box(F, x - 0.85, x + 0.85, CE - 0.05, CE, z - 0.9, z + 0.9, col('#e9d9c0'), 'trim', 'd', 1, 1, 0)
   ch.prism(F, 0, -6.5, 0.012, 0.012, 2.6, CE, col('#b58a4d'), 'metal', 4)
