@@ -392,6 +392,20 @@ export function buildStreet() {
       ch.box(FT, px - 0.14, px + 0.14, 3.15, 3.65, -146.04, -145.76, col('#ffd9a0'), 'glow', 'fulrb', 1, 1, 0); ch.solid(FT, px - 0.4, px + 0.4, 0, 3.2, -146.3, -145.5, 'pier')
       put('bench', BX + s * 5.5, -139.2, Math.PI, 1.0, T); ch.solid(frame(BX + s * 5.5, -139.2, Math.PI, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench')
     }
+    // ---- architectural glow-edge planters + benches along the inner promenade edge (Bible s15), burgundy wayfinding totem at the western approach
+    for (let i = 0; i < 9; i++) {
+      const x = -34 + i * 8.2; if (Math.abs(x - BX) < 11.5) continue
+      ch.box(FT, x - 1.3, x + 1.3, 0, 0.62, -134.9, -133.7, col('#d8cbb9'), 'ashlar', 'fulrb', 2.4, 1.2, 0.01); ch.box(FT, x - 1.34, x + 1.34, 0.62, 0.68, -135.0, -133.6, col('#e8dfcf'), 'trim', 'fulrbd', 1, 1, 0)
+      ch.box(FT, x - 1.28, x + 1.28, 0.05, 0.1, -133.7, -133.66, col('#ffd29a'), 'glow', 'f', 1, 1, 0)
+      for (let k = 0; k < 6; k++) ch.prism(frame(x - 1.0 + k * 0.4, -134.3, 0, T), 0, 0, 0.26, 0.2, 0.68, 0.95 + (k % 2) * 0.12, col(['#4e6139', '#718451', '#82749a', '#718451', '#edE6d7', '#4e6139'][k]), 'leaf', 8)
+      ch.solid(FT, x - 1.34, x + 1.34, 0, 0.9, -135.0, -133.6, 'planter')
+    }
+    {
+      const wx = BX - 19, wz = -136.2
+      ch.box(FT, wx - 0.55, wx + 0.55, 0, 2.4, wz - 0.18, wz + 0.18, col('#5a2230'), 'wood', 'fulrb', 1, 1, 0); ch.box(FT, wx - 0.6, wx + 0.6, 2.4, 2.5, wz - 0.22, wz + 0.22, col('#b58a4d'), 'metal', 'fulrbd', 1, 1, 0)
+      ch.acc('sign').quad(toWorld(FT, wx - 0.45, 1.0, wz + 0.19), toWorld(FT, wx + 0.45, 1.0, wz + 0.19), toWorld(FT, wx + 0.45, 2.3, wz + 0.19), toWorld(FT, wx - 0.45, 2.3, wz + 0.19), col('#ffffff'), dirWorld(FT, 0, 0, 1), signQ(12), 1)
+      ch.solid(FT, wx - 0.6, wx + 0.6, 0, 2.5, wz - 0.25, wz + 0.25, 'sign')
+    }
     halos.push([BX - 10.2, T + 3.4, -145.9], [BX + 10.2, T + 3.4, -145.9]); pools.push([BX, -142, 12, T])
     pois.viewpoint = { x: BX, z: -141 }
     // ---- Zone C: two waterfront café pavilions with dining terraces (east end)
@@ -694,4 +708,4 @@ export function buildStreet() {
 }
 
 const rw_ = () => -5.8 - 6.2, re_ = () => 8.2 + 6.2
-const signQ = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 6; return [[u0, v1 - 1 / 6], [u0 + 0.5, v1 - 1 / 6], [u0 + 0.5, v1], [u0, v1]] }
+const signQ = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 7; return [[u0, v1 - 1 / 7], [u0 + 0.5, v1 - 1 / 7], [u0 + 0.5, v1], [u0, v1]] }

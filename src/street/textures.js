@@ -100,9 +100,10 @@ export const SIGNS = [
   { text: 'The Quay', bg: '#2f3d36', fg: '#efe3d0', sub: 'riverside kitchen' },
   { text: 'Quay & Co', bg: '#6d5568', fg: '#f3ebe0', sub: 'wine bar' },
   { text: 'Atelier Bordeaux', bg: '#5a2a35', fg: '#efe3d0', sub: 'boutique' },
+  { text: 'Riverside Promenade', bg: '#5a2230', fg: '#efe3d0', sub: 'café · gardens · the river →' },
 ]
-export const signAtlas = () => mk(1024, 768, (g, w, h) => {
-  const cw = w / 2, chh = h / 6
+export const signAtlas = () => mk(1024, 896, (g, w, h) => {
+  const cw = w / 2, chh = h / 7
   SIGNS.forEach((s, i) => {
     const x = (i % 2) * cw, y = Math.floor(i / 2) * chh
     g.fillStyle = s.bg; g.fillRect(x, y, cw, chh)
@@ -112,4 +113,4 @@ export const signAtlas = () => mk(1024, 768, (g, w, h) => {
     g.font = `400 20px -apple-system, system-ui, sans-serif`; g.globalAlpha = 0.8; g.fillText(s.sub.toUpperCase().split('').join(' '), x + cw / 2, y + chh * 0.78); g.globalAlpha = 1
   })
 })
-export const signUV = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 6; return [u0, v1 - 1 / 6, u0 + 0.5, v1] }
+export const signUV = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 7; return [u0, v1 - 1 / 7, u0 + 0.5, v1] }
