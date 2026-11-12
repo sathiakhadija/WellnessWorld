@@ -11,9 +11,11 @@ import { GY } from '../street/geo.js'
 const COUNT = { low: 2500, medium: 6500, high: 12000 }
 const VOL = new THREE.Vector3(34, 22, 34)
 
+import { STREET_INDOOR } from './zones.js'
+const SI = STREET_INDOOR.map(([a, b, c, d]) => `(p.x > ${a.toFixed(2)} && p.x < ${b.toFixed(2)} && p.z > ${c.toFixed(2)} && p.z < ${d.toFixed(2)})`).join(' || ')
 const INSIDE = /* glsl */`
 uniform float uLevel;
-bool insideHome(vec3 p) { return uLevel < .5 && ((p.x > -9.95 && p.x < 4.05 && p.z > -11.95 && p.z < 0.45) || (p.x > -0.7 && p.x < 3.1 && p.z > 0.0 && p.z < 4.9)); }   // penthouse footprint (rooms + roof) - NO rain in here
+bool insideHome(vec3 p) { if (uLevel >= .5) return ${SI}; return ((p.x > -9.95 && p.x < 4.05 && p.z > -11.95 && p.z < 0.45) || (p.x > -0.7 && p.x < 3.1 && p.z > 0.0 && p.z < 4.9)); }   // penthouse footprint (rooms + roof) - NO rain in here
 `
 const streakVS = /* glsl */`
 attribute vec4 aSeed;
@@ -63,7 +65,7 @@ void main() {
   float size = (.06 + .1 * fract(aSeed.w * 17.)) * (.4 + t * 1.1);
   vec3 wp = vec3(xz.x, uGround + .02, xz.y) + vec3(position.x * size, 0., position.y * size);
   vUV = position.xy * 2.; vT = t; vOn = on * (1. - smoothstep(14., 24., distance(wp.xz, cameraPosition.xz)));
-  if (insideHome(wp) && uLevel < .5) vOn = 0.;
+  if (insideHome(wp)) vOn = 0.;
   gl_Position = projectionMatrix * viewMatrix * vec4(wp, 1.);
 }`
 const splashFS = /* glsl */`

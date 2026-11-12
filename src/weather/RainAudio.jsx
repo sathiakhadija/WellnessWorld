@@ -2,6 +2,7 @@
 // glass (louder/more frequent near a window), and distant thunder with the storm. Everything is smoothed (setTargetAtTime), driven by WX.rain, where the player
 // is (street / balcony = outdoors, inside = muffled) and the distance to the nearest window. Independent volume + mute live in weatherStore.
 // The AudioContext can only start after a user gesture, so it is created on the first key press / click.
+import { inStreetInterior } from './zones.js'
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { WX, weatherStore } from './weather.js'
@@ -68,7 +69,7 @@ export default function RainAudio() {
     // where is the player: street / balcony = outdoors; inside the apartment = muffled; distance to the nearest glazing
     const p = world.player, street = world.level === 'street'
     const onBalcony = !street && p.z < -11.95
-    const targetIn = street ? 0 : onBalcony ? 0.2 : 1
+    const targetIn = street ? (inStreetInterior(p.x, p.z) ? 1 : 0) : onBalcony ? 0.2 : 1
     indoor.current += (targetIn - indoor.current) * Math.min(1, step * 1.6)
     const dist = street ? 99 : Math.min(Math.abs(p.z + 11.8), Math.abs(p.x - 3.6))
     win.current += (clamp01(1 - dist / 5) - win.current) * Math.min(1, step * 2)
