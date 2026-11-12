@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RigidBody, CuboidCollider, interactionGroups } from '@react-three/rapier'
 import * as THREE from 'three'
+import { wwHex } from './palette.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { GROUPS } from './CameraRig.jsx'
 import { world, occupied } from './world.js'
@@ -162,20 +163,20 @@ function makeMats(src = {}) {
     frame: src.WW_Frame_Bronze_GAME || std('#111114', { metalness: 0.55, roughness: 0.42 }),     // slim matte-black aluminium
     glass: src.WW_Glass_GAME,
     floorBed: std('#b5aa99', { roughness: 0.98 }),                                    // soft greige wool carpet (placeholder finish)
-    floorBath: std('#e4dacb', { roughness: 0.25, envMapIntensity: 0.9 }),            // cream marble (placeholder finish)
-    stone: std('#d8cab6', { roughness: 0.55 }),
+    floorBath: std(wwHex('WW_LIMESTONE_CREAM'), { roughness: 0.25, envMapIntensity: 0.9 }),            // cream marble (placeholder finish)
+    stone: std(wwHex('WW_LIMESTONE_FACADE'), { roughness: 0.55 }),
     door: std('#efe5d2', { roughness: 0.55 }),
     dk: std('#2d2019', { roughness: 0.5 }),
     doorHi: std('#d6c4a6', { roughness: 0.5 }),
-    walnutHi: std('#41322a', { roughness: 0.38 }),                                          // cream satin paint
-    walnut: std('#2c211c', { roughness: 0.42 }),                                          // espresso entrance door
+    walnutHi: std(wwHex('WW_WALNUT_DARK', true), { roughness: 0.38 }),                                          // cream satin paint
+    walnut: std(wwHex('WW_WALNUT_DARK'), { roughness: 0.42 }),                                          // espresso entrance door
     limestone: (() => { const m = new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }); applyWet(m); return m })(),
-    deckSide: std('#cfc4b2', { roughness: 0.8 }),
+    deckSide: std(wwHex('WW_LIMESTONE_FACADE'), { roughness: 0.8 }),
     balGlass: new THREE.MeshStandardMaterial({ color: '#d4ebe8', roughness: 0.05, metalness: 0, transparent: true, opacity: 0.14, depthWrite: false }),
     black: std('#101012', { metalness: 0, roughness: 0.9, envMapIntensity: 0 }),
     led: new THREE.MeshBasicMaterial({ color: '#ffc77a', toneMapped: false }),
     tube: new THREE.MeshBasicMaterial({ color: '#fff1d6', toneMapped: false }),
-    brass: std('#d9b36a', { metalness: 1, roughness: 0.42, envMapIntensity: 2.6 }),       // brushed brass
+    brass: std(wwHex('WW_BRASS_ANTIQUE', true), { metalness: 1, roughness: 0.42, envMapIntensity: 2.6 }),       // brushed brass
     downlight: new THREE.MeshBasicMaterial({ color: '#fff0d0', toneMapped: false }),
   }
 }

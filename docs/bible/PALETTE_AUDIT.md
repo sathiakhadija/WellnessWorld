@@ -1,6 +1,6 @@
 # Palette audit
 
-Generated 2026-11-12T01:07:05.431Z — registry 34 materials.
+Generated 2026-11-12T01:20:08.762Z — registry 34 materials.
 
 ## Registry checks
 - ⚠️ WW_LIMESTONE_FACADE ≈ WW_LIMESTONE_FOUNTAIN (ΔE2000 2.0) — consider merging
@@ -14,15 +14,15 @@ Generated 2026-11-12T01:07:05.431Z — registry 34 materials.
 | src/street/props.js | 31 | 26 | 8 |
 | src/street/facade.js | 34 | 24 | 10 |
 | src/Tree.jsx | 22 | 19 | 3 |
-| src/Plan.jsx | 25 | 16 | 16 |
 | src/Waterfront.jsx | 14 | 14 | 0 |
 | src/street/Street.jsx | 15 | 14 | 1 |
+| src/Plan.jsx | 19 | 13 | 13 |
 | src/street/textures.js | 16 | 13 | 9 |
 | src/Skyline.jsx | 9 | 9 | 0 |
 | src/PenthouseScene.jsx | 7 | 8 | 0 |
 | src/Atmosphere.jsx | 4 | 4 | 0 |
 
-Total unregistered colour uses: 357 (migrate area by area; do not bulk-recolour approved environments).
+Total unregistered colour uses: 354 (migrate area by area; do not bulk-recolour approved environments).
 
 ## Duplicate MeshStandardMaterial definitions
 - none
@@ -49,3 +49,7 @@ Total unregistered colour uses: 357 (migrate area by area; do not bulk-recolour 
 - #000000: neutral black
 
 **RESULT: registry valid (0 errors)**
+
+## Wiring log
+- 2024-… n/a. 2026-11-12: `src/Plan.jsx` fallback materials wired to the registry by hand (semantic matches only): stone→WW_LIMESTONE_FACADE, deckSide→WW_LIMESTONE_FACADE, floorBath→WW_LIMESTONE_CREAM, brass→WW_BRASS_ANTIQUE(alt), walnut→WW_WALNUT_DARK, walnutHi→WW_WALNUT_DARK(alt). Penthouse before/after pixel diff (golden preset, living/door/balcony views): walls/floor unchanged; only the brass door handle shifted (muted antique brass, per Bible "not bright yellow"); remaining differences = animated water/tree (noise baseline measured separately).
+- Not wired (deliberately): GLB-supplied penthouse materials (WW_*_GAME, tuned by GRADE in PenthouseScene.jsx), street generators (`src/street/*` ≈ 400 hex literals) — migrate area-by-area with before/after checks as each environment is rebuilt; nearest-colour matches in `PALETTE_MIGRATION.md` are hints only (semantic mapping must be chosen by hand).

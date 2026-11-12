@@ -11,6 +11,7 @@ export const REGISTRY_GAPS = REG.gaps
 export const LAMP_K = { warmLow: 2700, warmHigh: 3200 }
 
 export function wwEntry(id) { const e = REGISTRY[id]; if (!e) throw new Error('[palette] unknown material id ' + id); return e }
+export function wwHex(id, alt = false) { const e = wwEntry(id); return alt && e.alt ? e.alt : e.hex }   // plain sRGB hex for APIs that take a colour string
 export function wwColor(id, alt = false) { const e = wwEntry(id); return new THREE.Color(alt && e.alt ? e.alt : e.hex) }
 
 const CACHE = new Map()
