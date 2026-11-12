@@ -1,8 +1,42 @@
 // Walkable shop interiors (Bible s13 Café Violette, s14 The Quiet Page). Built in the shop frame F: x across, +z to the street, interior at z < -1.1, floor y 0.2, ceiling y 3.35.
 // Called from shopBuilding(o.interior). Colours come from the master palette registry (hex literals mirrored from src/palette/registry.src.json).
 import * as THREE from 'three'
-import { toWorld } from './geo.js'
+import { toWorld, dirWorld } from './geo.js'
+import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import BAKED from '../baked/cafe.json'   // produced by assets/blender/make_cafe.py (Blender)
 const col = (h) => new THREE.Color(h)
+
+// ---- Blender-baked furniture placement: bucket geometry (y-up, front +z) -> street chunk accumulators in the shop frame
+const GEO = {}
+function bakedGeo(name) {
+  if (GEO[name]) return GEO[name]
+  const o = {}
+  for (const [bucket, d] of Object.entries(BAKED[name])) {
+    const n = d.p.length / 3, P = new Float32Array(d.p), g = new THREE.BufferGeometry(), uv = new Float32Array(n * 2)
+    for (let i = 0; i < n; i++) { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] }
+    g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
+    o[bucket] = toCreasedNormals(g, 0.7)
+  }
+  return (GEO[name] = o)
+}
+const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'awning', seat: 'awning', leather: 'awning', marble: 'slab', glow: 'glow' }
+function baked(ch, F, name, x, z, rot = 0, colors = {}, y = FL, scale = 1) {
+  const cr = Math.cos(rot), sr = Math.sin(rot), geos = bakedGeo(name)
+  for (const [bucket, g] of Object.entries(geos)) {
+    const a = ch.acc(BUCKET_KEY[bucket] || 'trim'), pos = g.attributes.position, nor = g.attributes.normal, uvs = g.attributes.uv, col = col_(colors[bucket] || '#ffffff'), idx = g.index
+    const base = a.k, N = pos.count
+    for (let i = 0; i < N; i++) {
+      const px = pos.getX(i) * scale, py = pos.getY(i) * scale, pz = pos.getZ(i) * scale, nx = nor.getX(i), ny = nor.getY(i), nz = nor.getZ(i)
+      const lx = x + px * cr + pz * sr, lz = z - px * sr + pz * cr, [wx, wy, wz] = toWorld(F, lx, y + py, lz)
+      const nlx = nx * cr + nz * sr, nlz = -nx * sr + nz * cr, d = dirWorld(F, nlx, ny, nlz)
+      a.p.push(wx, wy, wz); a.n.push(d[0], d[1], d[2]); a.c.push(col.r, col.g, col.b); a.uv.push(uvs.getX(i), uvs.getY(i))
+    }
+    if (idx) for (let i = 0; i < idx.count; i++) a.i.push(base + idx.getX(i))
+    else for (let i = 0; i < N; i++) a.i.push(base + i)
+    a.k += N
+  }
+}
+const col_ = (h) => new THREE.Color(h)
 const FL = 0.2, CE = 3.35
 // shared room shell: floor, ceiling, wall linings, front-wall lining beside window/door, walking surface + wall colliders handled by shopBuilding
 function shell(ch, F, c, o) {
@@ -25,20 +59,12 @@ function shell(ch, F, c, o) {
   ch.ramp(F, -w / 2 + 0.2, w / 2 - 0.2, z0, FL, 0.16, FL, 0.2, 'shopfloor')
 }
 const light = (L, F, x, y, z, color, i, dist) => { const [wx, wy, wz] = toWorld(F, x, y, z); L.push({ x: wx, y: wy, z: wz, color, intensity: i, distance: dist, always: true }) }
-function pendant(ch, F, x, z, r, y, glowCol = '#ffe0b0') {
-  ch.prism(F, x, z, 0.012, 0.012, y, CE, col('#b58a4d'), 'metal', 4)
-  ch.prism(F, x, z, r, r * 0.7, y - 0.12, y, col('#b58a4d'), 'metal', 16); ch.prism(F, x, z, r * 0.92, r * 0.92, y - 0.14, y - 0.1, col(glowCol), 'glow', 16, false)
-}
-const chair = (ch, F, x, z, rot, c1, c2) => { // small bistro chair, facing -z when rot 0 (back toward +z)
-  const f = { x: 0, z: 0 }; void f; void rot
-  ch.box(F, x - 0.21, x + 0.21, FL + 0.44, FL + 0.48, z - 0.21, z + 0.21, col(c1), 'wood', 'fulrbd', 1, 1, 0); for (const [dx, dz] of [[-0.18, -0.18], [0.18, -0.18], [-0.18, 0.18], [0.18, 0.18]]) ch.box(F, x + dx - 0.015, x + dx + 0.015, FL, FL + 0.44, z + dz - 0.015, z + dz + 0.015, col(c2), 'wood', 'fulrb', 1, 1, 0)
-  ch.box(F, x - 0.21, x + 0.21, FL + 0.48, FL + 0.9, z + (rot ? -0.2 : 0.2) - 0.02, z + (rot ? -0.2 : 0.2) + 0.02, col(c1), 'wood', 'fulrb', 1, 1, 0)
-}
-const table = (ch, F, x, z, r, top, c1, c2) => { ch.prism(F, x, z, r, r, FL + 0.72, FL + 0.76, col(c1), 'slab', 16); ch.prism(F, x, z, 0.04, 0.04, FL, FL + 0.72, col(c2), 'metal', 8); ch.prism(F, x, z, 0.22, 0.22, FL, FL + 0.03, col(c2), 'metal', 12); void top }
-
+function pendant(ch, F, x, z, r, y) { baked(ch, F, 'pendant', x, z, 0, { brass: '#b58a4d', glow: '#ffe0b0' }, CE - 1.0, r / 0.26) }
+const chair = (ch, F, x, z, rot, c1, c2) => baked(ch, F, 'bistro_chair', x, z, rot, { wood: c2, seat: c1 })
+const table = (ch, F, x, z, r, top, c1, c2) => baked(ch, F, 'bistro_table', x, z, 0, { marble: c1, metal: c2, brass: '#b58a4d' }, FL, r / 0.36)
 export function cafeInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
-  shell(ch, F, c, { floor: '#a98260', ceil: '#e8d4bc', wall: '#E6D3CB', skirt: '#F7EADA' })
+  shell(ch, F, c, { floor: '#876349', ceil: '#e8d4bc', wall: '#E6D3CB', skirt: '#F7EADA' })
   // marble inlay strip + rug-like central runner
   ch.box(F, -0.9, 0.9, FL, FL + 0.01, z0 + 0.4, -1.5, col('#e6dcd2'), 'slab', 'u', 1.2, 1.2, 0)
   // plum velvet banquette along the left wall with 3 round bistro tables
@@ -46,9 +72,9 @@ export function cafeInterior(ch, F, c, L) {
   void left
   ch.box(F, x0, x0 + 0.55, FL + 0.05, FL + 0.46, -9.6, -3.4, col('#4B2E5C'), 'awning', 'fulrb', 1, 1, 0.01)
   ch.box(F, x0, x0 + 0.18, FL + 0.46, FL + 1.15, -9.6, -3.4, col('#4B2E5C'), 'awning', 'fulrb', 1, 1, 0.01)
-  for (const z of [-4.4, -6.5, -8.6]) { table(ch, F, x0 + 1.35, z, 0.38, 0, '#efe6da', '#3a2f2a'); chair(ch, F, x0 + 2.0, z, 0, '#b69a78', '#3a2f2a') }
+  for (const z of [-4.4, -6.5, -8.6]) { table(ch, F, x0 + 1.35, z, 0.38, 0, '#efe6da', '#3a2f2a'); chair(ch, F, x0 + 2.05, z, -Math.PI / 2, '#c9ad88', '#4a3a2f'); chair(ch, F, x0 + 0.85, z + 0.0, Math.PI / 2, '#c9ad88', '#4a3a2f') }
   // lounge nook (plum armchairs + low table) toward the rear on the counter-side aisle
-  for (const [x, z] of [[-0.55, -10.0], [0.65, -10.0]]) { ch.prism(F, x, z, 0.42, 0.42, FL + 0.05, FL + 0.42, col('#8A5A8C'), 'awning', 16); ch.box(F, x - 0.42, x + 0.42, FL + 0.42, FL + 0.95, z - 0.46, z - 0.3, col('#8A5A8C'), 'awning', 'fulrb', 1, 1, 0) }
+  baked(ch, F, 'armchair', -0.75, -10.2, 0.25, { fabric: '#8A5A8C', brass: '#b58a4d' }); baked(ch, F, 'armchair', 0.95, -10.2, -0.25, { fabric: '#8A5A8C', brass: '#b58a4d' })
   table(ch, F, 0.05, -9.2, 0.3, 0, '#e6dcd2', '#B58A4D')
   // curved stone patisserie counter with glass display (right side)
   const cx0 = x1 - 1.0, cz0 = -2.9, cz1 = -7.4
@@ -65,7 +91,7 @@ export function cafeInterior(ch, F, c, L) {
   for (const y of [1.6, 2.1, 2.6]) ch.box(F, x1 - 2.6, x1, FL + y, FL + y + 0.04, z0 + 0.02, z0 + 0.3, col('#B58A4D'), 'metal', 'fud', 1, 1, 0)
   // window-side study bar with stools (along the glazing)
   ch.box(F, c.winX0 + 0.2, c.winX1 - 0.2, FL + 0.98, FL + 1.04, -1.75, -1.3, col('#38261F'), 'wood', 'fulrbd', 1, 1, 0)
-  for (let i = 0; i < 3; i++) { const x = c.winX0 + 0.6 + i * ((c.winX1 - c.winX0 - 1.2) / 2); ch.prism(F, x, -2.15, 0.19, 0.17, FL + 0.7, FL + 0.76, col('#8A5A8C'), 'awning', 12); ch.prism(F, x, -2.15, 0.03, 0.03, FL, FL + 0.7, col('#B58A4D'), 'metal', 6) }
+  for (let i = 0; i < 3; i++) { const x = c.winX0 + 0.6 + i * ((c.winX1 - c.winX0 - 1.2) / 2); baked(ch, F, 'stool', x, -2.15, 0, { fabric: '#8A5A8C', brass: '#b58a4d' }) }
   // rear: restroom door + service door
   ch.box(F, -0.2, 0.7, FL, 2.3, z0 + 0.02, z0 + 0.07, col('#4B2E5C'), 'wood', 'f', 1, 1, 0); ch.box(F, 0.52, 0.58, 1.0, 1.1, z0 + 0.07, z0 + 0.12, col('#B58A4D'), 'metal', 'f', 1, 1, 0)
   // art: framed prints on the banquette wall + street sign sconce
@@ -77,7 +103,7 @@ export function cafeInterior(ch, F, c, L) {
 
 export function bookInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
-  shell(ch, F, c, { floor: '#8a5f40', ceil: '#d8c6ab', wall: '#5a3d2c', skirt: '#3a261c' })
+  shell(ch, F, c, { floor: '#5e3e2b', ceil: '#d8c6ab', wall: '#5a3d2c', skirt: '#3a261c' })
   // oxblood rug with border
   ch.box(F, -2.2, 2.2, FL, FL + 0.012, -9.8, -3.2, col('#592B37'), 'trim', 'u', 1, 1, 0); ch.box(F, -2.0, 2.0, FL + 0.012, FL + 0.02, -9.6, -3.4, col('#7a3a40'), 'trim', 'u', 1, 1, 0)
   // continuous bookshelf wall on the x+ side with books + rolling ladder
@@ -92,9 +118,8 @@ export function bookInterior(ch, F, c, L) {
   ch.box(F, x1 - 0.7, x1 - 0.66, FL, 2.9, -5.2, -5.15, col('#b58a4d'), 'metal', 'fb', 1, 1, 0); ch.box(F, x1 - 0.7, x1 - 0.66, FL, 2.9, -5.9, -5.85, col('#b58a4d'), 'metal', 'fb', 1, 1, 0); for (let i = 0; i < 9; i++) ch.box(F, x1 - 0.7, x1 - 0.5, FL + 0.3 + i * 0.28, FL + 0.33 + i * 0.28, -5.9, -5.15, col('#b58a4d'), 'metal', 'fud', 1, 1, 0)
   ch.box(F, x1 - 0.52, x1 - 0.48, 2.85, 2.95, z0 + 0.3, -1.5, col('#b58a4d'), 'metal', 'l', 1, 1, 0)                                     // ladder rail
   // glazed street wall left: tall bronze mullions reading as library windows is the front glazing already; left-hand reading lounge: two oxblood leather chairs + brass lamp
-  for (const [x, z, rr] of [[x0 + 0.65, -3.2, 0], [x0 + 0.65, -4.8, 0]]) { ch.box(F, x - 0.45, x + 0.45, FL + 0.05, FL + 0.45, z - 0.45, z + 0.45, col('#592B37'), 'awning', 'fulrb', 1, 1, 0.01); ch.box(F, x - 0.5, x - 0.3, FL + 0.45, FL + 0.95, z - 0.45, z + 0.45, col('#592B37'), 'awning', 'fulrb', 1, 1, 0.01); void rr }
-  ch.prism(F, x0 + 0.65, -4.0, 0.2, 0.2, FL, FL + 0.6, col('#38261F'), 'wood', 10); ch.prism(F, x0 + 0.65, -4.0, 0.012, 0.012, FL + 0.6, FL + 1.1, col('#b58a4d'), 'metal', 6); ch.prism(F, x0 + 0.65, -4.0, 0.17, 0.1, FL + 1.1, FL + 1.3, col('#ffe0b0'), 'glow', 12)
-  for (let z = -2.2; z > z0 + 0.6; z -= 1.5) { ch.box(F, x0 + 0.02, x0 + 0.16, FL, CE - 0.2, z - 0.12, z + 0.12, col('#4a3123'), 'wood', 'fr', 1, 1, 0); ch.box(F, x0 + 0.16, x0 + 0.18, FL + 0.9, CE - 0.5, z - 0.02, z + 0.02, col('#b58a4d'), 'metal', 'r', 1, 1, 0) }
+  baked(ch, F, 'club_chair', x0 + 0.75, -3.0, -Math.PI / 2, { leather: '#592B37', brass: '#b58a4d' }); baked(ch, F, 'club_chair', x0 + 0.75, -5.0, -Math.PI / 2, { leather: '#592B37', brass: '#b58a4d' })
+  ch.prism(F, x0 + 0.5, -4.0, 0.2, 0.2, FL, FL + 0.6, col('#38261F'), 'wood', 12); baked(ch, F, 'brass_lamp', x0 + 0.5, -4.0, 0, { brass: '#b58a4d', glow: '#ffe0b0' }, FL + 0.6)
   // central circular book island with lit lower shelf
   ch.prism(F, 0, -6.5, 1.0, 1.0, FL, FL + 0.9, col('#38261F'), 'wood', 28); ch.prism(F, 0, -6.5, 1.04, 1.04, FL + 0.9, FL + 0.95, col('#b58a4d'), 'metal', 28); ch.prism(F, 0, -6.5, 1.02, 1.02, FL + 0.28, FL + 0.32, col('#ffd9b0'), 'glow', 28, false)
   for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; ch.prism(F, Math.cos(a) * 0.62, -6.5 + Math.sin(a) * 0.62, 0.12, 0.12, FL + 0.95, FL + 1.12, col(bookCols[i % bookCols.length]), 'trim', 5) }
