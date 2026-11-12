@@ -58,22 +58,9 @@ function buildArch() {
     const za = Math.max(a, -11.79), zb = Math.min(b, 0.05)
     if (zb - za < 0.2) continue
     add('skirt', -4.45, -4.415, 0, 0.18, za + (a < -11 ? 0 : 0.17), zb - (b > 0 ? 0 : 0.17))
-    const len = zb - za - 0.6
-    if (len > 0.7) {
-      const n = Math.max(1, Math.round(len / 1.55)), gap = 0.22, pw = (len - (n - 1) * gap) / n
-      for (let i = 0; i < n; i++) {
-        const p0 = za + 0.3 + i * (pw + gap), p1 = p0 + pw
-        const x0 = -4.45, x1 = -4.425, yb = 0.55, yt = 3.15, t = 0.05
-        add('trim', x0, x1, yb, yb + t, p0, p1); add('trim', x0, x1, yt - t, yt, p0, p1)
-        add('trim', x0, x1, yb, yt, p0, p0 + t); add('trim', x0, x1, yb, yt, p1 - t, p1)
-      }
-    }
   }
-  {   // fluted pilaster in the bay between the doors
-    const [a, b] = segs[1], zc = (a + b) / 2
-    // fluted pilaster = Blender-baked mesh (<InteriorKit/>)
-  }
-  add('trim', -4.45, -4.36, 3.66, 3.8, -11.79, 0.05); add('trim', -4.45, -4.40, 3.60, 3.66, -11.79, 0.05)   // cornice (as before)
+  // Bible s03: clean planar walls — no raised-panel mouldings, no pilaster, no ornate cornice (a thin shadow-gap trim only)
+  add('trim', -4.45, -4.42, 3.62, 3.66, -11.79, 0.05)
 
   // ---- front wall (rebuilt) with the main entrance: a 1.3 m opening through the whole 0.4 m wall, panelled surround, lintel
   const EX0 = 0.55, EX1 = 1.85
@@ -85,16 +72,7 @@ function buildArch() {
   // (V10 stacked a pale lining, a broad dark casing, an inner bead and plinth blocks here; that read as nested frames.)
   add('trim', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('trim', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('trim', EX0, EX1, 3.07, 3.1, 0, 0.4)
   add('trim', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('trim', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('trim', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
-  for (const [a, b] of [[-3.2, -0.4], [2.8, 3.95]]) {                                                              // flanking raised panels
-    const x0 = a + (a < 0 ? 0.0 : 0), yb = 0.55, yt = 3.15, t = 0.05
-    if (b - a < 0.6) continue
-    add('trim', a, b, yb, yb + t, -0.025, 0); add('trim', a, b, yt - t, yt, -0.025, 0); add('trim', a, a + t, yb, yt, -0.025, 0); add('trim', b - t, b, yb, yt, -0.025, 0)
-  }
-  // narrow tall panel pair either side of the door (each carries a sconce): tall upper frame, short lower frame
-  for (const [a, b] of [[-0.18, 0.3], [2.1, 2.58]]) for (const [yb, yt] of [[1.2, 3.0], [0.4, 1.05]]) {
-    const t = 0.04
-    add('trim', a, b, yb, yb + t, -0.025, 0); add('trim', a, b, yt - t, yt, -0.025, 0); add('trim', a, a + t, yb, yt, -0.025, 0); add('trim', b - t, b, yb, yt, -0.025, 0)
-  }
+  // (flanking raised panels and panel pairs removed — Bible s03 clean walls; sconces stay)
   add('skirt', -4.45, EX0 - 0.08, 0, 0.18, -0.03, 0); add('skirt', EX1 + 0.08, 3.61, 0, 0.18, -0.03, 0)
 
   // ---- BEDROOM  interior x -9.65..-4.85, z -8.15..-3.85
@@ -198,7 +176,7 @@ const leafParts = (lw, panels = [[0.3, 1.3], [1.52, 2.74]], h = DOOR_H - 0.02) =
 
 function Leaf({ lw, dir, hingeZ, M, rotRef, mat, hingeX = HINGE_X, hingeY = 0, entrance = false }) {
   const g = useMemo(() => {
-    const p = leafParts(lw, entrance ? [[0.3, 1.05], [1.3, 2.85]] : undefined, entrance ? 3.06 : undefined)
+    const p = leafParts(lw, [], entrance ? 3.06 : undefined)      // Bible s03: clean flush-panel doors (no raised mouldings)
     return { body: boxes(p.body), frame: boxes(p.frame) }
   }, [lw, entrance])
   const brass = useMemo(() => {
@@ -563,7 +541,6 @@ function InteriorKit({ M }) {
   return (
     <>
       {DOORS.map((d) => [[-4.45, Math.PI / 2], [-4.85, -Math.PI / 2]].map(([x, r]) => <Baked key={d.id + x} name={d.id === 'bedroom' ? 'arch_bedroom' : 'arch_bathroom'} M={M} position={[x, 0, d.zc]} rotY={r} />))}
-      <Baked name="pilaster" M={M} position={[-4.45, 0.25 - 0.0, zc]} rotY={Math.PI / 2} />
     </>
   )
 }
