@@ -116,3 +116,13 @@ Evidence folder: docs/bible/lobby/*.png (localhost, SwiftShader headless; M2 not
 - 13 Café Violette, 14 The Quiet Page: [V] walkable greybox-plus interiors, aisles collision-scanned [T] (D-006). 15 riverside: [V] planters + wayfinding totem only.
 - Palette registry/audit/calibration: [T]. Weather incl. rain exclusion in new interiors: [T] (D-007). Foliage rebuild, Blender-baked furniture for lobby/cafés/bookshop, M2 perf, gates G1–G8 evidence: [ ] open.
 - Perf (static street triangles, headless count): 132k tris (lobby 5.9k, courtyard 3.3k, laneShops 27.8k); true fps unknown.
+
+## STATUS UPDATE 2026-11-12 (supersedes the snapshot above where they differ; still NOTHING owner-approved, headless SwiftShader only, M2 not measurable)
+- 01 glazing: [V] mullions slimmed at load, champagne bronze (evidence/s01_glazing_slim.png, s01_penthouse_glazing.jpg). 02 balcony: [V] skyline/river/boat composition vs p.6; cherry tree moved to west corner, still present (owner decision). Tower height/density vs target open.
+- 03 wall-side: [V] raised panelling, pilaster, ornate cornice, door-leaf panels removed; slim flat casings (Blender rebake); cove strip + framed artwork + picture light added (s03_door_wall.png, s03_wall_side.jpg).
+- 04: sheet built, labelled TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION PENDING USER APPROVAL. Corrections not applied; no owner approval.
+- 05 lift lobby: [V] plaster desaturated toward p.17; D-001/2 open (golden-hour pink dominates, Lift sign faint).
+- 10/11: [V] shop identities now follow Bible (Home · Vivienne · burgundy; Sauvage · Papier & Co.), hydrangea planters added; façade modules not rebuilt.
+- 12 lane: [V] matches p.52 composition. 13/14: [V] Blender-baked furniture, limewash walls, woven fabric.
+- Evidence sheets exist for s01–s15 (BLENDER column is a note except blender_cafe_kit.png render). Regression: lift round-trip [T], no page errors.
+- NOT done: AO/contact shadows, M2 performance/G7, matched-camera Blender renders of scenes, trees/foliage Blender rebuild, owner approvals, layout 216×278 m approval.
