@@ -61,6 +61,14 @@ function buildArch() {
   }
   // Bible s03: clean planar walls — no raised-panel mouldings, no pilaster, no ornate cornice (a thin shadow-gap trim only)
   add('trim', -4.45, -4.42, 3.62, 3.66, -11.79, 0.05)
+  add('led', -4.45, -4.40, 3.585, 3.615, -11.79, 0.05)                                       // concealed perimeter cove glow (Bible s03 D)
+  {   // framed marble artwork on the bay between the doors (approved AFTER shows one, picture-light above)
+    const [a, b] = segs[1], zc = (a + b) / 2, hw = 0.55
+    add('brass', -4.45, -4.425, 1.05, 1.09, zc - hw - 0.04, zc + hw + 0.04); add('brass', -4.45, -4.425, 2.31, 2.35, zc - hw - 0.04, zc + hw + 0.04)
+    add('brass', -4.45, -4.425, 1.05, 2.35, zc - hw - 0.04, zc - hw); add('brass', -4.45, -4.425, 1.05, 2.35, zc + hw, zc + hw + 0.04)
+    add('stone', -4.45, -4.435, 1.09, 2.31, zc - hw, zc + hw)
+    add('brass', -4.45, -4.40, 2.45, 2.48, zc - 0.3, zc + 0.3); add('led', -4.45, -4.43, 2.42, 2.45, zc - 0.28, zc + 0.28)
+  }
 
   // ---- front wall (rebuilt) with the main entrance: a 1.3 m opening through the whole 0.4 m wall, panelled surround, lintel
   const EX0 = 0.55, EX1 = 1.85
