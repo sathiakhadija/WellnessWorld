@@ -5,3 +5,4 @@
 - s06 ground-floor lobby rebuilt in plan.js (D-003). s07 entrance glazing (D-004). s08 courtyard planter (D-005). s09 three-tier fountain.
 - s13 Café Violette + s14 The Quiet Page walkable interiors (D-006); rain exclusion zones (D-007).
 - Not started / partial: s10 Maison Home/Café Vivienne façades, s11 Maison Sauvage/Papier & Co., s12 shopping street cinematic pass, s15 riverside promenade, foliage rebuild, time-of-day matrix for new spaces, M2 perf, gate evidence G1–G8.
+- Shopping street pass 1: window boxes (not on the bookshop), A-frame blackboards, plum awning + wisteria on Café Violette, foliage greens/finer leaf cards. Still open: cobble variation, string-light density, Blender-baked props, matched-camera BEFORE/BLENDER/LOCALHOST triplets for every environment.

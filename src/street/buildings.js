@@ -236,7 +236,7 @@ export function shopBuilding(ch, F, o) {
     const winH = f === 1 ? 2.1 : 1.85, sill = f === 1 ? 0.55 : 0.6, ww = 1.0
     for (let b = 0; b < nb; b++) { const cx = (b + 0.5) * w / nb - w / 2; ops.push({ x0: cx - ww / 2, x1: cx + ww / 2, sill, head: sill + winH }) }
     rowWall(ch, F, -w / 2, w / 2, yy0, yy1, ops, t, main, key, su, sv)
-    for (let b = 0; b < nb; b++) { const cx = (b + 0.5) * w / nb - w / 2; sash(ch, F, cx, yy0 + sill, ww, winH, t, { lit: R() < 0.3, stone, trim }); if (f === 1 && o.balc) balconette(ch, F, cx, yy0 + sill, ww, {}) }
+    for (let b = 0; b < nb; b++) { const cx = (b + 0.5) * w / nb - w / 2; sash(ch, F, cx, yy0 + sill, ww, winH, t, { lit: R() < 0.3, stone, trim }); if (f === 1 && o.balc) { balconette(ch, F, cx, yy0 + sill, ww, {}); if (!o.noFlowers) { ch.box(F, cx - ww / 2, cx + ww / 2, yy0 + sill + 0.62, yy0 + sill + 0.84, 0.82, 1.1, col('#2b2623'), 'metal', 'fulrb', 1, 1, 0); for (let k = 0; k < 5; k++) ch.prism(F, cx - ww / 2 + 0.1 + k * (ww - 0.2) / 4, 0.96, 0.14, 0.09, yy0 + sill + 0.84, yy0 + sill + 1.08 + (k % 2) * 0.06, col(['#edE6d7', '#4e6139', '#82749a', '#edE6d7', '#718451'][k]), 'leaf', 7) } } }
     ch.box(F, -w / 2 - 0.02, w / 2 + 0.02, yy0 - 0.06, yy0 + 0.06, -0.02, 0.06, stone, 'trim', 'fu')
   }
   void top
