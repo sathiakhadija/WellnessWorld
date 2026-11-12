@@ -224,12 +224,12 @@ export function buildStreet() {
     {
       const tones = ['#f1ebe2', '#e9e2dc', '#8a76b0', '#a08cc6', '#6b7f4a', '#5b7243', '#f1ebe2']
       for (const sx of [-1, 1]) for (let z = cz + 9.5; z < CZ1 - 1.5; z += 1.15) {
-        const bx = cx + sx * (2.35 + R() * 0.9), n = 3 + ((R() * 3) | 0)
-        for (let k = 0; k < n; k++) { const r0 = 0.26 + R() * 0.2, h = 0.45 + R() * 0.5; g.prism(frame(bx + (R() - 0.5) * 0.7, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+        const bx = cx + sx * (2.35 + R() * 0.9), n = 8 + ((R() * 4) | 0)
+        for (let k = 0; k < n; k++) { const r0 = 0.13 + R() * 0.13, h = 0.28 + R() * 0.4; g.prism(frame(bx + (R() - 0.5) * 0.7, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
       }
       for (const sx of [-1, 1]) for (let z = CZ0 + 7.5; z < cz - 9; z += 1.3) {
         const bx = cx + sx * (3.0 + R() * 1.6)
-        for (let k = 0; k < 3; k++) { const r0 = 0.24 + R() * 0.2, h = 0.4 + R() * 0.45; g.prism(frame(bx + (R() - 0.5) * 0.8, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+        for (let k = 0; k < 8; k++) { const r0 = 0.13 + R() * 0.12, h = 0.26 + R() * 0.38; g.prism(frame(bx + (R() - 0.5) * 0.8, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
       }
     }
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
@@ -615,11 +615,11 @@ export function buildStreet() {
     // Bible s09: cream hydrangea + lavender beds ringing the setts apron (kept open at the four path entries)
     {
       const tones = ['#f1ebe2', '#e9e2dc', '#f1ebe2', '#8a76b0', '#a08cc6', '#5b7243']
-      for (let i2 = 0; i2 < 44; i2++) {
-        const a2 = (i2 / 44) * Math.PI * 2, q = Math.abs(((a2 / (Math.PI / 2)) % 1 + 1) % 1 - 0), nearPath = Math.min(q, 1 - q) < 0.11
+      for (let i2 = 0; i2 < 64; i2++) {
+        const a2 = (i2 / 64) * Math.PI * 2, q = Math.abs(((a2 / (Math.PI / 2)) % 1 + 1) % 1 - 0), nearPath = Math.min(q, 1 - q) < 0.11
         if (nearPath) continue
-        const rr = 6.3 + R() * 1.1, n = 2 + ((R() * 2) | 0)
-        for (let k = 0; k < n; k++) { const r0 = 0.28 + R() * 0.2, h = 0.45 + R() * 0.5; g.prism(frame(SCX + Math.cos(a2) * rr + (R() - 0.5) * 0.5, SCZ + Math.sin(a2) * rr + (R() - 0.5) * 0.5, 0, GY), 0, 0, r0, r0 * 0.7, 0.04, 0.04 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+        const rr = 6.3 + R() * 1.1, n = 6 + ((R() * 4) | 0)
+        for (let k = 0; k < n; k++) { const r0 = 0.13 + R() * 0.13, h = 0.28 + R() * 0.4; g.prism(frame(SCX + Math.cos(a2) * rr + (R() - 0.5) * 0.5, SCZ + Math.sin(a2) * rr + (R() - 0.5) * 0.5, 0, GY), 0, 0, r0, r0 * 0.7, 0.04, 0.04 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
       }
     }
     pools.push([SCX, SCZ, 11])
