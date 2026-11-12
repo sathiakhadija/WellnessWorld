@@ -157,7 +157,7 @@ export function StreetVisuals() {
   }, [built, M, pool])
 
   const liftGeo = useMemo(() => new THREE.BoxGeometry(0.93, 2.55, 0.05), [])
-  const liftMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#8a6d44', roughness: 0.4, metalness: 0.75 }), [])
+  const liftMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#c8a468', roughness: 0.32, metalness: 1, envMapIntensity: 1.8 }), [])
   const waterMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#4d4a63', roughness: 0.06, metalness: 0.15, transparent: true, opacity: 0.88, normalMap, normalScale: new THREE.Vector2(0.5, 0.5), envMapIntensity: 1.6 }), [normalMap])
   const jetRefs = useRef([]), haloMat = useRef()
   const last = useRef(-1)

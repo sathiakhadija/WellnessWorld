@@ -117,16 +117,26 @@ export function buildStreet() {
     ch.box(FL, -hw, hw, H + 0.55, H + 0.6, -10, 0.3, col(PAL.slate), 'roof', 'u')
     // ---- the lobby interior (FP: lz 0 = the tower wall at z = 4; the lobby is lx -7..7, lz 0.9..9.55; ceiling 4.9)
     const iw = 7
-    ch.box(FP, -iw, iw, -0.01, 0.04, 0.9, 9.6, col('#e4d8be'), 'slab', 'u', 1.8, 1.2)                                                      // travertine floor
-    ch.box(FP, -iw + 0.5, iw - 0.5, 0.04, 0.05, 1.5, 9.1, col('#d1c3a6'), 'slab', 'u', 1.8, 1.2, 0)                                       // inlaid border
-    ch.box(FP, -1.4, 1.4, 0.05, 0.06, 4.9, 9.55, col('#bba980'), 'trim', 'u', 1, 1, 0)                                                      // entrance runner
-    ch.box(FP, -iw, iw, 4.9, 5.2, 0.9, 9.6, col('#efe6d3'), 'trim', 'fd', 1, 1, 0)                                                          // ceiling
-    for (const s of [-1, 1]) { ch.box(FP, s * 5.6 - 0.15, s * 5.6 + 0.15, 4.84, 4.9, 1.2, 9.4, col('#ffe0b0'), 'glow', 'd', 1, 1, 0); ch.box(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, col('#e2d6bd'), 'ashlar', 'fulrb', 2.4, 1.2); ch.solid(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, 'lobbywall') }
+    ch.box(FP, -iw, iw, -0.01, 0.04, 0.9, 9.6, col('#f0dfca'), 'trim', 'u', 2.8, 2.8)                                                      // pale veined marble floor (large slabs)
+    ch.box(FP, -iw + 0.6, iw - 0.6, 0.04, 0.046, 1.5, 9.0, col('#e6d2bc'), 'trim', 'u', 2.8, 2.8, 0)                                      // inlaid border
+    for (const [x0, x1, z0, z1] of [[-iw + 0.6, iw - 0.6, 1.5, 1.54], [-iw + 0.6, iw - 0.6, 8.96, 9.0], [-iw + 0.6, -iw + 0.64, 1.5, 9.0], [iw - 0.64, iw - 0.6, 1.5, 9.0]]) ch.box(FP, x0, x1, 0.046, 0.052, z0, z1, brass, 'metal', 'u', 1, 1, 0)   // brass inlay line
+    ch.box(FP, -iw, iw, 4.9, 5.2, 0.9, 9.6, col('#efe4d6'), 'trim', 'fd', 1, 1, 0)                                                          // ceiling
+    for (const [x0, x1, z0, z1] of [[-iw, -iw + 0.9, 0.9, 9.6], [iw - 0.9, iw, 0.9, 9.6], [-iw + 0.9, iw - 0.9, 0.9, 1.7], [-iw + 0.9, iw - 0.9, 8.7, 9.6]]) ch.box(FP, x0, x1, 4.55, 4.9, z0, z1, col('#efe4d6'), 'trim', 'fd', 1, 1, 0)   // recessed ceiling soffit
+    for (const [x0, x1, z0, z1] of [[-iw + 0.9, -iw + 0.96, 1.7, 8.7], [iw - 0.96, iw - 0.9, 1.7, 8.7], [-iw + 0.96, iw - 0.96, 1.7, 1.76], [-iw + 0.96, iw - 0.96, 8.64, 8.7]]) ch.box(FP, x0, x1, 4.5, 4.55, z0, z1, col('#ffd9b0'), 'glow', 'd', 1, 1, 0)   // warm cove light
+    for (const x of [-4.2, -1.9, 1.9, 4.2]) for (const z of [2.6, 5.0, 7.4]) ch.prism(FP, x, z, 0.11, 0.11, 4.86, 4.9, col('#ffe6c4'), 'glow', 12)   // recessed downlights
+    for (const [x0, x1, z0, z1] of [[-iw, iw, 0.9, 0.96], [-iw, -iw + 0.06, 0.9, 9.6], [iw - 0.06, iw, 0.9, 9.6]]) ch.box(FP, x0, x1, 0, 0.16, z0, z1, col('#f1e8dc'), 'trim', 'fulrb', 1, 1, 0)   // skirting
+    for (const s of [-1, 1]) { ch.box(FP, s * 5.6 - 0.15, s * 5.6 + 0.15, 4.84, 4.9, 1.2, 9.4, col('#ffe0b0'), 'glow', 'd', 1, 1, 0); ch.box(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, col('#dcc3b1'), 'trim', 'fulrb', 8, 8); ch.solid(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, 'lobbywall') }
     ch.box(FP, -iw - 0.1, iw + 0.1, 4.9, 5.0, 0.9, 9.6, col('#e9dfca'), 'trim', 'fulrbd', 1, 1, 0)
     // back wall: limestone with the lift recess, flanked by walnut panelling
     const FB = frame(BX, 4.9, 0, GY)
-    rowWall(ch, FB, -iw, iw, 0, 4.9, [{ x0: -0.95, x1: 0.95, sill: 0, head: 2.6 }], 0.9, col('#ddd1b8'), 'ashlar', 2.4, 1.2)
-    for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x0 = s * (1.45 + i * 1.05); ch.box(FB, Math.min(x0, x0 + s * 0.95), Math.max(x0, x0 + s * 0.95), 0.1, 3.6, 0.0, 0.07, walnut.clone().multiplyScalar(0.92 + 0.08 * (i % 2)), 'wood', 'fu', 1, 1, 0) }
+    rowWall(ch, FB, -iw, iw, 0, 4.9, [{ x0: -0.95, x1: 0.95, sill: 0, head: 2.6 }], 0.9, col('#dcc3b1'), 'trim', 8, 8)
+    for (const sd of [-1, 1]) {
+      ch.box(FB, Math.min(sd * 1.55, sd * 5.8), Math.max(sd * 1.55, sd * 5.8), 0.1, 3.6, 0.0, 0.03, col('#c9ad92'), 'wood', 'f', 1, 1, 0)           // slat backing
+      for (let k = 0; k < 22; k++) { const x0 = sd * (1.6 + k * 0.19); ch.box(FB, Math.min(x0, x0 + sd * 0.12), Math.max(x0, x0 + sd * 0.12), 0.1, 3.6, 0.03, 0.09, col('#a9835f').multiplyScalar(0.92 + 0.07 * (k % 3)), 'wood', 'flr', 1, 1, 0.02) }
+      ch.box(FB, Math.min(sd * 1.1, sd * 1.5), Math.max(sd * 1.1, sd * 1.5), 0, 3.5, -0.02, 0.1, col('#33281f'), 'slab', 'fulr', 1.2, 1.2, 0)         // dark veined marble pilaster
+      ch.box(FB, Math.min(sd * 5.8, sd * 5.86), Math.max(sd * 5.8, sd * 5.86), 0.1, 3.6, 0.0, 0.12, col('#ffd9b0'), 'glow', 'f', 1, 1, 0)             // slat uplight edge
+    }
+    ch.box(FB, -1.5, 1.5, 2.72, 3.5, -0.02, 0.1, col('#33281f'), 'slab', 'fulr', 1.2, 1.2, 0)
     ch.box(FB, -0.95, 0.95, 0, 0.01, -0.9, 0, col('#cdbf9f'), 'trim', 'u')
     ch.acc('glow').quad(...[[-0.9, 0.04, -0.82], [0.9, 0.04, -0.82], [0.9, 2.55, -0.82], [-0.9, 2.55, -0.82]].map(([x, y, z]) => [FB.x + x, FB.y + y, FB.z + z]), col('#ffdca8'), [0, 0, 1], [[0, 0], [1, 0], [1, 1], [0, 1]])
     for (const s of [-1, 1]) ch.box(FB, s * 1.0 - 0.05, s * 1.0 + 0.05, 0, 2.7, -0.1, 0.06, bronze, 'metal+', 'fulr')
@@ -151,24 +161,33 @@ export function buildStreet() {
       ch.box(FA, -wx / 2, wx / 2, y, y + h, 0.04, 0.07, c1, 'trim', 'f', 1, 1, 0); ch.box(FA, -wx / 2 + 0.2, wx / 2 - 0.2, y + h * 0.18, y + h * 0.55, 0.07, 0.08, c2, 'trim', 'f', 1, 1, 0)
     }
     art(0, 3.3, 1.1, 1.4, 1.5, col('#bfb39b'), col('#8a6a78'), -1); art(0, 5.3, 1.1, 1.4, 1.5, col('#a9b39a'), col('#cbb78d'), -1); art(0, 7.3, 1.1, 1.4, 1.5, col('#d9cdb8'), col('#cf8f9c'), -1); art(0, 6.0, 2.3, 1.5, 1.4, col('#cbb9a0'), col('#a45f47'), 1)
-    // concierge desk (walnut, stone top) on the east side; seating group on the west
-    ch.box(FP, 2.6, 5.9, 0.04, 1.05, 2.9, 3.7, walnut, 'wood', 'fulrb', 1, 1, 0.05); ch.box(FP, 2.5, 6.0, 1.05, 1.12, 2.8, 3.8, col('#e7dfcf'), 'ashlar', 'fulrbd', 2.4, 1.2); ch.solid(FP, 2.5, 6.0, 0, 1.12, 2.8, 3.8, 'desk')
-    ch.box(FP, 3.2, 5.2, 1.12, 1.18, 3.1, 3.5, col('#2f2a26'), 'trim', 'u', 1, 1, 0); ch.box(FP, 4.0, 4.04, 1.12, 1.55, 3.2, 3.24, brass, 'metal', 'fulrb', 1, 1, 0); ch.box(FP, 3.85, 4.2, 1.55, 1.58, 3.1, 3.4, col('#ffe0b0'), 'glow', 'fu', 1, 1, 0)   // blotter + desk lamp
-    ch.box(FP, 5.6, 6.0, 0.04, 1.9, 1.0, 2.2, walnut.clone().multiplyScalar(0.9), 'wood', 'fulrb', 1, 1, 0.05)                                  // key cabinet
-    const sofa = col('#bdad96'), sofaDk = col('#a18f7b')
-    ch.box(FP, -6.2, -3.4, 0.04, 0.44, 5.6, 7.4, sofa, 'awning', 'fulrb', 1, 1, 0); ch.box(FP, -6.2, -5.7, 0.44, 0.95, 5.6, 7.4, sofaDk, 'awning', 'fulrb', 1, 1, 0); ch.solid(FP, -6.2, -3.4, 0, 0.95, 5.6, 7.4, 'sofa')
-    for (const z of [4.4, 8.6]) { ch.box(FP, -5.4, -4.3, 0.04, 0.42, z - 0.5, z + 0.5, sofa, 'awning', 'fulrb', 1, 1, 0); ch.box(FP, -5.4, -5.0, 0.42, 0.85, z - 0.5, z + 0.5, sofaDk, 'awning', 'fulrb', 1, 1, 0); ch.solid(FP, -5.4, -4.3, 0, 0.85, z - 0.5, z + 0.5, 'armchair') }
-    ch.box(FP, -4.1, -2.9, 0.04, 0.05, 4.9, 6.9, col('#cfc2a8'), 'trim', 'u', 1, 1, 0)                                                      // rug
-    put('table', BX - 3.5, 6.0, 0, 1.0, GY); ch.solid(FP, -3.9, -3.1, 0, 0.75, 5.6, 6.4, 'table')
+    // curved fluted reception counter (east), warm stone top, brass plinth, lamp + bouquet
+    {
+      const cc = col('#cdb59c'), fl = col('#bfa58a')
+      ch.box(FP, 3.45, 5.35, 0.08, 1.05, 2.4, 3.5, cc, 'plaster', 'fulrb', 2, 2, 0.01)
+      for (const x of [3.45, 5.35]) ch.prism(FP, x, 2.95, 0.55, 0.55, 0.08, 1.05, cc, 'plaster', 24)
+      for (let k = 0; k < 29; k++) { const x = 2.95 + k * 0.1; const z = x < 3.45 ? 2.95 + Math.sqrt(Math.max(0, 0.3025 - (x - 3.45) ** 2)) : x > 5.35 ? 2.95 + Math.sqrt(Math.max(0, 0.3025 - (x - 5.35) ** 2)) : 3.5; ch.box(FP, x, x + 0.045, 0.1, 1.03, z, z + 0.04, fl, 'plaster', 'f', 1, 1, 0) }
+      ch.box(FP, 3.45, 5.35, 0, 0.08, 2.4, 3.56, brass, 'metal', 'fulrb', 1, 1, 0); for (const x of [3.45, 5.35]) ch.prism(FP, x, 2.95, 0.58, 0.58, 0, 0.08, brass, 'metal', 24)
+      ch.box(FP, 3.45, 5.35, 1.05, 1.12, 2.34, 3.58, col('#efe6da'), 'slab', 'fulrbd', 1.2, 1.2, 0); for (const x of [3.45, 5.35]) ch.prism(FP, x, 2.95, 0.62, 0.62, 1.05, 1.12, col('#efe6da'), 'slab', 24)
+      ch.box(FP, 3.0, 5.8, 0.98, 1.04, 3.5, 3.58, col('#ffd9b0'), 'glow', 'f', 1, 1, 0)
+      ch.solid(FP, 2.85, 5.95, 0, 1.12, 2.35, 3.65, 'desk')
+      ch.prism(FP, 4.0, 3.0, 0.014, 0.014, 1.12, 1.5, brass, 'metal', 6); ch.prism(FP, 4.0, 3.0, 0.16, 0.12, 1.5, 1.7, col('#ffe0b0'), 'glow', 14)
+      ch.prism(FP, 5.0, 3.0, 0.06, 0.06, 1.12, 1.3, col('#e8e0d6'), 'trim', 10); ch.prism(FP, 5.0, 3.0, 0.2, 0.2, 1.3, 1.62, col('#c98f9f'), 'awning', 10)
+    }
+    // upholstered cream barrel chair + brass side table
+    ch.prism(FP, -4.7, 2.7, 0.46, 0.46, 0.05, 0.42, col('#eadfd0'), 'awning', 20); ch.box(FP, -5.2, -4.2, 0.42, 0.95, 2.2, 2.45, col('#eadfd0'), 'awning', 'fulrb', 1, 1, 0.01); ch.prism(FP, -4.7, 2.7, 0.44, 0.44, 0.42, 0.5, col('#cfa7a0'), 'awning', 20)
+    ch.solid(FP, -5.2, -4.2, 0, 0.95, 2.2, 3.2, 'armchair')
+    ch.prism(FP, -3.7, 2.7, 0.22, 0.22, 0.05, 0.56, brass, 'metal', 14); ch.prism(FP, -3.7, 2.7, 0.26, 0.26, 0.56, 0.6, col('#efe6da'), 'slab', 14); ch.prism(FP, -3.7, 2.7, 0.12, 0.1, 0.6, 0.8, col('#c98f9f'), 'awning', 10); ch.solid(FP, -3.95, -3.45, 0, 0.8, 2.45, 2.95, 'table')
+    // deliberately placed rug between lift, counter and door
+    ch.box(FP, -2.6, 2.6, 0.05, 0.062, 3.4, 7.2, col('#c9b6a3'), 'trim', 'u', 1, 1, 0); ch.box(FP, -2.4, 2.4, 0.062, 0.07, 3.6, 7.0, col('#d9c9bc'), 'trim', 'u', 1, 1, 0)
     // sculptural pendant: stacked brass rings on a drop rod, warm glow core
     const FD = frame(BX, 4 + 5.2, 0, GY)
-    ch.prism(FD, 0, 0, 0.012, 0.012, 3.6, 4.9, brass, 'metal', 4)
-    for (let i = 0; i < 5; i++) ch.prism(FD, 0, 0, 0.28 + i * 0.16, 0.28 + i * 0.16, 3.55 - i * 0.14, 3.6 - i * 0.14, brass, 'metal', 20)
-    ch.prism(FD, 0, 0, 0.28, 0.28, 3.0, 3.52, col('#ffe0b0'), 'glow', 12)
+    ch.prism(FD, 0, 0, 0.012, 0.012, 3.0, 4.9, brass, 'metal', 4)
+    for (const [r, y] of [[1.15, 3.85], [0.82, 3.52], [0.5, 3.2]]) { ch.prism(FD, 0, 0, r, r, y, y + 0.05, brass, 'metal', 40); ch.prism(FD, 0, 0, r - 0.05, r - 0.05, y - 0.04, y, col('#ffe0b0'), 'glow', 40) }
     // restrained greenery: two stone planters at the lift wall, a pair of potted trees by the doors
     for (const s of [-1, 1]) { put('planter', BX + s * 5.0, 5.7, 0, 1.0, GY); put('shrub', BX + s * 5.0 + 0.2, 5.7, 0, 1.0, GY + 0.62) }
     for (const s of [-1, 1]) { put('urn', BX + s * 2.7, 8.7, 0, 1.0, GY); put('ornamental', BX + s * 2.7, 8.7, 0, 0.42, GY + 0.9) }
-    lightsAt.push({ x: BX, y: GY + 3.4, z: 4 + 5.2, color: '#ffcf94', intensity: 7, distance: 16 })
+    lightsAt.push({ x: BX, y: GY + 3.4, z: 4 + 5.2, color: '#ffd5a8', intensity: 5, distance: 14 })
     halos.push([BX, GY + 3.2, 4 + 5.2], [BX, GY + 4.0, 14.6])
     // door to the courtyard: a clear 2.9 m opening (no leaves, so the arrival is never blocked)
     pois.lobby = { x: BX, z: 9 }
