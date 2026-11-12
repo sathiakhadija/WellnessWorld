@@ -62,6 +62,16 @@ const light = (L, F, x, y, z, color, i, dist) => { const [wx, wy, wz] = toWorld(
 function pendant(ch, F, x, z, r, y) { baked(ch, F, 'pendant', x, z, 0, { brass: '#b58a4d', glow: '#ffe0b0' }, CE - 1.0, r / 0.26) }
 const chair = (ch, F, x, z, rot, c1, c2) => baked(ch, F, 'bistro_chair', x, z, rot, { wood: c2, seat: c1 })
 const table = (ch, F, x, z, r, top, c1, c2) => baked(ch, F, 'bistro_table', x, z, 0, { marble: c1, metal: c2, brass: '#b58a4d' }, FL, r / 0.36)
+
+// hydrangea posy in a ceramic vase (Bible s13: lilac / mauve / cream blooms) — y = surface height
+function posy(ch, F, x, z, y, s = 1, tones = ['#9b7bb8', '#b894c8', '#e9dff0', '#c9a3c4', '#8a6aa6']) {
+  ch.prism(F, x, z, 0.06 * s, 0.045 * s, y, y + 0.16 * s, col('#efe6da'), 'slab', 10)
+  for (let k = 0; k < 6; k++) { const a = k * 1.05, r = k ? 0.075 * s : 0; ch.prism(F, x + Math.cos(a) * r, z + Math.sin(a) * r, 0.07 * s, 0.05 * s, y + 0.15 * s, y + (0.24 + (k % 2) * 0.03) * s, col(tones[k % tones.length]), 'leaf', 7) }
+}
+// hanging wisteria strands from the ceiling
+function wisteria(ch, F, x, z, len = 0.9, s = 1) {
+  for (let k = 0; k < 5; k++) { const dx = (k - 2) * 0.07 * s, dz = ((k * 7) % 3 - 1) * 0.05 * s, l = len * (0.7 + (k % 3) * 0.15); ch.prism(F, x + dx, z + dz, 0.035 * s, 0.012 * s, CE - l, CE - 0.04, col(k % 2 ? '#a78bcb' : '#8e6fb4'), 'leaf', 6) }
+}
 export function cafeInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
   shell(ch, F, c, { floor: '#876349', ceil: '#e8d4bc', wall: '#E6D3CB', skirt: '#F7EADA' })
@@ -96,6 +106,11 @@ export function cafeInterior(ch, F, c, L) {
   ch.box(F, -0.2, 0.7, FL, 2.3, z0 + 0.02, z0 + 0.07, col('#4B2E5C'), 'wood', 'f', 1, 1, 0); ch.box(F, 0.52, 0.58, 1.0, 1.1, z0 + 0.07, z0 + 0.12, col('#B58A4D'), 'metal', 'f', 1, 1, 0)
   // art: framed prints on the banquette wall + street sign sconce
   for (const z of [-4.4, -6.5, -8.6]) { ch.box(F, x0 + 0.02, x0 + 0.06, 1.5, 2.4, z - 0.4, z + 0.4, col('#B58A4D'), 'metal', 'r', 1, 1, 0); ch.box(F, x0 + 0.06, x0 + 0.08, 1.58, 2.32, z - 0.32, z + 0.32, col(['#8A5A8C', '#E6D3CB', '#8a9a85'][Math.abs(Math.round(z)) % 3]), 'trim', 'r', 1, 1, 0) }
+  // florals: posies on every table, counter and bar; wisteria drifting from the ceiling along the glazing and over the banquette
+  for (const z of [-4.4, -6.5, -8.6]) posy(ch, F, x0 + 1.35, z, FL + 0.78)
+  posy(ch, F, 0.05, -9.2, FL + 0.63, 1.1); posy(ch, F, cx0 + 0.3, cz0 - 0.2, FL + 1.1, 1.2); posy(ch, F, cx0 + 0.3, cz1 + 0.5, FL + 1.1, 1.1)
+  for (let i = 0; i < 4; i++) wisteria(ch, F, c.winX0 + 0.5 + i * ((c.winX1 - c.winX0 - 1.0) / 3), -0.9, 0.9)
+  for (const z of [-3.9, -5.4, -7.0, -8.4]) wisteria(ch, F, x0 + 0.3, z, 0.8)
   // lighting: pendants over the seating + warm interior points
   for (const [x, z] of [[x0 + 1.35, -4.4], [x0 + 1.35, -6.5], [x0 + 1.35, -8.6], [0.1, -9.2], [x1 - 2.0, -5.1]]) pendant(ch, F, x, z, 0.26, 2.3)
   light(L, F, 0, 2.5, -3.0, '#ffd5a8', 26, 9); light(L, F, 0, 2.5, -7.0, '#ffd5a8', 26, 9); light(L, F, x1 - 1.2, 2.3, -5, '#ffe0b8', 12, 6)
