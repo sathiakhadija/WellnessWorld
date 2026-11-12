@@ -453,6 +453,12 @@ export function buildStreet() {
       for (let i = 0; i < bays; i++) {
         const cx = -w + (i + 0.5) * ((2 * w) / bays), gw = 1.5
         ch.acc('glow').quad(toWorld(FB, cx - gw, HH + 0.35, 0.03), toWorld(FB, cx + gw, HH + 0.35, 0.03), toWorld(FB, cx + gw, HH + 3.6, 0.03), toWorld(FB, cx - gw, HH + 3.6, 0.03), col('#ffdca8'), dirWorld(FB, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+        // faux interior behind the glass: back-wall shelving bands, warm pendants, dark table/chair silhouettes
+        const ink = ['#b9814f', '#d9a76a', '#c9925c'][i % 3]
+        for (const sy of [1.0, 1.75, 2.5]) ch.box(FB, cx - gw + 0.12, cx + gw - 0.12, HH + sy, HH + sy + 0.05, 0.035, 0.1, col(ink), 'wood', 'f', 1, 1, 0)
+        for (let k = 0; k < 7; k++) { const bx = cx - gw + 0.25 + R() * (2 * gw - 0.5), sy = [1.05, 1.8, 2.55][(R() * 3) | 0]; ch.box(FB, bx, bx + 0.07 + R() * 0.12, HH + sy, HH + sy + 0.16 + R() * 0.2, 0.035, 0.1, col(['#7a3b3f', '#3f5a4a', '#e8d9bd', '#8a6a9a'][(R() * 4) | 0]), 'wood', 'f', 1, 1, 0) }
+        for (const px of [-0.9, 0.9]) { ch.box(FB, cx + px - 0.01, cx + px + 0.01, HH + 2.9, HH + 3.5, 0.035, 0.06, col('#4a3b2e'), 'metal', 'f', 1, 1, 0); ch.box(FB, cx + px - 0.14, cx + px + 0.14, HH + 2.7, HH + 2.9, 0.035, 0.1, col('#fff0cc'), 'glow', 'f', 1, 1, 0) }
+        ch.box(FB, cx - 0.6, cx + 0.6, HH + 0.35, HH + 0.8, 0.035, 0.1, col('#3a2b22'), 'wood', 'f', 1, 1, 0)
         for (const m of [-gw, 0, gw]) ch.box(FB, cx + m - 0.04, cx + m + 0.04, HH + 0.3, HH + 3.65, 0.03, 0.1, dark, 'metal', 'fulr', 1, 1, 0)        // mullions
         ch.box(FB, cx - gw - 0.04, cx + gw + 0.04, HH + 3.6, HH + 3.7, 0.03, 0.1, dark, 'metal', 'fulr', 1, 1, 0)
         for (const y0 of [HH + 5.1, HH + 8.1]) {
