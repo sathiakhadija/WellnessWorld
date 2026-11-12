@@ -36,7 +36,7 @@ function useMats() {
     const warm = new THREE.MeshBasicMaterial({ color: wwHex('WW_LAMP_WARM'), toneMapped: false })
     const marbleL = LT.marbleLight(), marbleD = LT.marbleDark(), gold = LT.brushedGold(); gold.wrapS = gold.wrapT = THREE.RepeatWrapping
     return {
-      blush: ww('WW_PLASTER_BLUSH', { roughness: 0.92, color: wwColor('WW_PLASTER_BLUSH').lerp(new THREE.Color('#9d8a86'), 0.45).multiplyScalar(0.8), envMapIntensity: 0.35 }, 'lobby'),
+      blush: ww('WW_PLASTER_BLUSH', { roughness: 0.92, color: wwColor('WW_PLASTER_BLUSH').lerp(new THREE.Color('#8a7873'), 0.6).multiplyScalar(0.72), envMapIntensity: 0.35 }, 'lobby'),
       trim: ww('WW_LIMESTONE_CREAM', { color: wwColor('WW_LIMESTONE_CREAM', true), roughness: 0.5 }, 'lobbyTrim'),
       floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.2, envMapIntensity: 0.8, color: wwColor('WW_MARBLE_LIGHT').multiplyScalar(0.75) }, 'lobbyFloor'),
       marble: ww('WW_MARBLE_DARK', { map: marbleD, color: new THREE.Color('#4a4340'), roughness: 0.26, envMapIntensity: 1.2 }, 'lobbyDark'),
@@ -142,7 +142,7 @@ export default function Lobby() {
         <group ref={leafR}><Kit name="lift_leaf" M={M} position={[0, 0, 0]} scale={[-1, 1, 1]} /></group>
       </group>
       <mesh position={[cx, 2.425, z1 - 0.0755]} rotation={[0, Math.PI, 0]} material={M.indicator}><planeGeometry args={[0.52, 0.15]} /></mesh>
-      <mesh position={[-0.09, 1.66, z1 - 0.004]} rotation={[0, Math.PI, 0]} material={M.sign}><planeGeometry args={[0.4, 0.4]} /></mesh>
+      <mesh position={[-0.09, 1.66, z1 - 0.004]} rotation={[0, Math.PI, 0]} material={M.sign}><planeGeometry args={[0.6, 0.6]} /></mesh>
       <Kit name="call_panel" M={M} position={[2.5, 0.98, z1]} rotY={Math.PI} />
       {/* cab behind the doors */}
       <group position={[cx, 0, z1 + 0.7 + 0.04]}>
