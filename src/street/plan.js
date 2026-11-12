@@ -13,6 +13,7 @@ import * as THREE from 'three'
 import { Chunk, frame, rng, C, GY, GROUND_Y, TERRACE_Y, rowWall, toWorld, dirWorld } from './geo.js'
 import { PAL, strip, pane, railing, sash, balconette } from './facade.js'
 import { townhouse, modernBlock, shopBuilding } from './buildings.js'
+import { cafeInterior, bookInterior } from './interiors.js'
 
 export const BX = 1.2                                   // penthouse entrance axis
 export const TERR_H = TERRACE_Y - GY                    // terrace height above street level (≈4.4)
@@ -608,7 +609,7 @@ export function buildStreet() {
         if (sp.passage) { const px = x - sp.passage * k / 2; pois.passage = { x: px, z: LS + 1 }; x -= sp.passage * k; continue }
         const w = sp.w * k, xc = x - w / 2; x -= w
         const F = row > 0 ? frame(xc, LN, 0, GY) : frame(xc, LS, Math.PI, GY)
-        shopBuilding(ch, F, { w, d: 12, floors: R() < 0.3 ? 4 : 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: R() < 0.5 ? 'l' : 'r', balc: R() < 0.5, roof: R() < 0.55 ? 'gable' : 'hip', side: PAL.stock })
+        shopBuilding(ch, F, { w, d: 12, floors: R() < 0.3 ? 4 : 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: R() < 0.5 ? 'l' : 'r', balc: R() < 0.5, roof: R() < 0.55 ? 'gable' : 'hip', side: PAL.stock, interior: sp.id === 'cafe' ? (c2, F2, cc) => cafeInterior(c2, F2, cc, lightsAt) : sp.id === 'books' ? (c2, F2, cc) => bookInterior(c2, F2, cc, lightsAt) : undefined })
         const zf = row > 0 ? LN : LS, dir = row > 0 ? 1 : -1                                              // dir = into the lane
         if (sp.id === 'cafe') { for (let i = 0; i < 4; i++) { const tx = xc + (i - 1.5) * 1.9, tz = zf + dir * 2.4; put('table', tx, tz, 0); put('chair', tx - 0.55, tz, Math.PI / 2); put('chair', tx + 0.55, tz, -Math.PI / 2) } put('planter', xc - w / 2 + 0.5, zf + dir * 1.3, 0, 1.0); put('planter', xc + w / 2 - 0.5, zf + dir * 1.3, 0, 1.0) }
         if (sp.id === 'florist') { for (let i = 0; i < 3; i++) { const fx = xc + (i - 1) * 1.1, fz = zf + dir * 0.9; ch.prism(frame(fx, fz, 0, GY), 0, 0, 0.2, 0.17, 0, 0.42, col('#6b6a70'), 'metal', 8); for (let j = 0; j < 5; j++) ch.prism(frame(fx + (j - 2) * 0.06, fz + ((j % 2) - 0.5) * 0.08, 0, GY), 0, 0, 0.07, 0.05, 0.42, 0.64 + (j % 3) * 0.05, col(['#cfa9ad', '#e4d9cb', '#b7a5c4', '#d9c08a', '#a9b39a'][j]), 'leaf', 6) } }

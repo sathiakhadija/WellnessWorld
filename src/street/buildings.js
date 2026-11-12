@@ -193,8 +193,8 @@ export function shopBuilding(ch, F, o) {
   // display window: stall riser + glass + transom bar + mullions
   ch.box(F, winX0, winX1, 0.12, 0.78, -0.55, -0.4, stall, 'wood', 'fu')
   const lit = o.shopLit ?? true
-  if (lit) shopInterior(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.35)
-  else pane(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.9, -0.5, lit)
+  if (lit && !o.interior) shopInterior(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.35)
+  else if (!o.interior) pane(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.9, -0.5, lit)
   const frameC = col('#2b2623')
   strip(ch, F, 'trim+', frameC, winX0, winX1, ground - 1.0, ground - 0.9, -0.48)
   if (lit) ch.acc('shopglass').quad(W(F, winX0 + 0.04, 0.8, -0.5), W(F, winX1 - 0.04, 0.8, -0.5), W(F, winX1 - 0.04, ground - 0.35, -0.5), W(F, winX0 + 0.04, ground - 0.35, -0.5), col('#ffffff'), dirW(F), [[0, 0], [1, 0], [1, 1], [0, 1]])
@@ -204,8 +204,7 @@ export function shopBuilding(ch, F, o) {
   // entrance recess: side reveals + door at the back, threshold step
   ch.box(F, dx - dw / 2 - 0.06, dx - dw / 2, 0.12, ground - 0.35, -1.1, -0.2, stall, 'wood', 'r'); ch.box(F, dx + dw / 2, dx + dw / 2 + 0.06, 0.12, ground - 0.35, -1.1, -0.2, stall, 'wood', 'l')
   ch.box(F, dx - dw / 2, dx + dw / 2, 0.12, 0.2, -1.1, 0.14, col('#a89d8e'), 'ashlar', 'fu', 2.4, 1.2)                         // step / threshold
-  ch.box(F, dx - dw / 2, dx + dw / 2, 0.12, ground - 0.35, -1.12, -1.1, col(o.door || PAL.green), 'wood', 'f')
-  pane(ch, F, dx - 0.35, dx + 0.35, 0.9, 2.3, -1.09, lit)
+  if (!o.interior) { ch.box(F, dx - dw / 2, dx + dw / 2, 0.12, ground - 0.35, -1.12, -1.1, col(o.door || PAL.green), 'wood', 'f'); pane(ch, F, dx - 0.35, dx + 0.35, 0.9, 2.3, -1.09, lit) }
   ch.box(F, dx + dw / 2 - 0.2, dx + dw / 2 - 0.15, 1.0, 1.1, -1.1, -1.0, col(PAL.brass), 'metal+', 'fl', 1, 1, 0)             // door pull
   ch.box(F, dx - dw / 2, dx + dw / 2, ground - 0.35, ground - 0.3, -1.1, -0.2, col('#cfc4ae'), 'trim', 'd')
   ch.ramp(F, dx - dw / 2, dx + dw / 2, 0.14, 0.2, 0.5, 0, 0.2, 'ramp')                                                          // glides over the step
@@ -257,7 +256,11 @@ export function shopBuilding(ch, F, o) {
   ch.box(F, cx - 0.4, cx + 0.4, B0 - 0.1, B0 + 2.4, -d * 0.55 - 0.35, -d * 0.55 + 0.35, col(PAL.stock), 'brick', 'fblru', 0.9, 1)
   for (const px of [-0.15, 0.15]) ch.prism(F, cx + px, -d * 0.55, 0.11, 0.09, B0 + 2.4, B0 + 2.75, col('#a8643f'), 'trim', 6)
   // colliders: body behind the recess, the display window zone, the piers, and the overhead mass (the door recess stays open so the entrance is reachable)
-  ch.solid(F, -w / 2, w / 2, 0, top + 4, -d, -1.1, 'building')
+  if (o.interior) {
+    ch.solid(F, -w / 2, w / 2, ground - 0.4, top + 4, -d, -1.1, 'building')
+    ch.solid(F, -w / 2, -w / 2 + 0.3, 0, ground, -d, -1.1, 'building'); ch.solid(F, w / 2 - 0.3, w / 2, 0, ground, -d, -1.1, 'building'); ch.solid(F, -w / 2, w / 2, 0, ground, -d, -d + 0.3, 'building')
+    o.interior(ch, F, { w, d, ground, dx, winX0, winX1 })
+  } else ch.solid(F, -w / 2, w / 2, 0, top + 4, -d, -1.1, 'building')
   ch.solid(F, winX0, winX1, 0, ground, -1.1, -0.45, 'frontage')
   for (const [a, b] of piers) ch.solid(F, a, b, 0, ground, -1.1, 0, 'frontage')
   ch.solid(F, -w / 2, w / 2, ground - 0.4, top + 4, -1.1, 0, 'building')

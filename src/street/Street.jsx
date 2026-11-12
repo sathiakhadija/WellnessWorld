@@ -177,7 +177,7 @@ export function StreetVisuals() {
     jetRefs.current.forEach((m) => { if (!m) return; const s = 0.82 + 0.18 * Math.sin(t * 2.1 + m.userData.k * 1.7); m.scale.y = s; m.position.y = m.userData.y + (s * 1.5) / 2 })
     const onStreet = world.level === 'street'
     M.shopin.color.setScalar(0.55 + 0.62 * Math.min(1, LIVE.win))                                        // interiors read dim by day, glow at dusk
-    for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * LIVE.lamp : 0
+    for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * (l.userData.always ? Math.max(LIVE.lamp, 0.6) : LIVE.lamp) : 0
     if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
       last.current = t
@@ -226,7 +226,7 @@ export function StreetVisuals() {
         const a = (k / 5) * Math.PI * 2, r = k === 0 ? 0 : 0.5
         return <mesh key={'j' + i + k} ref={(m) => { if (m) { m.userData.y = j.y; m.userData.k = k; jetRefs.current[k] = m } }} position={[j.x + Math.cos(a) * r, j.y + 0.75, j.z + Math.sin(a) * r]}><cylinderGeometry args={[0.025, 0.05, 1.5, 6]} /><meshStandardMaterial color="#e8eef6" transparent opacity={0.55} roughness={0.2} /></mesh>
       }))}
-      {built.lightsAt.map((l, i) => <pointLight key={'l' + i} ref={(p) => { if (p) { p.userData.i = l.intensity; lightRefs.current[i] = p } }} position={[l.x, l.y, l.z]} color={l.color} intensity={0} distance={l.distance} decay={1.6} />)}
+      {built.lightsAt.map((l, i) => <pointLight key={'l' + i} ref={(p) => { if (p) { p.userData.i = l.intensity; p.userData.always = !!l.always; lightRefs.current[i] = p } }} position={[l.x, l.y, l.z]} color={l.color} intensity={0} distance={l.distance} decay={1.6} />)}
     </>
   )
 }
