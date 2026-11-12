@@ -97,6 +97,12 @@ export function cafeInterior(ch, F, c, L) {
   ch.box(F, cx0 - 0.12, cx0 + 0.5, FL + 1.1, FL + 1.55, cz1 - 0.3, cz0 + 0.3, col('#dfeaec'), 'shopglass', 'fulrb', 1, 1, 0)         // pastry display glass case
   for (let i = 0; i < 7; i++) ch.prism(F, cx0 + 0.18, cz0 - 0.4 - i * 0.6, 0.12, 0.1, FL + 1.1, FL + 1.22, col(['#e8c79a', '#c98f9f', '#f1dcc0'][i % 3]), 'awning', 8)
   ch.box(F, cx0 - 0.1, cx0 + 0.55, FL + 0.3, FL + 0.34, cz1, cz0, col('#ffd9b0'), 'glow', 'l', 1, 1, 0)                                // under-counter glow
+  // Bible s13 p.56: fluted counter front, brass foot rail, lit second tier of pastries/tarts in the display case
+  for (let z = cz1 + 0.05; z < cz0 - 0.05; z += 0.11) ch.box(F, cx0 - 0.16, cx0 - 0.1, FL + 0.1, FL + 1.03, z, z + 0.07, col('#cdb59c'), 'trim', 'fulr', 1, 1, 0)
+  ch.box(F, cx0 - 0.2, cx0 - 0.17, FL + 0.1, FL + 0.14, cz1, cz0, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0)
+  ch.box(F, cx0 - 0.1, cx0 + 0.5, FL + 1.36, FL + 1.39, cz1 - 0.2, cz0 + 0.2, col('#efe6da'), 'slab', 'fulrbd', 1, 1, 0)
+  ch.box(F, cx0 - 0.08, cx0 + 0.48, FL + 1.34, FL + 1.36, cz1 - 0.2, cz0 + 0.2, col('#ffd9a0'), 'glow', 'd', 1, 1, 0)
+  for (let i = 0; i < 12; i++) ch.prism(F, cx0 + 0.12 + (i % 2) * 0.2, cz0 - 0.25 - i * 0.34, 0.07, 0.055, FL + 1.39, FL + 1.47, col(['#f1dcc0', '#c98f9f', '#e8c79a', '#8a5a4a'][i % 4]), 'awning', 7)
   ch.solid(F, cx0 - 0.15, cx0 + 0.6, FL, FL + 1.1, cz1 - 0.55, cz0 + 0.55, 'desk')
   // back bar / espresso shelf on the back wall behind the counter
   ch.box(F, x1 - 2.6, x1, FL, FL + 0.95, z0 + 0.02, z0 + 0.6, col('#38261F'), 'wood', 'fulb', 1, 1, 0.01)
