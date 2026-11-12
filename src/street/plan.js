@@ -179,6 +179,15 @@ export function buildStreet() {
       ch.box(FA, -wx / 2, wx / 2, y, y + h, 0.04, 0.07, c1, 'trim', 'f', 1, 1, 0); ch.box(FA, -wx / 2 + 0.2, wx / 2 - 0.2, y + h * 0.18, y + h * 0.55, 0.07, 0.08, c2, 'trim', 'f', 1, 1, 0)
     }
     art(0, 3.3, 1.1, 1.4, 1.5, col('#bfb39b'), col('#8a6a78'), -1); art(0, 5.3, 1.1, 1.4, 1.5, col('#a9b39a'), col('#cbb78d'), -1); art(0, 7.3, 1.1, 1.4, 1.5, col('#d9cdb8'), col('#cf8f9c'), -1); art(0, 6.0, 2.3, 1.5, 1.4, col('#cbb9a0'), col('#a45f47'), 1)
+    // Bible s06: lit wall niche with a hydrangea/lavender arrangement on a marble shelf (east wall, beyond the art)
+    {
+      const FA = frame(BX + iw, 4 + 8.2, -Math.PI / 2, GY)
+      ch.box(FA, -0.52, 0.52, 0.8, 2.5, 0, 0.05, bronze, 'metal+', 'fulrb', 1, 1, 0)                                                        // niche frame
+      ch.box(FA, -0.44, 0.44, 0.88, 2.42, 0.05, 0.07, col('#e9b97a'), 'glow', 'f', 1, 1, 0)                                                // warm backlit panel
+      ch.box(FA, -0.5, 0.5, 0.8, 0.88, 0, 0.34, col('#efe6da'), 'slab', 'fulrbd', 1.2, 1.2, 0)                                              // marble shelf
+      baked(ch, FA, 'hydrangea1', -0.14, 0.17, 0.4, { leaf: '#5b7243', bloom: '#ebe5d6' }, 0.88, 1.45)
+      baked(ch, FA, 'lavender1', 0.22, 0.15, 1.1, { leaf: '#7a8a68', stem: '#7a8a68', bloom2: '#8b7b9c' }, 0.88, 1.5)
+    }
     // curved fluted reception counter (east), warm stone top, brass plinth, lamp + bouquet
     {
       const cc = col('#cdb59c'), fl = col('#bfa58a')

@@ -10,3 +10,4 @@ Glazed bronze frontage seen from inside, courtyard framing trees, bollard lanter
 Blossom tree canopy overhead (Bible shows pink blossom; palette rules ban pink-blossom foliage elsewhere, so decision needed), glowing floor lanterns with hydrangea at the foreground, layered ring chandelier, polished marble reflections, sliding glass door detail.
 
 UPDATE s06: soft additive light pools under the lobby downlights and in front of the lift recess (evidence/s06_game_pools.png) give a polished-floor glow; true screen-space/planar reflections are NOT implemented (would be a High-preset option after owner M2 measurement). Lit niche with flowers still missing. Headless only.
+UPDATE s06: lit wall niche with marble shelf + Blender hydrangea/lavender arrangement on the east wall (evidence/s06_game_niche.png). Headless only; flowers still low-poly close up.
