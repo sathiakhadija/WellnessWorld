@@ -26,11 +26,11 @@ def leaf_obj(name, specs):
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     return new_obj(name, bm)
 
-def ball_obj(name, centres, jitter, seed):
+def ball_obj(name, centres, jitter, seed, sub=1):
     """Lumpy floret balls: (centre, radius) list, ico subdiv 1 with per-vertex jitter."""
     rnd = random.Random(seed); bm = bmesh.new()
     for c, r in centres:
-        g = bmesh.ops.create_icosphere(bm, subdivisions=1, radius=r)
+        g = bmesh.ops.create_icosphere(bm, subdivisions=sub, radius=r)
         for v in g['verts']:
             v.co = v.co * (1 + (rnd.random() - 0.5) * jitter) + Vector(c)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -43,7 +43,7 @@ def hemi_dirs(n, rnd, lift=0.25, spread=1.0):
         out.append(Vector((math.cos(a) * (1 - e * 0.55), math.sin(a) * (1 - e * 0.55), e)).normalized())
     return out
 
-def hydrangea(seed, h=0.62, r=0.42, blooms=7, second=False):
+def hydrangea(seed, h=0.62, r=0.42, blooms=5, second=False):
     reset(); PARTS.clear(); rnd = random.Random(seed)
     leaves = []
     for d in hemi_dirs(22, rnd, 0.1):
@@ -52,8 +52,8 @@ def hydrangea(seed, h=0.62, r=0.42, blooms=7, second=False):
     cs = []
     for i in range(blooms):
         a = rnd.random() * math.tau; rr = rnd.random() * r * 0.6; z = h * 0.7 + rnd.random() * h * 0.28 - (rr / r) * h * 0.18
-        cs.append(((math.cos(a) * rr, math.sin(a) * rr, z), 0.085 + rnd.random() * 0.05))
-    keep(ball_obj('blooms', cs, 0.45, seed + 1), 'bloom2' if second else 'bloom', C)
+        cs.append(((math.cos(a) * rr, math.sin(a) * rr, z), 0.1 + rnd.random() * 0.05))
+    keep(ball_obj('blooms', cs, 0.3, seed + 1, 2), 'bloom2' if second else 'bloom', C)
     return finish(f'hydrangea_{seed}')
 
 def lavender(seed, n=11, h=0.5):
@@ -69,7 +69,7 @@ def lavender(seed, n=11, h=0.5):
         a = rnd.random() * math.tau; rr = rnd.random() * 0.12; lean = 0.08 + rnd.random() * 0.12
         top = (math.cos(a) * (rr + lean), math.sin(a) * (rr + lean), h * (0.8 + rnd.random() * 0.25))
         stems.append(((math.cos(a) * rr * 0.4, math.sin(a) * rr * 0.4, 0.05), Vector((top[0] - math.cos(a) * rr * 0.4, top[1] - math.sin(a) * rr * 0.4, top[2] - 0.05)).normalized(), math.dist(top, (0, 0, 0.05)) * 0.95, 0.014))
-        for k in range(2): spikes.append(((top[0], top[1], top[2] - 0.045 * k + 0.03), 0.028 - 0.003 * k))
+        for k in range(2): spikes.append(((top[0], top[1], top[2] - 0.03 * k + 0.03), 0.02 - 0.002 * k))
     keep(leaf_obj('stems', stems), 'stem', C)
     keep(ball_obj('spikes', spikes, 0.3, seed + 3), 'bloom2', C)
     return finish(f'lavender_{seed}')
@@ -84,8 +84,8 @@ def shrub(seed, r=0.55, h=0.7):
 
 LIB = {}
 for s in range(3):
-    LIB[f'hydrangea{s}'] = hydrangea(10 + s, 0.58 + s * 0.06, 0.4 + s * 0.04, 6 + s)
-LIB['hydrangea_lilac'] = hydrangea(21, 0.6, 0.42, 7, True)
+    LIB[f'hydrangea{s}'] = hydrangea(10 + s, 0.58 + s * 0.06, 0.4 + s * 0.04, 4 + s)
+LIB['hydrangea_lilac'] = hydrangea(21, 0.6, 0.42, 5, True)
 for s in range(2): LIB[f'lavender{s}'] = lavender(30 + s, 8 + s * 2, 0.46 + s * 0.06)
 for s in range(2): LIB[f'shrub{s}'] = shrub(40 + s, 0.5 + s * 0.12, 0.62 + s * 0.12)
 tri = 0
