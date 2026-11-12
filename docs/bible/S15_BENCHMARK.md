@@ -23,3 +23,6 @@ Evidence: `evidence/s15_riverside_4way.jpg` (BEFORE p.65 / TARGET p.66 / LOCALHO
 
 ## Next
 Burgundy pavilion + café seating, denser canopy cards, interior depth behind glazing, Blender-baked neutral AO texture on the paving, owner M2 run.
+
+## Regression (headless)
+Day, blue hour and night shots load with no page errors after the baked brick/ashlar/sett/slab texture sets (`evidence/s15_game_night.png`). Known: tree foliage stays bright at night (canopy not dimmed enough); rain preset not exercised by the script's `W=` variable (the weather toggle still showed Sunny) — rain regression still to run.
