@@ -566,11 +566,12 @@ export function buildStreet() {
     // east side of East Street: a second, lower block of three houses facing the garden would crowd the corner; the lane's south houses already close it
     houseRow(so, 'x', 111, Math.PI, -8.3, 16.9, { d: 9, floors: 4 })
     const shopS = (xc, w, sp) => shopBuilding(sh, frame(xc, 108.75 + 0.0, Math.PI, GY), { w, d: 12, floors: 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: sp.side, balc: true, roof: 'hip', side: PAL.stock })
-    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 0, awning: '#cf8f9c', stall: '#d8ceb4', door: '#2b2630', side: 'l' })
-    shopS(-19.0, 7.0, { wall: 'plaster', main: '#d9c9bf', sign: 3, awning: '#8d9a85', stall: '#a9b89c', door: '#4a3a46', side: 'r' })
-    shopS(-11.5, 6.4, { wall: 'plaster', main: '#e0d6c4', sign: 4, awning: '#e6d9c2', stall: '#e4d6c2', door: '#41584a', side: 'l' })
-    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 11, awning: '#7a2f3f', stall: '#5a2a35', door: '#2b2630', side: 'r' })
-    shopS(28, 7.4, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#2f4a3a', stall: '#2c3a31', door: '#2f3d36', side: 'l' })
+    // Bible s10 (west corner, left→right facing the row): Maison Home · Café Vivienne · burgundy boutique; s11 (east corner): Maison Sauvage · Papier & Co.
+    shopS(-26.8, 8.0, { wall: 'plaster', main: '#d9c7b4', sign: 4, awning: '#e8d9c6', stall: '#e4d6c2', door: '#41584a', side: 'l' })
+    shopS(-19.0, 7.0, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#263b32', stall: '#263b32', door: '#2f3d36', side: 'r' })
+    shopS(-11.5, 6.4, { wall: 'brick', main: PAL.brick, sign: 11, awning: '#5a2934', stall: '#5a2934', door: '#2b2630', side: 'l' })
+    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 3, awning: '#2f4a3a', stall: '#2c3a31', door: '#2b2630', side: 'r' })
+    shopS(28, 7.4, { wall: 'plaster', main: '#d9c9bf', sign: 6, awning: '#5a2934', stall: '#37363f', door: '#37363f', side: 'l' })
     houseRow(so, 'x', 111, Math.PI, 31.7, ES1, { d: 9, floors: 4 })
     // café tables on the south pavement (under the garden railings)
     for (let i = 0; i < 3; i++) { put('table', -27 + i * 2.1, 107.6, 0, 1.0); put('chair', -27.6 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -26.4 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
