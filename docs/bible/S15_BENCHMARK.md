@@ -16,8 +16,8 @@ Evidence: `evidence/s15_riverside_4way.jpg` (BEFORE p.65 / TARGET p.66 / LOCALHO
 1. Shopfront glass is a flat cream plane: no interior depth, mullions only, no warm interior props.
 2. Tree canopies still sparser than the dense overhead canopy in the target; no fairy-light strings.
 3. Burgundy-canopied glass pavilion and terrace seating now **integrated** (evidence: s15_pavilion_bluehour.png); seating now uses the Blender-made bistro tables and bentwood chairs; canopy densified (15 cards/tip); still missing wall-mounted lanterns, hedges between trees, fairy lights.
-4. Ivy is blocky prisms (6-sided); needs leaf-card clusters.
-5. Paving is the generic slab texture; no warm light pools on the stone from lamps/windows at blue hour.
+4. Ivy now vine strands of small clumps (reads as climbing ivy); still prisms, not leaf cards.
+5. Paving, brick, ashlar and sett now use Blender-baked albedo+normal sets (`bake_textures.py`); remaining:  no warm light pools on the stone from lamps/windows at blue hour.
 6. Sky/river grade is cooler and less saturated than the target sunset; no bloom/halation (postprocessing absent).
 7. Blender master: foliage still blobby, sky more saturated than target, windows blown-out.
 
