@@ -318,7 +318,7 @@ function shopInterior(ch, F, x0, x1, y0, y1) {
 const W = (F, x, y, z) => [F.x + x * F.c + z * F.s, F.y + y, F.z - x * F.s + z * F.c]
 const dirW = (F) => [F.s, 0, F.c]
 // Baked-style ambient-occlusion contact strip on the ground along a façade/planter base (static, neutral, day/night-safe; Bible/Directive §3). Local z>0 is outward.
-export function aoStrip(ch, F, x0, x1, depth, z0 = 0, y = 0.03) {
+export function aoStrip(ch, F, x0, x1, depth, z0 = 0, y = 0.07) {
   ch.acc('ao').quad(W(F, x0, y, z0), W(F, x1, y, z0), W(F, x1, y, z0 + depth), W(F, x0, y, z0 + depth), col('#000000'), [0, 1, 0], [[0, 1], [1, 1], [1, 0], [0, 0]])
 }
 import { signUV } from './textures.js'
