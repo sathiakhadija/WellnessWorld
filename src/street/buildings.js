@@ -226,6 +226,12 @@ export function shopBuilding(ch, F, o) {
     const px = sx * (w / 2 - 0.3); if (Math.abs(px - dx) < 1.1) continue
     ch.prism(F, px, 0.62, 0.22, 0.2, 0.0, 0.42, col('#6b6a70'), 'metal', 10); ch.prism(F, px, 0.62, 0.012, 0.012, 0.42, 0.7, col('#5a4636'), 'wood', 5); ch.prism(F, px, 0.62, 0.3, 0.3, 0.68, 1.12, col('#4e6139'), 'leaf', 10)
     ch.solid(F, px - 0.25, px + 0.25, 0, 1.1, 0.37, 0.87, 'planter')
+    const hx = px - sx * 0.62
+    if (Math.abs(hx - dx) > 1.0) {
+      ch.prism(F, hx, 0.66, 0.26, 0.24, 0.0, 0.34, col('#8a8378'), 'metal', 10); ch.prism(F, hx, 0.66, 0.3, 0.2, 0.34, 0.62, col('#5d7a46'), 'leaf', 9)
+      for (let k = 0; k < 5; k++) { const a = k * 1.26 + sx, r = k ? 0.14 : 0; ch.prism(F, hx + Math.cos(a) * r, 0.66 + Math.sin(a) * r, 0.11, 0.09, 0.58, 0.76 + (k % 2) * 0.04, col(k % 2 ? '#f3f0ea' : '#e4e3f0'), 'leaf', 7) }
+      ch.solid(F, hx - 0.27, hx + 0.27, 0, 0.8, 0.39, 0.93, 'planter')
+    }
   }
   // upper floors
   const nb = w < 6 ? 2 : w < 8.2 ? 3 : 4
