@@ -139,6 +139,8 @@ export function buildStreet() {
     ch.box(FP, -iw, iw, 4.9, 5.2, 0.9, 9.6, col('#efe4d6'), 'trim', 'fd', 1, 1, 0)                                                          // ceiling
     for (const [x0, x1, z0, z1] of [[-iw, -iw + 0.9, 0.9, 9.6], [iw - 0.9, iw, 0.9, 9.6], [-iw + 0.9, iw - 0.9, 0.9, 1.7], [-iw + 0.9, iw - 0.9, 8.7, 9.6]]) ch.box(FP, x0, x1, 4.55, 4.9, z0, z1, col('#efe4d6'), 'trim', 'fd', 1, 1, 0)   // recessed ceiling soffit
     for (const [x0, x1, z0, z1] of [[-iw + 0.9, -iw + 0.96, 1.7, 8.7], [iw - 0.96, iw - 0.9, 1.7, 8.7], [-iw + 0.96, iw - 0.96, 1.7, 1.76], [-iw + 0.96, iw - 0.96, 8.64, 8.7]]) ch.box(FP, x0, x1, 4.5, 4.55, z0, z1, col('#ffd9b0'), 'glow', 'd', 1, 1, 0)   // warm cove light
+    for (const x of [-3.1, 3.1]) for (const z of [2.6, 5.0, 7.4]) pools.push([BX + x, 4 + z, 1.7, GY + 0.01])   // Bible s06: soft light pools on the polished marble (reads as reflected downlights)
+    pools.push([BX, 4 + 8.2, 2.2, GY + 0.01])   // warm pool in front of the lift recess
     for (const x of [-4.2, -1.9, 1.9, 4.2]) for (const z of [2.6, 5.0, 7.4]) ch.prism(FP, x, z, 0.11, 0.11, 4.86, 4.9, col('#ffe6c4'), 'glow', 12)   // recessed downlights
     for (const [x0, x1, z0, z1] of [[-iw, iw, 0.9, 0.96], [-iw, -iw + 0.06, 0.9, 9.6], [iw - 0.06, iw, 0.9, 9.6]]) ch.box(FP, x0, x1, 0, 0.16, z0, z1, col('#f1e8dc'), 'trim', 'fulrb', 1, 1, 0)   // skirting
     for (const s of [-1, 1]) { ch.box(FP, s * 5.6 - 0.15, s * 5.6 + 0.15, 4.84, 4.9, 1.2, 9.4, col('#ffe0b0'), 'glow', 'd', 1, 1, 0); ch.box(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, col('#dcc3b1'), 'trim', 'fulrb', 8, 8); ch.solid(FP, Math.min(s * 7.0, s * 7.2), Math.max(s * 7.0, s * 7.2), 0, 4.9, 0.9, 9.6, 'lobbywall') }

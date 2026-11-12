@@ -8,3 +8,5 @@ Glossy reflective marble floor (reflections faint), warm lit shelving niche with
 Glazed bronze frontage seen from inside, courtyard framing trees, bollard lanterns, courtyard fountain in the distance.
 ## s07 gaps vs p.26
 Blossom tree canopy overhead (Bible shows pink blossom; palette rules ban pink-blossom foliage elsewhere, so decision needed), glowing floor lanterns with hydrangea at the foreground, layered ring chandelier, polished marble reflections, sliding glass door detail.
+
+UPDATE s06: soft additive light pools under the lobby downlights and in front of the lift recess (evidence/s06_game_pools.png) give a polished-floor glow; true screen-space/planar reflections are NOT implemented (would be a High-preset option after owner M2 measurement). Lit niche with flowers still missing. Headless only.
