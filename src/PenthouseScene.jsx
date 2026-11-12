@@ -47,7 +47,7 @@ const GRADE = {
   WW_Ceiling_Ivory_GAME: { set: [0.86, 0.78, 0.66] },
   WW_Trim_Satin_GAME:    { set: [0.86, 0.77, 0.63] },
   WW_Skirting_GAME:      { set: [0.86, 0.77, 0.63] },
-  WW_Frame_Bronze_GAME:  { set: [0.046, 0.036, 0.03], rough: 0.8, metal: 0.0, envI: 0.0 },   // V10: slim matte-black aluminium on every exterior frame
+  WW_Frame_Bronze_GAME:  { set: [0.25, 0.19, 0.125], rough: 0.4, metal: 0.8, envI: 1.1 },   // Bible: slim champagne bronze (palette WW_BRONZE_CHAMPAGNE), not matte black
 }
 const TONE = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neutral: THREE.NeutralToneMapping, linear: THREE.LinearToneMapping }
 

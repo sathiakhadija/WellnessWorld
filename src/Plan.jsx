@@ -161,7 +161,7 @@ function makeMats(src = {}) {
     skirt: src.WW_Skirting_GAME || std('#efe6d6'),
     ceil: src.WW_Ceiling_Ivory_GAME || std('#f2eadc'),
     ceilR: src.WW_Ceiling_Ivory_GAME || std('#f2eadc'),
-    frame: src.WW_Frame_Bronze_GAME || std('#111114', { metalness: 0.55, roughness: 0.42 }),     // slim matte-black aluminium
+    frame: std(wwHex('WW_BRONZE_CHAMPAGNE'), { metalness: 1, roughness: 0.36, envMapIntensity: 1.6 }),     // slim champagne-bronze (palette WW_BRONZE_CHAMPAGNE)
     glass: src.WW_Glass_GAME,
     floorBed: std('#b5aa99', { roughness: 0.98 }),                                    // soft greige wool carpet (placeholder finish)
     floorBath: std(wwHex('WW_LIMESTONE_CREAM'), { roughness: 0.25, envMapIntensity: 0.9 }),            // cream marble (placeholder finish)
