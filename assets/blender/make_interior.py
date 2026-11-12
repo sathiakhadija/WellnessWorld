@@ -11,21 +11,9 @@ CREAM, TUBE, BR = '#ffffff', '#fff1d6', '#d9b36a'
 def arch(w, h, name):
     reset(); PARTS.clear()
     k = lambda o, b='trim', c=CREAM: keep(o, b, c)
-    # opening is w wide x h high (z-up). Stepped architrave: wide shallow outer band + narrower deeper inner band, both sides
-    for s in (-1, 1):
-        k(box(f'o{s}', s * (w / 2 + 0.005), s * (w / 2 + 0.17), -0.045, 0.0, 0.0, h + 0.16, 0.008, 2))
-        k(box(f'i{s}', s * (w / 2 + 0.005), s * (w / 2 + 0.085), -0.085, -0.04, 0.0, h + 0.07, 0.01, 2))
-        # plinth block (taller, wider, deeper than the casing)
-        k(box(f'p{s}', s * (w / 2 - 0.005), s * (w / 2 + 0.215), -0.09, 0.0, 0.0, 0.26, 0.012, 2))
-        k(box(f'pc{s}', s * (w / 2 - 0.005), s * (w / 2 + 0.225), -0.1, -0.085, 0.24, 0.27, 0.006, 1))
-    # head: architrave band, frieze, stepped cornice (three layers), small centre keystone block
-    k(box('head_o', -w / 2 - 0.17, w / 2 + 0.17, -0.045, 0.0, h, h + 0.16, 0.008, 2))
-    k(box('head_i', -w / 2 - 0.085, w / 2 + 0.085, -0.085, -0.04, h, h + 0.07, 0.01, 2))
-    k(box('frieze', -w / 2 - 0.19, w / 2 + 0.19, -0.05, 0.0, h + 0.16, h + 0.30, 0.008, 2))
-    k(box('cor1', -w / 2 - 0.23, w / 2 + 0.23, -0.085, 0.0, h + 0.30, h + 0.335, 0.008, 2))
-    k(box('cor2', -w / 2 - 0.26, w / 2 + 0.26, -0.13, 0.0, h + 0.335, h + 0.37, 0.008, 2))
-    k(box('cor3', -w / 2 - 0.285, w / 2 + 0.285, -0.16, 0.0, h + 0.37, h + 0.405, 0.01, 2))
-    k(box('key', -0.06, 0.06, -0.1, -0.04, h + 0.16, h + 0.30, 0.008, 1))
+    # Bible s03: clean modern detailing — one slim flat casing (7 cm) + flat head, no plinths/frieze/cornice/keystone
+    for s in (-1, 1): k(box(f'c{s}', s * (w / 2 + 0.003), s * (w / 2 + 0.075), -0.03, 0.0, 0.0, h + 0.075, 0.006, 1))
+    k(box('head', -w / 2 - 0.075, w / 2 + 0.075, -0.03, 0.0, h, h + 0.075, 0.006, 1))
     # thin brass threshold
     k(box('thr', -w / 2, w / 2, -0.09, 0.0, -0.004, 0.006, 0.002, 1), 'brass', BR)
     return finish(name)
