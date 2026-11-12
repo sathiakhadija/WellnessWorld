@@ -2,4 +2,5 @@
 Evidence: `evidence/s12_shopping_street.jpg` (BEFORE p.51 / TARGET p.52 / LOCALHOST blue hour, headless). Pose ≈ (-62, -85.2, 93.5) yaw 1.5708 (looking −x along the lane). Not claimed approved; not M2-verified.
 - Now uses Blender-baked sett/slab/brick/ashlar sets (cobbles show setts with joints and relief).
 - Present: string lights, awnings, café tables, planters, A-frame boards, facades with lit windows.
-- Gaps vs p.52: no wisteria curtain on the left façade, shopfront interiors shallow, no Blender master yet, trees at the lane end sparse, no bloom on lamps.
+- Wisteria curtains now hang over ~70% of shopfronts (lilac strands, headless-viewed; strands read slightly plank-like).
+- Gaps vs p.52: shopfront interiors shallow, no Blender master yet, trees at the lane end sparse, no bloom on lamps.
