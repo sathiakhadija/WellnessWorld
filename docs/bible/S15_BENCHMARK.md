@@ -13,7 +13,7 @@ Evidence: `evidence/s15_riverside_4way.jpg` (BEFORE p.65 / TARGET p.66 / LOCALHO
 | M2 benchmark | not run (owner) |
 
 ## Discrepancies vs TARGET (p.66)
-1. Shopfront glass is a flat cream plane: no interior depth, mullions only, no warm interior props.
+1. Shopfront glass now has faux interiors (shelving bands, books, pendants, table silhouettes) behind the glow plane — reads as depth only faintly; real modelled interiors still open.
 2. Tree canopies still sparser than the dense overhead canopy in the target; fairy-light swags and wall lanterns now integrated (glow geometry, no extra real lights).
 3. Burgundy-canopied glass pavilion and terrace seating now **integrated** (evidence: s15_pavilion_bluehour.png); seating now uses the Blender-made bistro tables and bentwood chairs; canopy densified (15 cards/tip); still missing hedges between trees.
 4. Ivy now vine strands of small clumps (reads as climbing ivy); still prisms, not leaf cards.
