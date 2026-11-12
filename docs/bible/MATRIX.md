@@ -27,3 +27,6 @@ Rejects: global pink/purple/orange/green cast, oversaturation, washed-out, overb
 
 ## Regression 2026-11-12 (after Blender planting kit, s05 panel colour, s06 pools/niche)
 Night (promenade, fountain, lane) and heavy rain (lane, fountain) rendered headless with zero page errors (evidence/regress_*). Observation: white hydrangea reads slightly bright at night (plants are not in the night foliage dim list) — minor, open. Not M2-verified.
+
+## Time-of-day matrix (evidence/time_of_day_matrix.jpg, 2026-11-12) — lane, promenade, courtyard, café, bookshop, ground lobby × afternoon / golden / blue / night
+All 24 shots rendered with zero page errors (headless, not M2). Observations: exteriors respond correctly (lamps/halos/windows turn on, planting dims at night). Findings (open): café + bookshop interiors look nearly identical in all four presets (interior lighting is not time-driven — the café ceiling/walls read bright at night); lane "night" is close to blue hour (needs a darker night grade); lobby afternoon is very white. Owner to judge against Bible per-time targets.
