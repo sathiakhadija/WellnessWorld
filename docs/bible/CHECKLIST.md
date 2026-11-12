@@ -105,3 +105,14 @@ Correction loop: identify → severity → cause → fix → re-render Blender �
 
 ## FINAL VISION (acceptance feel)
 Penthouse luxurious with Thames views; courtyard peaceful with mature trees; shopping streets intimate; Café Violette inviting; The Quiet Page a warm reading retreat; riverside a natural continuation (no unfinished map edge); same visual identity in daylight, golden hour, blue hour, rainy evening.
+
+## HONEST STATUS SNAPSHOT (updated by Claude; supersedes any unticked line above — no line is signed off)
+Evidence folder: docs/bible/lobby/*.png (localhost, SwiftShader headless; M2 not measurable). Nothing is owner-approved; Section 04 remains "TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION PENDING USER APPROVAL".
+- 01–03 penthouse/balcony/wall interior: [~] untouched this pass (re-audit pending).
+- 04 world scale: [T] measured + report; corrections NOT applied.
+- 05 private lift lobby: [V] doorway + inside views, ride round-trip [T] (D-001/D-002 open: paler than target).
+- 06 ground lobby: [V] rebuilt pass 1 (D-003 open). 07 entrance: [V] slim bronze glazing + door leaves (D-004). 08 courtyard: [V] glow-ring planter (D-005). 09 fountain: [V] three-tier.
+- 10/11 shop rows: [~] signage + awning colours only (façade modules/flower boxes/lanterns not rebuilt). 12 shopping street: [ ] not started beyond signage.
+- 13 Café Violette, 14 The Quiet Page: [V] walkable greybox-plus interiors, aisles collision-scanned [T] (D-006). 15 riverside: [V] planters + wayfinding totem only.
+- Palette registry/audit/calibration: [T]. Weather incl. rain exclusion in new interiors: [T] (D-007). Foliage rebuild, Blender-baked furniture for lobby/cafés/bookshop, M2 perf, gates G1–G8 evidence: [ ] open.
+- Perf (static street triangles, headless count): 132k tris (lobby 5.9k, courtyard 3.3k, laneShops 27.8k); true fps unknown.

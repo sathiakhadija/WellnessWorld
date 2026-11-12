@@ -196,7 +196,7 @@ export function buildStreet() {
     for (const sd of [-1, 1]) for (const [dx, dz, hh] of [[3.35, 8.4, 0.42], [3.75, 8.85, 0.3]]) { const x = sd * dx; ch.box(FP, x - 0.14, x + 0.14, 0.04, 0.04 + hh, dz - 0.14, dz + 0.14, col('#ffdca8'), 'glow', 'fulrb', 1, 1, 0); ch.box(FP, x - 0.17, x + 0.17, 0.0, 0.05, dz - 0.17, dz + 0.17, brass, 'metal', 'fulrbu', 1, 1, 0); ch.box(FP, x - 0.17, x + 0.17, 0.04 + hh, 0.08 + hh, dz - 0.17, dz + 0.17, brass, 'metal', 'fulrbu', 1, 1, 0); for (const [ax, az] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) ch.box(FP, x + ax * 0.16 - 0.012, x + ax * 0.16 + 0.012, 0.05, 0.04 + hh, dz + az * 0.16 - 0.012, dz + az * 0.16 + 0.012, brass, 'metal', 'fulrb', 1, 1, 0) }   // brass lanterns
     for (const sd of [-1, 1]) ch.prism(FP, sd * 3.0, 8.35, 0.26, 0.2, 0.04, 0.5, col('#c98f9f'), 'awning', 12)                                                                                   // hydrangea mound
     for (const s of [-1, 1]) { put('urn', BX + s * 2.7, 8.7, 0, 1.0, GY); put('ornamental', BX + s * 2.7, 8.7, 0, 0.42, GY + 0.9) }
-    lightsAt.push({ x: BX, y: GY + 3.4, z: 4 + 5.2, color: '#ffd5a8', intensity: 5, distance: 14 })
+    lightsAt.push({ x: BX, y: GY + 3.4, z: 4 + 5.2, color: '#ffd5a8', intensity: 14, distance: 14, always: true }); lightsAt.push({ x: BX + 4.2, y: GY + 2.2, z: 4 + 2.9, color: '#ffe0b8', intensity: 6, distance: 6, always: true }); lightsAt.push({ x: BX - 4.5, y: GY + 2.2, z: 4 + 2.9, color: '#ffe0b8', intensity: 5, distance: 6, always: true })
     halos.push([BX, GY + 3.2, 4 + 5.2], [BX, GY + 4.0, 14.6])
     // door to the courtyard: a clear 2.9 m opening (no leaves, so the arrival is never blocked)
     pois.lobby = { x: BX, z: 9 }
