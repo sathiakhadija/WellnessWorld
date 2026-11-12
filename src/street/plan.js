@@ -459,7 +459,7 @@ export function buildStreet() {
           ch.acc('glow').quad(toWorld(FB, cx - 0.55, y0, 0.03), toWorld(FB, cx + 0.55, y0, 0.03), toWorld(FB, cx + 0.55, y0 + 1.9, 0.03), toWorld(FB, cx - 0.55, y0 + 1.9, 0.03), col(i % 3 === 1 ? '#c9d2d8' : '#ffd3a0'), dirWorld(FB, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
           ch.box(FB, cx - 0.68, cx + 0.68, y0 - 0.1, y0, 0.0, 0.18, lim, 'trim', 'fulrbd', 1, 1, 0); ch.box(FB, cx - 0.62, cx + 0.62, y0 + 1.9, y0 + 2.02, 0.0, 0.12, lim, 'trim', 'fulrbd', 1, 1, 0)
         }
-        for (let k = 0; k < 7; k++) { const y0 = HH + 0.6 + R() * 8, hgt = 0.5 + R() * 0.9; ch.prism(FB, cx - 1.8 + R() * 3.6, 0.12, 0.2 + R() * 0.12, 0.16 + R() * 0.1, y0, y0 + hgt, col(['#4e6139', '#5b7243', '#3f5230', '#6b7f4a'][k % 4]), 'leaf', 6) }   // ivy clumps on the brick
+        for (let v = 0; v < 3; v++) { const vx = cx - 1.9 + R() * 3.8, top = HH + 2.0 + R() * 8; for (let y = HH + 0.5; y < top; y += 0.28 + R() * 0.12) { const r0 = 0.1 + R() * 0.11; ch.prism(FB, vx + (R() - 0.5) * 0.3, 0.1 + R() * 0.04, r0, r0 * 0.8, y, y + 0.2 + R() * 0.2, col(['#4e6139', '#5b7243', '#3f5230', '#6b7f4a', '#7a8f55'][(R() * 5) | 0]), 'leaf', 5) } }
       }
       ch.solid(FB, -w, w, HH - 0.5, top, -6, 0.3, 'frontage')
     }
