@@ -126,3 +126,9 @@ Evidence folder: docs/bible/lobby/*.png (localhost, SwiftShader headless; M2 not
 - 12 lane: [V] matches p.52 composition. 13/14: [V] Blender-baked furniture, limewash walls, woven fabric.
 - Evidence sheets exist for s01–s15 (BLENDER column is a note except blender_cafe_kit.png render). Regression: lift round-trip [T], no page errors.
 - NOT done: AO/contact shadows, M2 performance/G7, matched-camera Blender renders of scenes, trees/foliage Blender rebuild, owner approvals, layout 216×278 m approval.
+
+## STATUS UPDATE 2026-11-12 (evening) — still NOTHING owner-approved; headless only; M2 not measured
+- 04: S04_PROPOSAL.md + sheet written, NOT approved. 05: panels darkened (D-001/2 still open). 06: light pools + lit niche with flowers (no true reflections). 07: unchanged (floor lanterns/blossom canopy await owner decision).
+- 08/09/10/11/12/15: Blender planting kit (hydrangea/lavender/shrub) integrated (evidence/*_planting.png); s10 hydrangea drift in front of Café Vivienne row (s10_game_planting.png); s11 row sheet + S11_STATUS.md.
+- 13/14: gap list corrected (S13_S14_STATUS.md); café walls warmed, back-lit shelving strips.
+- Gates: GATES.md (G7 unmeasured; not ready for sign-off). Static tris 313k (PERF_BENCHMARK.md). No push.
