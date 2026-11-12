@@ -1,0 +1,20 @@
+{
+ "files": {
+  "src/HUD.jsx": "UI chrome colours",
+  "src/HUDExtras.jsx": "UI chrome colours",
+  "src/weather/Rain.jsx": "effect: rain streak colour",
+  "src/weather/windowRain.js": "effect shader",
+  "src/character/appearance.js": "character creator is a separate workstream",
+  "src/character/buildCharacter.js": "character creator is a separate workstream",
+  "src/companion/kittenAppearance.js": "pets are a separate workstream",
+  "src/companion/buildKitten.js": "pets are a separate workstream",
+  "src/Avatar.jsx": "character avatar (separate workstream)",
+  "src/atmosphere.js": "time-of-day sky/light presets (lighting, not material colours; registry covers only the blue-hour/dusk anchors)",
+  "src/Boats.jsx": "small boats (layer B scenery) \u2014 migrate later",
+  "src/studio/Studio.jsx": "look-dev studio"
+ },
+ "hex": {
+  "#ffffff": "neutral white (glow/UI/test)",
+  "#000000": "neutral black"
+ }
+}

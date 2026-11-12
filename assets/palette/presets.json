@@ -1,0 +1,208 @@
+{
+ "neutral": {
+  "sky": [
+   200,
+   205,
+   215
+  ],
+  "skyStrength": 0.9,
+  "sunColor": [
+   255,
+   250,
+   240
+  ],
+  "sunStrength": 3.2,
+  "sunElev": 50,
+  "sunAz": 20,
+  "sunSoftness": 3,
+  "exposure": 0.0,
+  "note": "neutral calibration: no grading"
+ },
+ "golden": {
+  "sky": [
+   250,
+   190,
+   150
+  ],
+  "skyStrength": 0.6,
+  "sunColor": [
+   255,
+   190,
+   120
+  ],
+  "sunStrength": 3.0,
+  "sunElev": 12,
+  "sunAz": 20,
+  "sunSoftness": 3,
+  "exposure": 0.0
+ },
+ "blue": {
+  "sky": [
+   133,
+   140,
+   170
+  ],
+  "skyStrength": 0.7,
+  "sunColor": [
+   160,
+   170,
+   210
+  ],
+  "sunStrength": 0.25,
+  "sunElev": 4,
+  "sunAz": 20,
+  "sunSoftness": 5,
+  "exposure": 0.0,
+  "lamps": [
+   [
+    [
+     -4,
+     -6,
+     2.5
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    300
+   ],
+   [
+    [
+     4,
+     -6,
+     2.5
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    300
+   ]
+  ]
+ },
+ "interior_evening": {
+  "sky": [
+   60,
+   50,
+   50
+  ],
+  "skyStrength": 0.05,
+  "sunColor": [
+   255,
+   200,
+   140
+  ],
+  "sunStrength": 0.0,
+  "sunElev": 30,
+  "sunAz": 20,
+  "sunSoftness": 5,
+  "exposure": 0.5,
+  "lamps": [
+   [
+    [
+     -5,
+     -3,
+     3
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    900
+   ],
+   [
+    [
+     0,
+     -3,
+     3
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    900
+   ],
+   [
+    [
+     5,
+     -3,
+     3
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    900
+   ]
+  ]
+ },
+ "overcast": {
+  "sky": [
+   175,
+   180,
+   190
+  ],
+  "skyStrength": 1.2,
+  "sunColor": [
+   230,
+   235,
+   245
+  ],
+  "sunStrength": 0.15,
+  "sunElev": 50,
+  "sunAz": 20,
+  "sunSoftness": 10,
+  "exposure": 0.0
+ },
+ "rainy_evening": {
+  "sky": [
+   95,
+   100,
+   120
+  ],
+  "skyStrength": 0.35,
+  "sunColor": [
+   160,
+   170,
+   200
+  ],
+  "sunStrength": 0.0,
+  "sunElev": 20,
+  "sunAz": 20,
+  "sunSoftness": 10,
+  "exposure": 0.3,
+  "lamps": [
+   [
+    [
+     -4,
+     -6,
+     2.5
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    350
+   ],
+   [
+    [
+     4,
+     -6,
+     2.5
+    ],
+    [
+     255,
+     200,
+     140
+    ],
+    350
+   ]
+  ]
+ }
+}

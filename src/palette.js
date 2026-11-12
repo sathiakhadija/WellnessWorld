@@ -1,23 +1,34 @@
-// Central Wellness World palette (Design Bible V16 p.72). sRGB hex starting targets: verify the PERCEIVED colour in engine, not just the hex.
-// Material families (STONE_CREAM, BRICK_WARM, ...) are the only way area code should pick a colour so all areas share one language.
-export const PALETTE = {
-  STONE_CREAM: { base: '#E8DDCF', alt: '#F2E8DB', rough: 0.72 },
-  STONE_LIMESTONE: { base: '#D8CBB9', alt: '#D9C7B4', rough: 0.8 },
-  STONE_PAVING: { base: '#B5ADA8', alt: '#C7BEB4', rough: 0.85 },
-  BRICK_WARM: { base: '#8B5E50', alt: '#A97465', rough: 0.9 },
-  WOOD_WALNUT: { base: '#38261F', alt: '#4A3128', rough: 0.42 },
-  WOOD_OAK: { base: '#79533B', alt: '#9B6E4A', rough: 0.48 },
-  METAL_BRASS: { base: '#B58A4D', alt: '#C5A06A', rough: 0.32, metal: 1 },
-  METAL_BRONZE: { base: '#292725', alt: '#7D6244', rough: 0.4, metal: 1 },
-  TEXTILE_OXBLOOD: { base: '#603345', alt: '#723E50', rough: 0.85 },
-  CAFE_VIOLET: { base: '#4B2E5C', alt: '#8A5A8C', rough: 0.8 },
-  FOLIAGE_DEEP: { base: '#3E5736', alt: '#354A35', rough: 0.8 },
-  FOLIAGE_SAGE: { base: '#64765A', alt: '#536E4C', rough: 0.8 },
-  FOLIAGE_LIGHT: { base: '#718451', alt: '#6A7641', rough: 0.8 },
-  LAVENDER: { base: '#82749A', alt: '#8B7B9C', rough: 0.9 },
-  SKY_BLUEHOUR: { base: '#858CAA', alt: '#A29AB6' },
-  CEILING_CREAM: { base: '#E9D8C4', alt: '#F3DEBE', rough: 0.9 },
-  IRONWORK: { base: '#25272A', alt: '#292725', rough: 0.5, metal: 0.6 },
-}
+// Wellness World palette + shared material registry (game side). Source of truth: src/palette/registry.src.json -> `node scripts/build_palette.mjs`.
+// RULES for environments (docs/bible/PALETTE_USAGE.md): pick colours/materials ONLY via ww('WW_ID') / wwColor('WW_ID'); never write a free hex for architecture.
+// Colour space: registry hex is sRGB. THREE.Color(hex) converts sRGB->linear once (ColorManagement enabled), so we hand it the hex, never pre-linearised values (no double gamma).
+// Linear RGB values in the JSON are for Blender (Principled BSDF takes linear) and for the audit.
+import * as THREE from 'three'
+import REG from './palette/registry.json'
+
+export const REGISTRY = Object.fromEntries(REG.materials.map((m) => [m.id, m]))
+export const REGISTRY_LIST = REG.materials
+export const REGISTRY_GAPS = REG.gaps
 export const LAMP_K = { warmLow: 2700, warmHigh: 3200 }
-export const REJECT = ['global pink/purple/orange/green cast', 'oversaturation', 'washed-out', 'overbright emissive', 'crushed shadows', 'plastic reflections', 'mirror floors']
+
+export function wwEntry(id) { const e = REGISTRY[id]; if (!e) throw new Error('[palette] unknown material id ' + id); return e }
+export function wwColor(id, alt = false) { const e = wwEntry(id); return new THREE.Color(alt && e.alt ? e.alt : e.hex) }
+
+const CACHE = new Map()
+// One shared MeshStandardMaterial per canonical id (+ optional variant key) — prevents duplicate materials. `over` may tweak roughness/map/etc. for a documented variant.
+export function ww(id, over = {}, variant = '') {
+  const key = id + '|' + variant
+  if (CACHE.has(key)) return CACHE.get(key)
+  const e = wwEntry(id)
+  const glass = e.cat === 'glass'
+  const p = { color: new THREE.Color(e.hex), roughness: e.rough ?? 0.8, metalness: e.metal ?? 0 }
+  if (glass) Object.assign(p, { transparent: true, opacity: e.glass?.opacity ?? 0.12, depthWrite: false })
+  const m = new THREE.MeshStandardMaterial({ ...p, ...over })
+  m.name = id + (variant ? ':' + variant : '')
+  m.userData.wwId = id
+  CACHE.set(key, m)
+  return m
+}
+export const wwMaterials = () => [...CACHE.values()]
+
+// sRGB hex helpers (audit/calibration)
+export const hexToLinear = (hex) => { const c = new THREE.Color(hex); return [c.r, c.g, c.b] }
