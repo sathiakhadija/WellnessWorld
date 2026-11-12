@@ -463,6 +463,10 @@ export function buildStreet() {
       }
       ch.solid(FB, -w, w, HH - 0.5, top, -6, 0.3, 'frontage')
     }
+    const bistroSet = (FS, tx, tz, n = 3) => {
+      baked(ch, FS, 'bistro_table', tx, tz, 0, { marble: '#efe6da', metal: '#2b2523', brass: '#b58a4d' }, 0, 1.15)
+      for (let k = 0; k < n; k++) { const a = (k / n) * Math.PI * 2 + 0.6; baked(ch, FS, 'bistro_chair', tx + Math.cos(a) * 0.62, tz + Math.sin(a) * 0.62, -a - Math.PI / 2, { wood: '#6a4d3a', seat: '#8a3b48' }, 0, 1.1) }
+    }
     // ---- Bible s15: burgundy-canopied glass café pavilion + café terrace seating with umbrellas in front of the west frontage
     {
       const FP = frame(42, -135.5, 0, T), burg = col('#6b2a35'), dk = col('#2b2523'), gl = col('#ffdca8')
@@ -476,17 +480,12 @@ export function buildStreet() {
       ch.solid(FP, -6, 6, 0, 3.6, -3.2, 3.2, 'pavilion')
       for (const sx of [-4.2, -1.4, 1.4, 4.2]) { // terrace tables under umbrellas
         const tx = sx, tz = 6.2
-        ch.prism(FP, tx, tz, 0.4, 0.4, 0.74, 0.78, col('#efe6da'), 'slab', 14); ch.prism(FP, tx, tz, 0.04, 0.04, 0.12, 0.74, dk, 'metal', 6)
         ch.prism(FP, tx, tz, 1.25, 0.05, 2.35, 2.75, burg, 'awning', 12); ch.prism(FP, tx, tz, 0.03, 0.03, 0.12, 2.4, dk, 'metal', 6)
-        for (const a of [0.6, 2.2, 3.8, 5.4]) ch.prism(FP, tx + Math.cos(a) * 0.62, tz + Math.sin(a) * 0.62, 0.2, 0.18, 0.12, 0.5, col('#7a5a3e'), 'timber', 8)
+        bistroSet(FP, tx, tz, 3)
       }
     }
-    // west frontage terrace seating (lit by the shopfront glass behind)
-    for (const x of [-52, -46, -40]) for (const dz of [0]) {
-      const FS = frame(x, -135.4, 0, T)
-      ch.prism(FS, 0, 0, 0.42, 0.42, 0.72, 0.76, col('#efe6da'), 'slab', 14); ch.prism(FS, 0, 0, 0.04, 0.04, 0.1, 0.72, col('#2b2523'), 'metal', 6)
-      for (const a of [0.6, 2.2, 3.8, 5.4]) ch.prism(FS, Math.cos(a) * 0.62, Math.sin(a) * 0.62, 0.2, 0.18, 0.1, 0.48, col('#7a5a3e'), 'timber', 8)
-    }
+    // terrace café seating: Blender-made bistro tables + bentwood chairs (assets/blender/make_cafe.py)
+    for (const x of [-54, -48, -42, -36, -30]) bistroSet(frame(x, -135.4, 0, T), 0, 0, 2 + (x % 2 === 0 ? 1 : 0))
     // Bible s15: layered mature planes along the landward edge of the central promenade (kept clear of the BX viewpoint corridor)
     for (const x of [-44, -32, -20, 18, 28, 38]) { grate(ch, x, -137.6, 1.3); put('plane', x, -137.6, R() * 6, 0.9 + R() * 0.2, T) }
     // ---- Zone A: peaceful riverside trees (kept off the central view) + benches

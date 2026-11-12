@@ -190,7 +190,7 @@ export function treeGeo(kind) {
     }
     LI.push(base0, base0 + 1, base0 + 2, base0, base0 + 2, base0 + 3)
   }
-  const per = kind === 'plane' ? 11 : kind === 'ornamental' ? 10 : 1, size = kind === 'plane' ? 1.02 : kind === 'ornamental' ? 0.84 : 0.8
+  const per = kind === 'plane' ? 15 : kind === 'ornamental' ? 10 : 1, size = kind === 'plane' ? 1.02 : kind === 'ornamental' ? 0.84 : 0.8
   for (const t of tips) for (let i = 0; i < per; i++) card(t.p.x + (R() - 0.5) * 2.4, t.p.y + (R() - 0.35) * 1.6, t.p.z + (R() - 0.5) * 2.4, size * (0.8 + R() * 0.5))
   const mk = (P, Nn, Cc, U, I, norm) => {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(Cc, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I)
