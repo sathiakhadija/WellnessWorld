@@ -688,6 +688,7 @@ export function buildStreet() {
     houseRow(so, 'x', 111, Math.PI, 31.7, ES1, { d: 9, floors: 4 })
     // café tables on the south pavement (under the garden railings)
     for (let i = 0; i < 3; i++) { put('table', -21.5 + i * 2.1, 107.6, 0, 1.0); put('chair', -22.1 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -20.9 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
+    for (const x of [-30.9, -23.4, -15.2, -7.8, 16.2, 24.3, 32.1]) baked(sh, W0, 'topiary', x, 108.3, 0, { marble: '#d9cdb5', leaf: '#4f6a3d', stem: '#5a4a3a' }, 0, 1)   // Bible s10/s11: Blender topiary tubs flanking the shop entrances
     pois.cafeSquare = { x: -19, z: 107.5 }
   }
 

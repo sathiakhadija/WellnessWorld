@@ -83,7 +83,16 @@ def shrub(seed, r=0.55, h=0.7):
     keep(leaf_obj('leaves', leaves), 'leaf', C)
     return finish(f'shrub_{seed}')
 
+def topiary(seed, h=1.25, r=0.3):
+    """Clipped ball topiary on a bare stem in a moulded stone tub (Bible s10/s11 shop entrances). Origin on the ground."""
+    reset(); PARTS.clear()
+    keep(lathe('tub', [(0.0, 0.0), (0.22, 0.0), (0.27, 0.05), (0.3, 0.35), (0.33, 0.4), (0.3, 0.42), (0.0, 0.42)], 14), 'marble', C)
+    keep(lathe('stem', [(0.0, 0.4), (0.022, 0.4), (0.022, h - r * 0.6), (0.0, h - r * 0.6)], 6), 'stem', C)
+    keep(ball_obj('crown', [((0, 0, h), r)], 0.22, seed, 2), 'leaf', C)
+    return finish(f'topiary_{seed}')
+
 LIB = {}
+LIB['topiary'] = topiary(50)
 for s in range(3):
     LIB[f'hydrangea{s}'] = hydrangea(10 + s, 0.58 + s * 0.06, 0.4 + s * 0.04, 4 + s)
 LIB['hydrangea_lilac'] = hydrangea(21, 0.6, 0.42, 5, True)
