@@ -36,3 +36,6 @@
 - Still open: golden-hour sun blows out the cream door leaf and 0.4 m jambs so the doorway still reads paler than p.17; marble floor reflection faint; Lift pictogram sign small. Not claimed approved.
 
 ## s05 update (2026-11-12, later): flanking taupe-blush panels darkened (#a58e88 -> #85706a) so they read against the cream mouldings under golden hour (evidence/s05_doorway_golden_v2.png). D-001/D-002 still open: golden-hour sun still washes the door leaf/jambs and plaster pink; floor reflection faint; Lift sign small. Headless only.
+
+## D-008 (fixed 2026-11-12): player fell through the lift-lobby floor
+Reported by owner on localhost: the rabbit falls before reaching the lift. Cause: Lobby.jsx had wall colliders but no floor collider (the visual marble plane was render-only). Reproduced headless by walking (ArrowUp) through the open entrance door: y dropped to -1.24 at z≈1.3. Fix: floor CuboidCollider under the lobby. Re-test: walk from the penthouse door to the lift door stays at y=0 and stops at z=2.48. Earlier "ride round-trip" tests used teleports, so they missed this — walking tests added to the checklist.

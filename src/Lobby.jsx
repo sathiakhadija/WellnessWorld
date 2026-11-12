@@ -175,6 +175,7 @@ export default function Lobby() {
 
       {/* ---- collision ---- */}
       <RigidBody type="fixed" colliders={false}>
+        <CuboidCollider args={[(x1 - x0) / 2 + 0.1, 0.15, (z1 - z0) / 2 + 0.45]} position={[cx, -0.15, (z0 + z1) / 2 - 0.35]} collisionGroups={WORLD} />   {/* floor: without it the player falls through the lobby floor after the entrance door */}
         <CuboidCollider args={[0.1, 1.9, 1.4]} position={[x0 - 0.1, 1.9, 1.6]} collisionGroups={WORLD} />
         <CuboidCollider args={[0.1, 1.9, 1.4]} position={[x1 + 0.1, 1.9, 1.6]} collisionGroups={WORLD} />
         <CuboidCollider args={[0.65, 1.9, 0.1]} position={[0.025, 1.9, z1 + 0.1]} collisionGroups={WORLD} />
