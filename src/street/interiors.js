@@ -77,7 +77,7 @@ function wisteria(ch, F, x, z, len = 0.9, s = 1) {
 }
 export function cafeInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
-  shell(ch, F, c, { floor: '#876349', ceil: '#e8d4bc', wall: '#E6D3CB', skirt: '#F7EADA' })
+  shell(ch, F, c, { floor: '#876349', ceil: '#e8d4bc', wall: '#dccbb6', skirt: '#F7EADA' })
   // marble inlay strip + rug-like central runner
   ch.box(F, -0.9, 0.9, FL, FL + 0.01, z0 + 0.4, -1.5, col('#e6dcd2'), 'slab', 'u', 1.2, 1.2, 0)
   // plum velvet banquette along the left wall with 3 round bistro tables
@@ -102,6 +102,7 @@ export function cafeInterior(ch, F, c, L) {
   ch.box(F, x1 - 2.6, x1, FL, FL + 0.95, z0 + 0.02, z0 + 0.6, col('#38261F'), 'wood', 'fulb', 1, 1, 0.01)
   ch.box(F, x1 - 2.6, x1, FL + 0.95, FL + 1.0, z0 + 0.02, z0 + 0.65, col('#efe6da'), 'slab', 'fulrbd', 1, 1, 0)
   for (const y of [1.6, 2.1, 2.6]) ch.box(F, x1 - 2.6, x1, FL + y, FL + y + 0.04, z0 + 0.02, z0 + 0.3, col('#B58A4D'), 'metal', 'fud', 1, 1, 0)
+  for (const y of [1.6, 2.1, 2.6]) ch.box(F, x1 - 2.55, x1 - 0.05, FL + y - 0.02, FL + y, z0 + 0.04, z0 + 0.28, col('#ffd9a0'), 'glow', 'd', 1, 1, 0)   // back-lit shelving strips
   // window-side study bar with stools (along the glazing)
   ch.box(F, c.winX0 + 0.2, c.winX1 - 0.2, FL + 0.98, FL + 1.04, -1.75, -1.3, col('#38261F'), 'wood', 'fulrbd', 1, 1, 0)
   for (let i = 0; i < 3; i++) { const x = c.winX0 + 0.6 + i * ((c.winX1 - c.winX0 - 1.2) / 2); baked(ch, F, 'stool', x, -2.15, 0, { fabric: '#8A5A8C', brass: '#b58a4d' }) }

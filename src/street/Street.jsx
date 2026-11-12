@@ -180,6 +180,7 @@ export function StreetVisuals() {
     const onStreet = world.level === 'street'
     M.shopin.color.setScalar(0.55 + 0.62 * Math.min(1, LIVE.win))                                        // interiors read dim by day, glow at dusk
     for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * (l.userData.always ? Math.max(LIVE.lamp, 0.6) : LIVE.lamp) : 0
+    M.leaf.color.setScalar(1 - 0.3 * Math.min(1, LIVE.lamp))                                         // modelled planting (hydrangea/lavender/shrub) dims at night too
     for (const cm of props.canopyMats) cm.color.setScalar(1 - 0.42 * Math.min(1, LIVE.lamp))       // foliage sinks into the evening instead of glowing green at night
     if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
