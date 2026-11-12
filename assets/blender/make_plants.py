@@ -54,7 +54,7 @@ def hydrangea(seed, h=0.62, r=0.42, blooms=5, second=False):
     for i in range(blooms):
         a = rnd.random() * math.tau; rr = rnd.random() * r * 0.6; z = h * 0.7 + rnd.random() * h * 0.28 - (rr / r) * h * 0.18
         cs.append(((math.cos(a) * rr, math.sin(a) * rr, z), 0.1 + rnd.random() * 0.05))
-    keep(ball_obj('blooms', cs, 0.3, seed + 1, 2), 'bloom2' if second else 'bloom', C)
+    keep(ball_obj('blooms', cs, 0.14, seed + 1, 2), 'bloom2' if second else 'bloom', C)
     return finish(f'hydrangea_{seed}')
 
 def lavender(seed, n=11, h=0.5):
