@@ -164,7 +164,7 @@ export function treeGeo(kind) {
   }
   let crown = v3(0, 6, 0)
   if (kind === 'plane') {                                          // London plane: tall dappled trunk, 4 strong limbs, broad open crown
-    tube([v3(0, 0, 0), v3(0.05, 1.8, 0.03), v3(-0.04, 3.6, 0.02), v3(0.03, 5.0, -0.02)], 0.34, 0.2, 8)
+    tube([v3(0, 0, 0), v3(0.05, 1.8, 0.03), v3(-0.04, 3.6, 0.02), v3(0.03, 5.0, -0.02)], 0.32, 0.19, 12)
     for (let k = 0; k < 4; k++) { const a = k * 1.57 + R() * 0.8; grow(v3(0.03, 4.6 + R() * 0.7, -0.02), v3(Math.cos(a) * 0.7, 0.8, Math.sin(a) * 0.7).normalize(), 3.2 + R() * 0.8, 0.17, 1, 3, { kids: [0, 3, 3], spread: 0.9, shrink: 0.7, lift: 1, leader: false }) }
     crown = v3(0, 8.0, 0)
   } else if (kind === 'ornamental') {                              // blossom / magnolia type: short trunk, low rounded multi-limb crown
@@ -177,7 +177,7 @@ export function treeGeo(kind) {
     crown = v3(0, 3.8, 0)
   }
   // leaf-spray cards: clusters on each tip (and a few strays on the way) with soft, crown-radial normals so the canopy shades as one volume
-  const green = [C('#e2efb0'), C('#d2e6a0'), C('#b4d08a'), C('#eef3a6'), C('#a8c890')], tmp = v3(0, 0, 0)
+  const green = [C('#b9cf8e'), C('#9db577'), C('#86a066'), C('#c8d79a'), C('#76905a')], tmp = v3(0, 0, 0)   // palette foliage greens (#718451 / #3E5736 family), no lime, tmp = v3(0, 0, 0)
   const card = (cx, cy, cz, size, clusterR) => {
     const n = v3(R() - 0.5, R() - 0.5, R() - 0.5).normalize(), u = new THREE.Vector3().crossVectors(n, Math.abs(n.y) > 0.9 ? v3(1, 0, 0) : v3(0, 1, 0)).normalize(), w = new THREE.Vector3().crossVectors(n, u)
     const rot = R() * 6.28, cu = u.clone().multiplyScalar(Math.cos(rot)).addScaledVector(w, Math.sin(rot)), cw = new THREE.Vector3().crossVectors(n, cu)
@@ -190,7 +190,7 @@ export function treeGeo(kind) {
     }
     LI.push(base0, base0 + 1, base0 + 2, base0, base0 + 2, base0 + 3)
   }
-  const per = kind === 'plane' ? 8 : kind === 'ornamental' ? 7 : 1, size = kind === 'plane' ? 1.3 : kind === 'ornamental' ? 1.05 : 0.8
+  const per = kind === 'plane' ? 11 : kind === 'ornamental' ? 10 : 1, size = kind === 'plane' ? 1.02 : kind === 'ornamental' ? 0.84 : 0.8
   for (const t of tips) for (let i = 0; i < per; i++) card(t.p.x + (R() - 0.5) * 2.4, t.p.y + (R() - 0.35) * 1.6, t.p.z + (R() - 0.5) * 2.4, size * (0.8 + R() * 0.5))
   const mk = (P, Nn, Cc, U, I, norm) => {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(Cc, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I)

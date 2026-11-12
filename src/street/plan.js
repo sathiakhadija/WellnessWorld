@@ -221,7 +221,7 @@ export function buildStreet() {
     surf(g, 'slab', CX0, CX0 + 2.4, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', CX1 - 2.4, CX1, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1)     // side paths along the house gardens
     surf(g, 'slab', cx - 8.4, CX0 + 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', cx + 8.4, CX1 - 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1)   // cross paths
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
-    put('plane', cx, cz, 0.3, 1.5)
+    put('plane', cx, cz, 0.3, 1.25)
     {
       const FT = frame(cx, cz, 0, GY)
       g.prism(FT, 0, 0, 2.6, 2.6, 0, 0.42, col('#e0d6c4'), 'ashlar', 36)                                                         // low circular limestone planter
