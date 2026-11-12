@@ -26,3 +26,5 @@ Burgundy pavilion + café seating, denser canopy cards, interior depth behind gl
 
 ## Regression (headless)
 Day, blue hour and night shots load with no page errors after the baked brick/ashlar/sett/slab texture sets (`evidence/s15_game_night.png`). Fixed: canopy now dims with the lamp factor at night (viewed). Rain regression run with the real weather kind `moderate` (earlier "rain" tests were invalid: valid kinds are sunny|cloudy|light|moderate|heavy): paving darkens and glosses, streaks and grey sky render, no page errors (`evidence/s15_game_rain.png`).
+
+UPDATE (planting): Blender hydrangea/lavender/shrub kit (make_plants.py) now lines the river-edge hedges and the landward frontage foot (evidence/s15_game_planting.png). Headless blue hour; not M2-verified; triangle cost not re-measured. Gaps unchanged: denser canopy, modelled shopfront interiors, bloom.

@@ -35,12 +35,12 @@ export function buildStreet() {
   const W0 = frame(0, 0, 0, GY)
   // Blender-modelled planting kit (assets/blender/make_plants.py): h cream hydrangea, p lilac hydrangea, l lavender, s leafy shrub
   const GREENS = ['#566e40', '#647a47', '#4f6a3d', '#6b8050']
-  const plantAt = (ch, x, z, kind, k = 1) => {
+  const plantAt = (ch, x, z, kind, k = 1, F = W0) => {
     const gcol = GREENS[(R() * GREENS.length) | 0], rot = R() * Math.PI * 2, sc = (0.85 + R() * 0.5) * k
-    if (kind === 'h') baked(ch, W0, `hydrangea${(R() * 3) | 0}`, x, z, rot, { leaf: gcol, bloom: '#ebe5d6' }, 0, sc)
-    else if (kind === 'p') baked(ch, W0, 'hydrangea_lilac', x, z, rot, { leaf: gcol, bloom2: '#9a88b4' }, 0, sc)
-    else if (kind === 'l') baked(ch, W0, `lavender${(R() * 2) | 0}`, x, z, rot, { leaf: '#7a8a68', stem: '#7a8a68', bloom2: '#8b7b9c' }, 0, sc)
-    else baked(ch, W0, `shrub${(R() * 2) | 0}`, x, z, rot, { leaf: gcol }, 0, sc)
+    if (kind === 'h') baked(ch, F, `hydrangea${(R() * 3) | 0}`, x, z, rot, { leaf: gcol, bloom: '#ebe5d6' }, 0, sc)
+    else if (kind === 'p') baked(ch, F, 'hydrangea_lilac', x, z, rot, { leaf: gcol, bloom2: '#9a88b4' }, 0, sc)
+    else if (kind === 'l') baked(ch, F, `lavender${(R() * 2) | 0}`, x, z, rot, { leaf: '#7a8a68', stem: '#7a8a68', bloom2: '#8b7b9c' }, 0, sc)
+    else baked(ch, F, `shrub${(R() * 2) | 0}`, x, z, rot, { leaf: gcol }, 0, sc)
   }
 
   // ---------- small helpers
@@ -521,6 +521,12 @@ export function buildStreet() {
     for (const [bx0, bx1] of [[-62, -14], [16, 34]]) for (let x = bx0 + 1.8; x < bx1 - 1; x += 3.6) {
       const FL2 = frame(x, -132.45, Math.PI, T)
       ch.box(FL2, -0.08, 0.08, 3.9, 4.3, 0.0, 0.14, col('#2b2523'), 'metal', 'fulrbd', 1, 1, 0); ch.box(FL2, -0.06, 0.06, 3.95, 4.25, 0.14, 0.26, col('#ffd9a0'), 'glow', 'fulrbd', 1, 1, 0)
+    }
+    // Bible s15: Blender hydrangea / lavender / shrub drifts at the foot of the landward frontage and in front of the river-edge hedges
+    {
+      const K = ['h', 'l', 's', 'p', 'l', 'h']; let ki = 0
+      for (const [x0, x1] of [[-60, -16], [17, 33]]) for (let x = x0; x < x1; x += 1.3) plantAt(ch, x + (R() - 0.5) * 0.4, -134.1 - R() * 0.5, K[ki++ % K.length], 1.25, FT)
+      for (const [x0, x1] of [[-58, -49], [-43, -34], [-27, -18], [20, 26], [30, 36]]) for (let x = x0; x < x1; x += 1.1) plantAt(ch, x + (R() - 0.5) * 0.3, -144.3 - R() * 0.3, ['l', 'h', 'l', 'p'][ki++ % 4], 1.1, FT)
     }
     // Bible s15: layered mature planes along the landward edge of the central promenade (kept clear of the BX viewpoint corridor)
     for (const x of [-44, -32, -20, 18, 28, 38]) { grate(ch, x, -137.6, 1.3); put('plane', x, -137.6, R() * 6, 0.9 + R() * 0.2, T) }
