@@ -182,6 +182,15 @@ export function shopBuilding(ch, F, o) {
   const main = col(o.main), trim = col(PAL.white), stone = col(PAL.limestone), brick = o.wall === 'brick'
   const key = brick ? 'brick' : 'plaster', su = brick ? 0.9 : 3, sv = brick ? 1 : 3
   const ys = [ground]; for (let i = 0; i < nf - 1; i++) ys.push(ys[i] + fh[i])
+  if (nf >= 2 && R() < 0.5) {   // Bible s12: wisteria curtain trailing from the first-floor line over the shopfront
+    const cx = (R() - 0.5) * w * 0.5, span = Math.min(w * 0.45, 3.2), top = ys[0] + 0.55
+    for (let k = 0; k < 26; k++) {
+      const x = cx - span / 2 + R() * span, l = 0.5 + R() * 1.7, r0 = 0.05 + R() * 0.05
+      ch.prism(F, x, 0.34 + R() * 0.12, r0, 0.015, top - l, top, col(['#a58fc4', '#b9a6d6', '#8e76ae', '#c8b8e0'][(R() * 4) | 0]), 'leaf', 5)
+      if (R() < 0.6) ch.prism(F, x + (R() - 0.5) * 0.1, 0.4, 0.045, 0.02, top - l * 0.4, top + 0.05, col(['#5b7243', '#6b7f4a', '#4e6139'][(R() * 3) | 0]), 'leaf', 5)
+    }
+    ch.box(F, cx - span / 2, cx + span / 2, top, top + 0.06, 0.28, 0.46, col('#5b7243'), 'leaf', 'fulr', 1, 1, 0)
+  }
   const top = ys[nf - 1]
   ch.box(F, -w / 2, w / 2, 0, top + 0.7, -d, -t, col(o.side || PAL.stock), 'brick', 'lrb', 0.9, 1)
   // ground floor shopfront: stall riser, display window (recessed), recessed entrance with a step, fascia + sign, awning
