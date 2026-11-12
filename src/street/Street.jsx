@@ -24,14 +24,14 @@ function makeMaterials() {
   const std = (o = {}) => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0, ...o })
   const off = (n) => ({ polygonOffset: true, polygonOffsetFactor: -n, polygonOffsetUnits: -n })
   const M = {
-    brick: std({ map: T.brickTex(), normalMap: T.brickNormalTex(), normalScale: new THREE.Vector2(0.8, 0.8) }), ashlar: std({ map: T.ashlarTex() }), plaster: std({ map: T.plasterTex() }),
+    brick: std({ map: T.brickTex(), normalMap: T.brickNormalTex(), normalScale: new THREE.Vector2(0.8, 0.8) }), ashlar: std({ map: T.ashlarTex(), normalMap: T.ashlarNormalTex(), normalScale: new THREE.Vector2(0.8, 0.8) }), plaster: std({ map: T.plasterTex() }),
     parquet: std({ map: T.parquetTex(), roughness: 0.48, envMapIntensity: 0.6 }), marble: std({ map: T.marbleTex(), roughness: 0.2, envMapIntensity: 0.9 }),
     trim: std({ roughness: 0.8 }), roof: std({ roughness: 0.78 }), metal: std({ roughness: 0.42, metalness: 0.65 }), wood: std({ map: T.woodTex(), roughness: 0.58 }),
     shopin: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: true }), shopglass: new THREE.MeshStandardMaterial({ color: '#cfe0e4', transparent: true, opacity: 0.14, roughness: 0.04, metalness: 0, envMapIntensity: 2.6, depthWrite: false }), glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: Object.assign(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), { userData: { glow: true } }),
     awning: std({ side: THREE.DoubleSide, roughness: 0.95 }), wallplaster: std({ map: T.limewashTex(), roughness: 0.9 }), fabric: std({ map: T.fabricTex(), roughness: 0.92, envMapIntensity: 0.3 }), leaf: std({ roughness: 1 }), trunk: std({ roughness: 1 }),
     sign: std({ map: T.signAtlas(), roughness: 0.65 }),
     grass: std({ map: T.grassTex(), roughness: 1 }),
-    slab: std({ map: T.slabTex(), normalMap: T.slabNormalTex(), normalScale: new THREE.Vector2(1, 1), ...off(1) }), sett: std({ map: T.settTex(), bumpMap: T.settTex(), bumpScale: 2.2, ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),
+    slab: std({ map: T.slabTex(), normalMap: T.slabNormalTex(), normalScale: new THREE.Vector2(1, 1), ...off(1) }), sett: std({ map: T.settTex(), normalMap: T.settNormalTex(), normalScale: new THREE.Vector2(1, 1), ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),
     slab2: std({ map: T.slabTex(), ...off(2) }), sett2: std({ map: T.settTex(), ...off(2) }), road2: std({ map: T.asphaltTex(), roughness: 0.96, ...off(2) }), gravel2: std({ map: T.gravelTex(), roughness: 1, ...off(2) }),
     paint: std({ roughness: 0.9, ...off(3) }),
     ao: new THREE.MeshBasicMaterial({ map: T.aoTex(), color: '#000000', transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }),

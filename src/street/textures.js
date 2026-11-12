@@ -25,7 +25,7 @@ export const brickTexCanvas = () => mk(256, 256, (g, w, h) => {
   speckle(g, w, h, R, 900, 70, 1.8)
 })
 // ashlar limestone: tile = 2.4 m x 1.2 m, two courses of 1.2 m x 0.6 m blocks (stacked bond offset)
-export const ashlarTex = () => mk(512, 256, (g, w, h) => {
+export const ashlarTexCanvas = () => mk(512, 256, (g, w, h) => {
   const R = rng(23); g.fillStyle = gray(190); g.fillRect(0, 0, w, h)
   for (let r = 0; r < 2; r++) for (let c = -1; c < 2; c++) {
     const x = c * (w / 2) + (r % 2) * (w / 4), y = r * (h / 2), v = 244 + (R() - 0.5) * 20
@@ -51,7 +51,7 @@ export const slabTexCanvas = () => mk(512, 256, (g, w, h) => {
   speckle(g, w, h, R, 1400, 30, 1.6)
 })
 // granite setts (cobbles): tile = 1.6 m x 1.6 m of 0.1 m setts in staggered rows. Each sett has its own warm/cool grey tint, a lit top edge and a dark joint.
-export const settTex = () => mk(512, 512, (g, w, h) => {
+export const settTexCanvas = () => mk(512, 512, (g, w, h) => {
   const R = rng(41); g.fillStyle = 'rgb(96,90,86)'; g.fillRect(0, 0, w, h)
   const n = 16, s = w / n, hues = [[214, 204, 194], [204, 200, 198], [222, 206, 190], [198, 192, 188], [226, 212, 200], [190, 188, 190], [216, 196, 184]]
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
@@ -195,3 +195,8 @@ export const slabNormalTex = () => { const cv = document.createElement('canvas')
 export const aoTex = () => loadBaked('textures/ao_contact.png', aoTexCanvas())
 export const brickTex = () => loadBaked('textures/brick_albedo.png', brickTexCanvas())
 export const brickNormalTex = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 4; const g = cv.getContext('2d'); g.fillStyle = 'rgb(128,128,255)'; g.fillRect(0, 0, 4, 4); const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.minFilter = THREE.LinearMipmapLinearFilter; return loadBaked('textures/brick_normal.png', t, false) }
+export const ashlarTex = () => loadBaked('textures/ashlar_albedo.png', ashlarTexCanvas())
+export const settTex = () => loadBaked('textures/sett_albedo.png', settTexCanvas())
+const flatNormal = () => (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 4; const g = cv.getContext('2d'); g.fillStyle = 'rgb(128,128,255)'; g.fillRect(0, 0, 4, 4); const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.minFilter = THREE.LinearMipmapLinearFilter; return t })()
+export const ashlarNormalTex = () => loadBaked('textures/ashlar_normal.png', flatNormal(), false)
+export const settNormalTex = () => loadBaked('textures/sett_normal.png', flatNormal(), false)
