@@ -82,6 +82,11 @@ function buildArch() {
   add('trim', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('trim', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('trim', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
   // (flanking raised panels and panel pairs removed — Bible s03 clean walls; sconces stay)
   add('skirt', -4.45, EX0 - 0.08, 0, 0.18, -0.03, 0); add('skirt', EX1 + 0.08, 3.61, 0, 0.18, -0.03, 0)
+  // Bible s05: taupe-blush wall panels with slim cream mouldings flanking the entrance (p.17)
+  for (const [px0, px1] of [[-0.45, 0.47], [1.93, 2.75]]) {
+    add('blush', px0, px1, 0.2, 2.95, -0.022, -0.0)
+    for (const [tx0, tx1, ty0, ty1] of [[px0, px1, 0.2, 0.24], [px0, px1, 2.91, 2.95], [px0, px0 + 0.04, 0.2, 2.95], [px1 - 0.04, px1, 0.2, 2.95]]) add('trim', tx0, tx1, ty0, ty1, -0.034, -0.0)
+  }
   // Bible s05: tall vertical glowing tube sconces with brass caps flanking the entrance (p.17)
   for (const sx of [0.06, 2.34]) { add('led', sx - 0.03, sx + 0.03, 0.85, 2.55, -0.065, -0.03); add('brass', sx - 0.05, sx + 0.05, 0.8, 0.85, -0.08, -0.03); add('brass', sx - 0.05, sx + 0.05, 2.55, 2.6, -0.08, -0.03); add('brass', sx - 0.04, sx + 0.04, 1.62, 1.68, -0.075, -0.03) }
 
@@ -158,6 +163,7 @@ function makeMats(src = {}) {
     door: std('#efe5d2', { roughness: 0.55 }),
     dk: std('#2d2019', { roughness: 0.5 }),
     doorHi: std('#d6c4a6', { roughness: 0.5 }),
+    blush: std('#a58e88', { roughness: 0.92, envMapIntensity: 0.2 }),                                      // taupe-blush panel (Bible s05 flanking walls)
     walnutHi: std(wwHex('WW_WALNUT_DARK', true), { roughness: 0.38 }),                                          // cream satin paint
     walnut: std(wwHex('WW_WALNUT_DARK'), { roughness: 0.42 }),                                          // espresso entrance door
     limestone: (() => { const m = new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }); applyWet(m); return m })(),
