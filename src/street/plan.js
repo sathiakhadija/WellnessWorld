@@ -567,15 +567,15 @@ export function buildStreet() {
     houseRow(so, 'x', 111, Math.PI, -8.3, 16.9, { d: 9, floors: 4 })
     const shopS = (xc, w, sp) => shopBuilding(sh, frame(xc, 108.75 + 0.0, Math.PI, GY), { w, d: 12, floors: 3, wall: sp.wall, main: sp.main, sign: sp.sign, awning: sp.awning, stall: sp.stall, door: sp.door, doorSide: sp.side, balc: true, roof: 'hip', side: PAL.stock })
     // Bible s10 (west corner, left→right facing the row): Maison Home · Café Vivienne · burgundy boutique; s11 (east corner): Maison Sauvage · Papier & Co.
-    shopS(-26.8, 8.0, { wall: 'plaster', main: '#d9c7b4', sign: 4, awning: '#e8d9c6', stall: '#e4d6c2', door: '#41584a', side: 'l' })
+    shopS(-11.5, 6.4, { wall: 'plaster', main: '#d9c7b4', sign: 4, awning: '#e8d9c6', stall: '#e4d6c2', door: '#41584a', side: 'l' })
     shopS(-19.0, 7.0, { wall: 'plaster', main: '#cdd2c0', sign: 7, awning: '#263b32', stall: '#263b32', door: '#2f3d36', side: 'r' })
-    shopS(-11.5, 6.4, { wall: 'brick', main: PAL.brick, sign: 11, awning: '#5a2934', stall: '#5a2934', door: '#2b2630', side: 'l' })
-    shopS(20.5, 7.2, { wall: 'brick', main: '#b4806e', sign: 3, awning: '#2f4a3a', stall: '#2c3a31', door: '#2b2630', side: 'r' })
-    shopS(28, 7.4, { wall: 'plaster', main: '#d9c9bf', sign: 6, awning: '#5a2934', stall: '#37363f', door: '#37363f', side: 'l' })
+    shopS(-26.8, 8.0, { wall: 'brick', main: PAL.brick, sign: 11, awning: '#5a2934', stall: '#5a2934', door: '#2b2630', side: 'l' })
+    shopS(28, 7.4, { wall: 'brick', main: '#b4806e', sign: 3, awning: '#2f4a3a', stall: '#2c3a31', door: '#2b2630', side: 'r' })
+    shopS(20.5, 7.2, { wall: 'plaster', main: '#d9c9bf', sign: 6, awning: '#5a2934', stall: '#37363f', door: '#37363f', side: 'l' })
     houseRow(so, 'x', 111, Math.PI, 31.7, ES1, { d: 9, floors: 4 })
     // café tables on the south pavement (under the garden railings)
-    for (let i = 0; i < 3; i++) { put('table', -27 + i * 2.1, 107.6, 0, 1.0); put('chair', -27.6 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -26.4 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
-    pois.cafeSquare = { x: -26.8, z: 107.5 }
+    for (let i = 0; i < 3; i++) { put('table', -21.5 + i * 2.1, 107.6, 0, 1.0); put('chair', -22.1 + i * 2.1, 107.6, Math.PI / 2, 1.0); put('chair', -20.9 + i * 2.1, 107.6, -Math.PI / 2, 1.0) }
+    pois.cafeSquare = { x: -19, z: 107.5 }
   }
 
   // =====================================================================================================================================
