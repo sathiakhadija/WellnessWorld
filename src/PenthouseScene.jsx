@@ -1,5 +1,6 @@
 // Wellness World - Penthouse V8 : React Three Fiber scene.
 // Verified in headless Chromium (SwiftShader): GLB loads, trimesh colliders hold the player, camera modes work. See README.md.
+import { Bench, PRESET } from './bench.jsx'
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Environment } from '@react-three/drei'
@@ -304,8 +305,9 @@ export default function PenthouseScene() {
   const atmo = useAtmo()
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
-      <Canvas shadows camera={{ fov: 50, near: 0.05, far: 700, position: [0, 1.7, 0] }}
+      <Canvas shadows dpr={[1, PRESET.dprMax]} camera={{ fov: 50, near: 0.05, far: 700, position: [0, 1.7, 0] }}
               gl={{ toneMapping: TONE[L.tm] ?? THREE.ACESFilmicToneMapping, toneMappingExposure: L.exp }}>
+        <Bench />
         <fog attach="fog" args={[HAZE, 100, 560]} />
         <SkyDome />
         <Suspense fallback={null}><SkyEnv key={atmo.rev} /></Suspense>
@@ -314,7 +316,7 @@ export default function PenthouseScene() {
         <RainAudio />
         {/* golden-hour sun: Blender direction (0.42, 0.89, 0.16) -> three.js (x, z, -y). Target = room centre, shadow frustum covers the whole penthouse */}
         <primitive object={sunTarget} position={[-1, 0, -6]} />
-        <directionalLight ref={sunRef} target={sunTarget} color={L.sunCol} intensity={L.sun} position={[20, 8, -51]} castShadow shadow-mapSize={[4096, 4096]}
+        <directionalLight ref={sunRef} target={sunTarget} color={L.sunCol} intensity={L.sun} position={[20, 8, -51]} castShadow shadow-mapSize={[PRESET.shadow, PRESET.shadow]}
           shadow-camera-left={-14} shadow-camera-right={14} shadow-camera-top={14} shadow-camera-bottom={-14} shadow-camera-near={1} shadow-camera-far={120}
           shadow-bias={-0.0004} shadow-normalBias={0.03} />
         {/* warm bounce stand-in: sky colour lights upward faces, honey ground colour lights downward faces (ceiling, soffits) */}
