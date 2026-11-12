@@ -38,7 +38,7 @@ function useMats() {
     return {
       blush: ww('WW_PLASTER_BLUSH', { roughness: 0.92, color: wwColor('WW_PLASTER_BLUSH').lerp(new THREE.Color('#8a7873'), 0.6).multiplyScalar(0.72), envMapIntensity: 0.35 }, 'lobby'),
       trim: ww('WW_LIMESTONE_CREAM', { color: wwColor('WW_LIMESTONE_CREAM', true), roughness: 0.5 }, 'lobbyTrim'),
-      floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.2, envMapIntensity: 0.8, color: wwColor('WW_MARBLE_LIGHT').multiplyScalar(0.75) }, 'lobbyFloor'),
+      floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.12, envMapIntensity: 1.4, color: wwColor('WW_MARBLE_LIGHT').multiplyScalar(0.75) }, 'lobbyFloor'),
       marble: ww('WW_MARBLE_DARK', { map: marbleD, color: new THREE.Color('#4a4340'), roughness: 0.26, envMapIntensity: 1.2 }, 'lobbyDark'),
       top: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.3 }, 'lobbyTop'),
       flute: ww('WW_LIMESTONE_CREAM', { roughness: 0.62 }, 'lobbyFlute'),
