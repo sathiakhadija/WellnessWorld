@@ -39,7 +39,7 @@ export const plasterTex = () => mk(256, 256, (g, w, h) => {
   speckle(g, w, h, R, 2600, 38, 3.2)
 })
 // large-format paving slabs: tile = 1.8 m x 1.2 m (2 x 2 slabs of 0.9 x 0.6). Natural limestone/sandstone variation: per-slab tint + veining, crisp darker joints.
-export const slabTex = () => mk(512, 256, (g, w, h) => {
+export const slabTexCanvas = () => mk(512, 256, (g, w, h) => {
   const R = rng(31); g.fillStyle = 'rgb(168,160,150)'; g.fillRect(0, 0, w, h)
   const tints = [[238, 232, 220], [232, 224, 210], [236, 226, 216], [226, 224, 214], [240, 230, 214]]
   for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) {
@@ -176,8 +176,20 @@ export const limewashTex = () => mk(256, 256, (g, w, h) => {
 })
 
 // soft ambient-occlusion gradient for ground contact strips: opaque black at the wall edge (v=1) fading to nothing (alpha only)
-export const aoTex = () => mk(8, 64, (g, w, h) => {
+export const aoTexCanvas = () => mk(8, 64, (g, w, h) => {
   g.clearRect(0, 0, w, h); const gr = g.createLinearGradient(0, 0, 0, h)
   gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(0.25, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.6, 'rgba(0,0,0,0.14)'); gr.addColorStop(1, 'rgba(0,0,0,0)')
   g.fillStyle = gr; g.fillRect(0, 0, w, h)
 })
+
+// Blender-baked texture sets (assets/blender/bake_textures.py): loaded async, the canvas versions show until they arrive / if missing
+const loadBaked = (url, fallback, srgb = true) => {
+  const t = fallback; if (typeof Image === 'undefined') return t
+  new THREE.TextureLoader().load(import.meta.env.BASE_URL + url, (img) => {
+    t.image = img.image; t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.needsUpdate = true
+  }, undefined, () => {})
+  return t
+}
+export const slabTex = () => loadBaked('textures/slab_albedo.png', slabTexCanvas())
+export const slabNormalTex = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 4; const g = cv.getContext('2d'); g.fillStyle = 'rgb(128,128,255)'; g.fillRect(0, 0, 4, 4); const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.minFilter = THREE.LinearMipmapLinearFilter; return loadBaked('textures/slab_normal.png', t, false) }
+export const aoTex = () => loadBaked('textures/ao_contact.png', aoTexCanvas())
