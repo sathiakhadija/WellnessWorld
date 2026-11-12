@@ -463,6 +463,30 @@ export function buildStreet() {
       }
       ch.solid(FB, -w, w, HH - 0.5, top, -6, 0.3, 'frontage')
     }
+    // ---- Bible s15: burgundy-canopied glass café pavilion + café terrace seating with umbrellas in front of the west frontage
+    {
+      const FP = frame(42, -135.5, 0, T), burg = col('#6b2a35'), dk = col('#2b2523'), gl = col('#ffdca8')
+      ch.box(FP, -6, 6, 0, 0.12, -3.2, 3.2, col('#d9cdb7'), 'slab', 'fulu', 1.8, 1.2, 0)
+      ch.acc('glow').quad(toWorld(FP, -5.6, 0.2, 3.0), toWorld(FP, 5.6, 0.2, 3.0), toWorld(FP, 5.6, 3.1, 3.0), toWorld(FP, -5.6, 3.1, 3.0), gl, dirWorld(FP, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+      for (let i = 0; i <= 8; i++) ch.box(FP, -5.6 + i * 1.4 - 0.05, -5.6 + i * 1.4 + 0.05, 0.12, 3.2, 2.95, 3.05, dk, 'metal', 'fulr', 1, 1, 0)
+      ch.box(FP, -5.7, 5.7, 3.1, 3.2, 2.9, 3.1, dk, 'metal', 'fulrbd', 1, 1, 0)
+      ch.box(FP, -6.2, 6.2, 3.2, 3.55, -3.4, 3.9, burg, 'awning', 'fulrbd', 1, 1, 0)                               // burgundy canopy roof
+      ch.box(FP, -5.5, 5.5, 3.0, 3.2, 3.9, 4.0, col('#ffd9a0'), 'glow', 'f', 1, 1, 0)                              // canopy under-light
+      ch.box(FP, -5.6, 5.6, 0.12, 3.2, -3.0, -2.9, col('#c9a98d'), 'wallplaster', 'fb', 1, 1, 0)
+      ch.solid(FP, -6, 6, 0, 3.6, -3.2, 3.2, 'pavilion')
+      for (const sx of [-4.2, -1.4, 1.4, 4.2]) { // terrace tables under umbrellas
+        const tx = sx, tz = 6.2
+        ch.prism(FP, tx, tz, 0.4, 0.4, 0.74, 0.78, col('#efe6da'), 'slab', 14); ch.prism(FP, tx, tz, 0.04, 0.04, 0.12, 0.74, dk, 'metal', 6)
+        ch.prism(FP, tx, tz, 1.25, 0.05, 2.35, 2.75, burg, 'awning', 12); ch.prism(FP, tx, tz, 0.03, 0.03, 0.12, 2.4, dk, 'metal', 6)
+        for (const a of [0.6, 2.2, 3.8, 5.4]) ch.prism(FP, tx + Math.cos(a) * 0.62, tz + Math.sin(a) * 0.62, 0.2, 0.18, 0.12, 0.5, col('#7a5a3e'), 'timber', 8)
+      }
+    }
+    // west frontage terrace seating (lit by the shopfront glass behind)
+    for (const x of [-52, -46, -40]) for (const dz of [0]) {
+      const FS = frame(x, -135.4, 0, T)
+      ch.prism(FS, 0, 0, 0.42, 0.42, 0.72, 0.76, col('#efe6da'), 'slab', 14); ch.prism(FS, 0, 0, 0.04, 0.04, 0.1, 0.72, col('#2b2523'), 'metal', 6)
+      for (const a of [0.6, 2.2, 3.8, 5.4]) ch.prism(FS, Math.cos(a) * 0.62, Math.sin(a) * 0.62, 0.2, 0.18, 0.1, 0.48, col('#7a5a3e'), 'timber', 8)
+    }
     // Bible s15: layered mature planes along the landward edge of the central promenade (kept clear of the BX viewpoint corridor)
     for (const x of [-44, -32, -20, 18, 28, 38]) { grate(ch, x, -137.6, 1.3); put('plane', x, -137.6, R() * 6, 0.9 + R() * 0.2, T) }
     // ---- Zone A: peaceful riverside trees (kept off the central view) + benches
