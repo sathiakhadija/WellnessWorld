@@ -159,3 +159,18 @@ export const brushedTex = () => mk(256, 256, (g, w, h) => {
   for (let i = 0; i < 420; i++) { const x = R() * w, v = R() < 0.5 ? 90 : 255; g.strokeStyle = `rgba(${v},${v},${v},${0.04 + R() * 0.1})`; g.lineWidth = 0.5 + R(); g.beginPath(); g.moveTo(x, 0); g.lineTo(x + (R() - 0.5) * 2, h); g.stroke() }
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0.10)'); gr.addColorStop(0.5, 'rgba(0,0,0,0.06)'); gr.addColorStop(1, 'rgba(255,255,255,0.08)'); g.fillStyle = gr; g.fillRect(0, 0, w, h)
 })
+
+// woven linen/boucle upholstery: tile ~0.5 m, fine crossing threads + slub flecks (greyscale)
+export const fabricTex = () => mk(256, 256, (g, w, h) => {
+  const R = rng(113); g.fillStyle = gray(222); g.fillRect(0, 0, w, h)
+  for (let y = 0; y < h; y += 3) { g.strokeStyle = `rgba(${R() < 0.5 ? 255 : 80},${R() < 0.5 ? 255 : 80},${R() < 0.5 ? 255 : 80},${0.05 + R() * 0.08})`; g.lineWidth = 1; g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke() }
+  for (let x = 0; x < w; x += 3) { g.strokeStyle = `rgba(${R() < 0.5 ? 255 : 70},${R() < 0.5 ? 255 : 70},${R() < 0.5 ? 255 : 70},${0.05 + R() * 0.08})`; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke() }
+  for (let i = 0; i < 160; i++) { g.fillStyle = `rgba(${R() < 0.5 ? 255 : 60},${R() < 0.5 ? 255 : 60},${R() < 0.5 ? 255 : 60},0.10)`; g.fillRect(R() * w, R() * h, 2 + R() * 7, 1) }
+})
+
+// interior limewash: very low-contrast cloudy trowel marks + faint grain (greyscale), tile ~2 m
+export const limewashTex = () => mk(256, 256, (g, w, h) => {
+  const R = rng(131); g.fillStyle = gray(246); g.fillRect(0, 0, w, h)
+  for (let i = 0; i < 70; i++) { const gr = g.createRadialGradient(R() * w, R() * h, 2, R() * w, R() * h, 30 + R() * 60); const v = R() < 0.5 ? 255 : 200; gr.addColorStop(0, `rgba(${v},${v},${v},0.07)`); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h) }
+  for (let i = 0; i < 500; i++) { g.fillStyle = `rgba(0,0,0,${0.012 + R() * 0.02})`; g.fillRect(R() * w, R() * h, 1, 1) }
+})

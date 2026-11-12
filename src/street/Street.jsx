@@ -28,7 +28,7 @@ function makeMaterials() {
     parquet: std({ map: T.parquetTex(), roughness: 0.48, envMapIntensity: 0.6 }), marble: std({ map: T.marbleTex(), roughness: 0.2, envMapIntensity: 0.9 }),
     trim: std({ roughness: 0.8 }), roof: std({ roughness: 0.78 }), metal: std({ roughness: 0.42, metalness: 0.65 }), wood: std({ map: T.woodTex(), roughness: 0.58 }),
     shopin: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: true }), shopglass: new THREE.MeshStandardMaterial({ color: '#cfe0e4', transparent: true, opacity: 0.14, roughness: 0.04, metalness: 0, envMapIntensity: 2.6, depthWrite: false }), glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: Object.assign(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), { userData: { glow: true } }),
-    awning: std({ side: THREE.DoubleSide, roughness: 0.95 }), leaf: std({ roughness: 1 }), trunk: std({ roughness: 1 }),
+    awning: std({ side: THREE.DoubleSide, roughness: 0.95 }), wallplaster: std({ map: T.limewashTex(), roughness: 0.9 }), fabric: std({ map: T.fabricTex(), roughness: 0.92, envMapIntensity: 0.3 }), leaf: std({ roughness: 1 }), trunk: std({ roughness: 1 }),
     sign: std({ map: T.signAtlas(), roughness: 0.65 }),
     grass: std({ map: T.grassTex(), roughness: 1 }),
     slab: std({ map: T.slabTex(), bumpMap: T.slabTex(), bumpScale: 1.2, ...off(1) }), sett: std({ map: T.settTex(), bumpMap: T.settTex(), bumpScale: 2.2, ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),

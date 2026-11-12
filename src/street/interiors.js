@@ -19,7 +19,7 @@ function bakedGeo(name) {
   }
   return (GEO[name] = o)
 }
-const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'awning', seat: 'awning', leather: 'awning', marble: 'slab', glow: 'glow' }
+const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'fabric', seat: 'fabric', leather: 'fabric', marble: 'slab', glow: 'glow' }
 export function baked(ch, F, name, x, z, rot = 0, colors = {}, y = FL, scale = 1) {
   const cr = Math.cos(rot), sr = Math.sin(rot), geos = bakedGeo(name)
   for (const [bucket, g] of Object.entries(geos)) {
@@ -43,15 +43,15 @@ function shell(ch, F, c, o) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3, z1 = -1.1
   ch.box(F, x0, x1, FL - 0.06, FL, z0, z1 + 0.02, col(o.floor), 'parquet', 'u', 1.2, 1.2, 0)
   ch.box(F, x0, x1, CE, CE + 0.1, z0, z1 + 0.02, col(o.ceil), 'trim', 'ud', 1, 1, 0)
-  ch.box(F, x0, x0 + 0.02, FL, CE, z0, z1, col(o.wall), 'trim', 'r', 3, 3, 0)
-  ch.box(F, x1 - 0.02, x1, FL, CE, z0, z1, col(o.wall), 'trim', 'l', 3, 3, 0)
-  ch.box(F, x0, x1, FL, CE, z0, z0 + 0.02, col(o.wall), 'trim', 'f', 3, 3, 0)
+  ch.box(F, x0, x0 + 0.02, FL, CE, z0, z1, col(o.wall), 'wallplaster', 'r', 3, 3, 0)
+  ch.box(F, x1 - 0.02, x1, FL, CE, z0, z1, col(o.wall), 'wallplaster', 'l', 3, 3, 0)
+  ch.box(F, x0, x1, FL, CE, z0, z0 + 0.02, col(o.wall), 'wallplaster', 'f', 3, 3, 0)
   // front wall lining (inside faces): everywhere except the display window and the doorway
   const segs = [[x0, Math.min(c.winX0, c.dx - 0.6)], [Math.max(c.winX1, c.dx + 0.6), x1]].filter(([a, b]) => b - a > 0.05)
   const lo = Math.min(c.winX0, c.dx - 0.6), hi = Math.max(c.winX1, c.dx + 0.6)
-  for (const [a, b] of [[x0, lo], [hi, x1]]) if (b - a > 0.05) ch.box(F, a, b, FL, CE, z1 - 0.02, z1, col(o.wall), 'trim', 'b', 3, 3, 0)
-  ch.box(F, lo, hi, CE - 0.4, CE, z1 - 0.02, z1, col(o.wall), 'trim', 'b', 3, 3, 0)                    // above the window
-  ch.box(F, c.winX0, c.winX1, FL, 0.8, z1 - 0.02, z1, col(o.wall), 'trim', 'b', 3, 3, 0)               // below the window
+  for (const [a, b] of [[x0, lo], [hi, x1]]) if (b - a > 0.05) ch.box(F, a, b, FL, CE, z1 - 0.02, z1, col(o.wall), 'wallplaster', 'b', 3, 3, 0)
+  ch.box(F, lo, hi, CE - 0.4, CE, z1 - 0.02, z1, col(o.wall), 'wallplaster', 'b', 3, 3, 0)                    // above the window
+  ch.box(F, c.winX0, c.winX1, FL, 0.8, z1 - 0.02, z1, col(o.wall), 'wallplaster', 'b', 3, 3, 0)               // below the window
   void segs
   ch.box(F, x0, x1, FL, FL + 0.14, z0 + 0.02, z0 + 0.05, col(o.skirt || '#f1e8dc'), 'trim', 'f', 1, 1, 0)  // skirting (back)
   ch.box(F, x0, x1, CE - 0.18, CE, z0 + 0.02, z0 + 0.2, col(o.ceil), 'trim', 'fud', 1, 1, 0)             // crown moulding (back)
