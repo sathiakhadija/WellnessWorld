@@ -612,6 +612,16 @@ export function buildStreet() {
     g.prism(Fq, 0, 0, 1.52, 1.52, 0.96, 0.99, col('#ffd29a'), 'glow', 28); g.prism(Fq, 0, 0, 2.0, 2.0, 0.44, 0.46, col('#ffe0b0'), 'glow', 28, false)   // tier + basin glow
     g.solid(Fq, -2.5, 2.5, 0, 0.55, -2.5, 2.5, 'fountain'); g.cols[g.cols.length - 1].cyl = true; g.cols[g.cols.length - 1].r = 2.5
     waters.push({ x: SCX, z: SCZ, r: 2.0, y: GY + 0.42, kind: 'fountain' }); jets.push({ x: SCX, z: SCZ, y: GY + 2.4 })
+    // Bible s09: cream hydrangea + lavender beds ringing the setts apron (kept open at the four path entries)
+    {
+      const tones = ['#f1ebe2', '#e9e2dc', '#f1ebe2', '#8a76b0', '#a08cc6', '#5b7243']
+      for (let i2 = 0; i2 < 44; i2++) {
+        const a2 = (i2 / 44) * Math.PI * 2, q = Math.abs(((a2 / (Math.PI / 2)) % 1 + 1) % 1 - 0), nearPath = Math.min(q, 1 - q) < 0.11
+        if (nearPath) continue
+        const rr = 6.3 + R() * 1.1, n = 2 + ((R() * 2) | 0)
+        for (let k = 0; k < n; k++) { const r0 = 0.28 + R() * 0.2, h = 0.45 + R() * 0.5; g.prism(frame(SCX + Math.cos(a2) * rr + (R() - 0.5) * 0.5, SCZ + Math.sin(a2) * rr + (R() - 0.5) * 0.5, 0, GY), 0, 0, r0, r0 * 0.7, 0.04, 0.04 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+      }
+    }
     pools.push([SCX, SCZ, 11])
     // perimeter: low stone wall + black railings + clipped hedge with four gates (N on the courtyard axis, W lane mouth, E, S)
     // (north + south runs are along x; west + east runs along z). Hedge sits inside the wall.
