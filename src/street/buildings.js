@@ -220,6 +220,13 @@ export function shopBuilding(ch, F, o) {
     ch.tri(F, [winX0 - 0.1, ground - 0.4, 0.16], [winX0 - 0.1, ground - 1.15, 1.35], [winX0 - 0.1, ground - 0.4, 1.35], aw.clone().multiplyScalar(0.85), 'awning', [-1, 0, 0])
     ch.tri(F, [winX1 + 0.1, ground - 0.4, 0.16], [winX1 + 0.1, ground - 1.15, 1.35], [winX1 + 0.1, ground - 0.4, 1.35], aw.clone().multiplyScalar(0.85), 'awning', [1, 0, 0])
   }
+  // wall lanterns beside the shopfront + clipped topiary pots at the corners (not in front of the door)
+  for (const sx of [-1, 1]) { const lx = sx * (w / 2 - 0.12); ch.box(F, lx - 0.05, lx + 0.05, ground - 1.35, ground - 0.95, 0.16, 0.3, col('#ffd9a0'), 'glow', 'fulrb', 1, 1, 0); ch.box(F, lx - 0.06, lx + 0.06, ground - 0.95, ground - 0.9, 0.15, 0.31, col('#2b2623'), 'metal', 'fulrbd', 1, 1, 0); ch.box(F, lx - 0.06, lx + 0.06, ground - 1.4, ground - 1.35, 0.15, 0.31, col('#2b2623'), 'metal', 'fulrbu', 1, 1, 0) }
+  for (const sx of [-1, 1]) {
+    const px = sx * (w / 2 - 0.3); if (Math.abs(px - dx) < 1.1) continue
+    ch.prism(F, px, 0.62, 0.22, 0.2, 0.0, 0.42, col('#6b6a70'), 'metal', 10); ch.prism(F, px, 0.62, 0.012, 0.012, 0.42, 0.7, col('#5a4636'), 'wood', 5); ch.prism(F, px, 0.62, 0.3, 0.3, 0.68, 1.12, col('#4e6139'), 'leaf', 10)
+    ch.solid(F, px - 0.25, px + 0.25, 0, 1.1, 0.37, 0.87, 'planter')
+  }
   // upper floors
   const nb = w < 6 ? 2 : w < 8.2 ? 3 : 4
   for (let f = 1; f < nf; f++) {
