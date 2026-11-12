@@ -49,3 +49,6 @@ Delivered as an in-app harness (`?bench=1`, `window.__bench`), see `docs/bible/P
 
 ## 6. Outstanding permissions
 None required to proceed (all work stays inside the current architecture, free/self-authored assets, reversible commits, **no push** until the checklist is complete per owner instruction). Needed from the owner later: running the benchmark on the M2; approval of any extra architectural redesign; optionally dropping licensed texture sets if wanted.
+
+## Status update (s15 benchmark)
+See `S15_BENCHMARK.md`: Blender master rendered; landward frontage integrated in-game (headless-viewed); baked PBR/AO sets planned; M2 not measured.
