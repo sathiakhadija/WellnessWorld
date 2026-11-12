@@ -122,7 +122,7 @@ export function StreetVisuals() {
     ]
     const palette = ['#86a84e', '#729a46', '#9ab458', '#63914a', '#a8bb55', '#70a050', '#8cab45']
     let sd = 91; const R = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 }
-    const trees = [], treeSets = [], leafTex = P.leafTexture()
+    const trees = [], treeSets = [], leafTex = P.leafTexture(), canopyMats = []
     for (const kind of ['plane', 'ornamental', 'clipped']) {
       const list = built.inst[kind]; if (!list.length) continue
       const g = P.treeGeo(kind), trunk = new THREE.InstancedMesh(g.trunk, M.trunk, list.length), canopy = new THREE.InstancedMesh(g.canopy, null, list.length)
@@ -137,7 +137,7 @@ export function StreetVisuals() {
             transformed.x += sin(uTime * 0.9 + ph) * 0.07 * sw + sin(uTime * 2.3 + ph * 1.7 + position.z) * 0.025 * sw;
             transformed.z += cos(uTime * 0.75 + ph * 1.3) * 0.06 * sw;`)
       }
-      canopy.material = cm
+      canopy.material = cm; canopyMats.push(cm)
       canopy.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: leafTex, alphaTest: 0.5 })   // leaf-shaped shadows, not card-shaped
       const o = new THREE.Object3D(), mats = [], cols = []
       list.forEach(([x, y, z, ry, s], i) => {
@@ -155,7 +155,7 @@ export function StreetVisuals() {
     built.pools.forEach(([x, z, r, y], i) => { o.position.set(x, (y ?? GY) + 0.06, z); o.scale.set(r * 2, 1, r * 2); o.updateMatrix(); pm.setMatrixAt(i, o.matrix) })
     pm.frustumCulled = false; pm.renderOrder = 2
     const hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.Float32BufferAttribute(built.halos.flat(), 3))
-    return { sets, trees, treeSets, pm, hg }
+    return { sets, trees, treeSets, pm, hg, canopyMats }
   }, [built, M, pool])
 
   const liftGeo = useMemo(() => new THREE.BoxGeometry(0.93, 2.55, 0.05), [])
@@ -180,6 +180,7 @@ export function StreetVisuals() {
     const onStreet = world.level === 'street'
     M.shopin.color.setScalar(0.55 + 0.62 * Math.min(1, LIVE.win))                                        // interiors read dim by day, glow at dusk
     for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * (l.userData.always ? Math.max(LIVE.lamp, 0.6) : LIVE.lamp) : 0
+    for (const cm of props.canopyMats) cm.color.setScalar(1 - 0.42 * Math.min(1, LIVE.lamp))       // foliage sinks into the evening instead of glowing green at night
     if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
       last.current = t
