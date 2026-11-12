@@ -77,13 +77,14 @@ export function cafeInterior(ch, F, c, L) {
 
 export function bookInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
-  shell(ch, F, c, { floor: '#6e4a36', ceil: '#cfbda3', wall: '#38261F', skirt: '#2b1c16' })
+  shell(ch, F, c, { floor: '#8a5f40', ceil: '#d8c6ab', wall: '#5a3d2c', skirt: '#3a261c' })
   // oxblood rug with border
   ch.box(F, -2.2, 2.2, FL, FL + 0.012, -9.8, -3.2, col('#592B37'), 'trim', 'u', 1, 1, 0); ch.box(F, -2.0, 2.0, FL + 0.012, FL + 0.02, -9.6, -3.4, col('#7a3a40'), 'trim', 'u', 1, 1, 0)
   // continuous bookshelf wall on the x+ side with books + rolling ladder
-  const R = ch.R, bookCols = ['#7a2f2f', '#2f4a3a', '#3b4a6a', '#a07850', '#5a3a28', '#8a5a4a', '#d8c7a8', '#4a3550']
-  ch.box(F, x1 - 0.5, x1, FL, CE - 0.2, z0 + 0.3, -1.5, col('#38261F'), 'wood', 'l', 1, 1, 0)
+  const R = ch.R, bookCols = ['#9a3a3a', '#3f6a4e', '#4a5f8f', '#c29a68', '#7a4a32', '#b9785f', '#e6d6b4', '#6a4a80', '#d9b26a']
+  ch.box(F, x1 - 0.04, x1, FL, CE - 0.2, z0 + 0.3, -1.5, col('#4a3123'), 'wood', 'l', 1, 1, 0)
   for (let b = 0; b < 8; b++) { const zA = -1.6 - b * 1.3; ch.box(F, x1 - 0.5, x1 - 0.46, FL, CE - 0.2, zA - 0.05, zA, col('#2b1c16'), 'wood', 'fulr', 1, 1, 0) }
+  for (const y of [0.45, 0.95, 1.45, 1.95, 2.45]) ch.box(F, x1 - 0.12, x1 - 0.1, FL + y - 0.46, FL + y - 0.4, z0 + 0.3, -1.5, col('#ffd9a0'), 'glow', 'l', 1, 1, 0)
   for (const y of [0.45, 0.95, 1.45, 1.95, 2.45]) ch.box(F, x1 - 0.5, x1, FL + y - 0.02, FL + y + 0.02, z0 + 0.3, -1.5, col('#4a2f20'), 'wood', 'fulrbud', 1, 1, 0)
   for (const y of [0.0, 0.5, 1.0, 1.5, 2.0]) { let z = -1.7; while (z > z0 + 0.4) { const wd = 0.05 + R() * 0.07, h = 0.28 + R() * 0.16; ch.box(F, x1 - 0.42, x1 - 0.1, FL + y + 0.05, FL + y + 0.05 + h, z - wd, z, col(bookCols[Math.floor(R() * bookCols.length)]), 'trim', 'l', 1, 1, 0); z -= wd + 0.004; if (R() < 0.07) z -= 0.18 } }
   ch.solid(F, x1 - 0.5, x1, FL, CE, z0, -1.5, 'shelves')
@@ -93,6 +94,7 @@ export function bookInterior(ch, F, c, L) {
   // glazed street wall left: tall bronze mullions reading as library windows is the front glazing already; left-hand reading lounge: two oxblood leather chairs + brass lamp
   for (const [x, z, rr] of [[x0 + 0.65, -3.2, 0], [x0 + 0.65, -4.8, 0]]) { ch.box(F, x - 0.45, x + 0.45, FL + 0.05, FL + 0.45, z - 0.45, z + 0.45, col('#592B37'), 'awning', 'fulrb', 1, 1, 0.01); ch.box(F, x - 0.5, x - 0.3, FL + 0.45, FL + 0.95, z - 0.45, z + 0.45, col('#592B37'), 'awning', 'fulrb', 1, 1, 0.01); void rr }
   ch.prism(F, x0 + 0.65, -4.0, 0.2, 0.2, FL, FL + 0.6, col('#38261F'), 'wood', 10); ch.prism(F, x0 + 0.65, -4.0, 0.012, 0.012, FL + 0.6, FL + 1.1, col('#b58a4d'), 'metal', 6); ch.prism(F, x0 + 0.65, -4.0, 0.17, 0.1, FL + 1.1, FL + 1.3, col('#ffe0b0'), 'glow', 12)
+  for (let z = -2.2; z > z0 + 0.6; z -= 1.5) { ch.box(F, x0 + 0.02, x0 + 0.16, FL, CE - 0.2, z - 0.12, z + 0.12, col('#4a3123'), 'wood', 'fr', 1, 1, 0); ch.box(F, x0 + 0.16, x0 + 0.18, FL + 0.9, CE - 0.5, z - 0.02, z + 0.02, col('#b58a4d'), 'metal', 'r', 1, 1, 0) }
   // central circular book island with lit lower shelf
   ch.prism(F, 0, -6.5, 1.0, 1.0, FL, FL + 0.9, col('#38261F'), 'wood', 28); ch.prism(F, 0, -6.5, 1.04, 1.04, FL + 0.9, FL + 0.95, col('#b58a4d'), 'metal', 28); ch.prism(F, 0, -6.5, 1.02, 1.02, FL + 0.28, FL + 0.32, col('#ffd9b0'), 'glow', 28, false)
   for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; ch.prism(F, Math.cos(a) * 0.62, -6.5 + Math.sin(a) * 0.62, 0.12, 0.12, FL + 0.95, FL + 1.12, col(bookCols[i % bookCols.length]), 'trim', 5) }
