@@ -12,7 +12,7 @@
 import * as THREE from 'three'
 import { Chunk, frame, rng, C, GY, GROUND_Y, TERRACE_Y, rowWall, toWorld, dirWorld } from './geo.js'
 import { PAL, strip, pane, railing, sash, balconette } from './facade.js'
-import { townhouse, modernBlock, shopBuilding } from './buildings.js'
+import { aoStrip, townhouse, modernBlock, shopBuilding } from './buildings.js'
 import { cafeInterior, bookInterior, baked } from './interiors.js'
 
 export const BX = 1.2                                   // penthouse entrance axis
@@ -399,6 +399,7 @@ export function buildStreet() {
       ch.box(FT, x - 1.28, x + 1.28, 0.05, 0.1, -133.7, -133.66, col('#ffd29a'), 'glow', 'f', 1, 1, 0)
       for (let k = 0; k < 6; k++) ch.prism(frame(x - 1.0 + k * 0.4, -134.3, 0, T), 0, 0, 0.26, 0.2, 0.68, 0.95 + (k % 2) * 0.12, col(['#4e6139', '#718451', '#82749a', '#718451', '#edE6d7', '#4e6139'][k]), 'leaf', 8)
       ch.solid(FT, x - 1.34, x + 1.34, 0, 0.9, -135.0, -133.6, 'planter')
+      for (const [px, pz, pr, hw] of [[x, -133.6, 0, 1.45], [x, -135.0, Math.PI, 1.45], [x + 1.34, -134.3, -Math.PI / 2, 0.75], [x - 1.34, -134.3, Math.PI / 2, 0.75]]) aoStrip(ch, frame(px, pz, pr, T), -hw, hw, 0.95)   // baked-style contact AO around each planter
     }
     {
       const wx = BX - 19, wz = -136.2

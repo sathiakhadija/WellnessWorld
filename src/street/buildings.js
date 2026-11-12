@@ -9,6 +9,7 @@ const col = (h) => new THREE.Color(h)
 // ------------------------------------------------------------------------------------------------------------------------------------------
 // Georgian / Victorian townhouse (Elegant Quarter). o: { w, d, floors, main, ground, brick?, upper, doorBay, door, litP, mansard, balc }
 export function townhouse(ch, F, o) {
+  aoStrip(ch, F, -(o.w) / 2 - 0.1, o.w / 2 + 0.1, 1.3)
   const R = ch.R, w = o.w, d = o.d ?? 13, t = 0.36, nf = o.floors ?? 4, nb = w < 6.15 ? 2 : 3
   const plinth = 0.9, hs = [3.35, 3.95, 3.5, 3.1, 2.8].slice(0, nf).map((h) => h + (R() - 0.5) * 0.25)
   const ys = [plinth]; hs.forEach((h, i) => ys.push(ys[i] + h))
@@ -176,6 +177,7 @@ export function modernBlock(ch, F, o) {
 // ------------------------------------------------------------------------------------------------------------------------------------------
 // Shopfront building (Romantic Quarter). o: { w, d, floors, wall:'brick'|'plaster', main, sign (index), awning, stall, extras }
 export function shopBuilding(ch, F, o) {
+  aoStrip(ch, F, -(o.w) / 2 - 0.1, o.w / 2 + 0.1, 1.5)
   const R = ch.R, w = o.w, d = o.d ?? 12, t = 0.34, nf = o.floors ?? 3, ground = 3.7, fh = [3.3, 3.0, 2.8]
   const main = col(o.main), trim = col(PAL.white), stone = col(PAL.limestone), brick = o.wall === 'brick'
   const key = brick ? 'brick' : 'plaster', su = brick ? 0.9 : 3, sv = brick ? 1 : 3
@@ -315,5 +317,9 @@ function shopInterior(ch, F, x0, x1, y0, y1) {
 }
 const W = (F, x, y, z) => [F.x + x * F.c + z * F.s, F.y + y, F.z - x * F.s + z * F.c]
 const dirW = (F) => [F.s, 0, F.c]
+// Baked-style ambient-occlusion contact strip on the ground along a façade/planter base (static, neutral, day/night-safe; Bible/Directive §3). Local z>0 is outward.
+export function aoStrip(ch, F, x0, x1, depth, z0 = 0, y = 0.03) {
+  ch.acc('ao').quad(W(F, x0, y, z0), W(F, x1, y, z0), W(F, x1, y, z0 + depth), W(F, x0, y, z0 + depth), col('#000000'), [0, 1, 0], [[0, 1], [1, 1], [1, 0], [0, 0]])
+}
 import { signUV } from './textures.js'
 const signUVq = (i) => { const [u0, v0, u1, v1] = signUV(i); return [[u0, v0], [u1, v0], [u1, v1], [u0, v1]] }

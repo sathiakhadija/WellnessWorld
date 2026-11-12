@@ -174,3 +174,10 @@ export const limewashTex = () => mk(256, 256, (g, w, h) => {
   for (let i = 0; i < 70; i++) { const gr = g.createRadialGradient(R() * w, R() * h, 2, R() * w, R() * h, 30 + R() * 60); const v = R() < 0.5 ? 255 : 200; gr.addColorStop(0, `rgba(${v},${v},${v},0.07)`); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h) }
   for (let i = 0; i < 500; i++) { g.fillStyle = `rgba(0,0,0,${0.012 + R() * 0.02})`; g.fillRect(R() * w, R() * h, 1, 1) }
 })
+
+// soft ambient-occlusion gradient for ground contact strips: opaque black at the wall edge (v=1) fading to nothing (alpha only)
+export const aoTex = () => mk(8, 64, (g, w, h) => {
+  g.clearRect(0, 0, w, h); const gr = g.createLinearGradient(0, 0, 0, h)
+  gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(0.25, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.6, 'rgba(0,0,0,0.14)'); gr.addColorStop(1, 'rgba(0,0,0,0)')
+  g.fillStyle = gr; g.fillRect(0, 0, w, h)
+})

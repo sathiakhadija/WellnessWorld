@@ -76,9 +76,9 @@ M = {
     'bronze': mat_simple('WW_Bronze_Dark', '#2b2623', 0.38, 1.0), 'brass': mat_simple('WW_Brass_Antique', '#b58a4d', 0.28, 1.0),
     'burg': mat_simple('WW_Burgundy', '#5a2230', 0.55), 'burgfab': mat_simple('WW_Burgundy_Canvas', '#6b2a38', 0.9),
     'soil': mat_simple('WW_Soil', '#4a382c', 0.95), 'glass': mat_glass(),
-    'glow': mat_simple('WW_Lantern_Glow', '#ffd29a', 0.4, 0, '#ffc477', 22.0), 'glowwin': mat_simple('WW_Window_Glow', '#ffd8a8', 0.4, 0, '#ffc98a', 2.2),
+    'glow': mat_simple('WW_Lantern_Glow', '#ffd29a', 0.4, 0, '#ffc477', 22.0), 'glowwin': mat_simple('WW_Window_Glow', '#ffd8a8', 0.4, 0, '#ffc98a', 1.1),
     'glowedge': mat_simple('WW_Planter_Edge_Glow', '#ffd29a', 0.4, 0, '#ffb867', 9.0),
-    'bark': mat_bark(), 'leafA': mat_leaf('WW_Leaf_A', '#76905a'), 'leafB': mat_leaf('WW_Leaf_B', '#5e7a46'), 'leafC': mat_leaf('WW_Leaf_C', '#9db577'),
+    'bark': mat_bark(), 'leafA': mat_leaf('WW_Leaf_A', '#6a8750'), 'leafB': mat_leaf('WW_Leaf_B', '#4d6f3b'), 'leafC': mat_leaf('WW_Leaf_C', '#86a45f'),
     'ivy': mat_leaf('WW_Ivy', '#3f5a36'), 'hydr': mat_simple('WW_Hydrangea', '#eee9e0', 0.7), 'lav': mat_simple('WW_Lavender', '#8a77a8', 0.8),
     'sign': mat_simple('WW_Totem_Sign', '#efe3d0', 0.5, 0, '#ffe2b0', 1.5),
 }

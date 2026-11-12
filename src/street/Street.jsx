@@ -34,13 +34,14 @@ function makeMaterials() {
     slab: std({ map: T.slabTex(), bumpMap: T.slabTex(), bumpScale: 1.2, ...off(1) }), sett: std({ map: T.settTex(), bumpMap: T.settTex(), bumpScale: 2.2, ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),
     slab2: std({ map: T.slabTex(), ...off(2) }), sett2: std({ map: T.settTex(), ...off(2) }), road2: std({ map: T.asphaltTex(), roughness: 0.96, ...off(2) }), gravel2: std({ map: T.gravelTex(), roughness: 1, ...off(2) }),
     paint: std({ roughness: 0.9, ...off(3) }),
+    ao: new THREE.MeshBasicMaterial({ map: T.aoTex(), color: '#000000', transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }),
   }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'grass']) { M[k].map.repeat.set(1, 1) }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']) applyWet(M[k])       // rain: darker, glossier, puddles
   return M
 }
-const NOSHADOW = new Set(['glow', 'shopin', 'sign', 'paint', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2'])
-const GROUND = new Set(['grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'paint'])
+const NOSHADOW = new Set(['ao', 'glow', 'shopin', 'sign', 'paint', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2'])
+const GROUND = new Set(['ao', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'paint'])
 
 // ---------------------------------------------------------------- water
 function rippleNormal() {
