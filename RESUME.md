@@ -12,3 +12,9 @@ Rule: Section 04 stays "TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION
 - s15 done so far: Blender master render, landward brick frontage w/ lit glazing + ivy, glow planters, burgundy glass pavilion, Blender bistro sets, Blender-baked slab albedo/normal + contact-AO decal (assets/blender/bake_textures.py -> public/textures). See docs/bible/S15_BENCHMARK.md for discrepancies.
 - Next: interior depth behind glazing; apply the same bake pipeline (brick/ashlar/plaster/sett textures) to the rest of the street; lift lobby pink (D-001/2); s04 corrections for owner approval; other envs' Blender masters; owner runs M2 benchmark (docs/bible/PERF_BENCHMARK.md).
 - Test tooling: /tmp/serve.sh serves dist4 on :4176 (npx vite build --outDir dist4); /tmp/gl.cjs (afternoon) and /tmp/glb.cjs (blue hour) take `outdir '{"name":[x,y,z,yaw,pitch,fov]}'`.
+
+## CHECKPOINT 2026-11-12 (evening, planting + s04/s11 docs)
+- Local commits only; NOT pushed. Latest work: S04_PROPOSAL.md (not approved), S11_STATUS.md, GATES.md (G1–G8 + 18 rules, honest), Blender planting kit (assets/blender/make_plants.py -> src/baked/plants.json; plantAt() helper in plan.js) used in s08/s09/s11/s12/s15, s05 panel colour, s06 light pools + lit niche, stale s13/s14 gap list corrected, night + heavy-rain regression clean.
+- Static triangles 313k (PERF_BENCHMARK.md). M2 benchmark is owner's (`?bench=1`).
+- Next: s07 floor lanterns (blossom-canopy palette conflict needs owner decision), s10 topiary, s13 warmer limewash/back-lit shelving, close-up flower/book detail, night dimming for plants, Blender masters for remaining envs, owner audit before any push.
+- Tooling note: when re-running shots delete the log file first (stale "errors" line ends the wait loop early).

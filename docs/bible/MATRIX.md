@@ -24,3 +24,6 @@ Cream stone #E8DDCF/#F2E8DB · London brick #8B5E50/#A97465 · dark walnut #3826
 Rejects: global pink/purple/orange/green cast, oversaturation, washed-out, overbright emissive, crushed shadows, plastic reflections, mirror floors.
 
 ## Verification gates (p.77): G1 Layout · G2 Palette · G3 Form · G4 Light · G5 Continuity · G6 Function · G7 Performance · G8 Coverage (all 15 sections)
+
+## Regression 2026-11-12 (after Blender planting kit, s05 panel colour, s06 pools/niche)
+Night (promenade, fountain, lane) and heavy rain (lane, fountain) rendered headless with zero page errors (evidence/regress_*). Observation: white hydrangea reads slightly bright at night (plants are not in the night foliage dim list) — minor, open. Not M2-verified.
