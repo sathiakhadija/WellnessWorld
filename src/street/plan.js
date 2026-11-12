@@ -509,9 +509,15 @@ export function buildStreet() {
     const Fq = frame(SCX, SCZ, 0, GY), stone = '#d9cdb5'
     g.prism(Fq, 0, 0, 2.5, 2.5, 0, 0.5, col(stone), 'trim', 28, false)
     for (let i = 0; i < 28; i++) { const a0 = (i / 28) * Math.PI * 2, a1 = ((i + 1) / 28) * Math.PI * 2, r0 = 2.0, r1 = 2.5, y = GY + 0.5; g.acc('trim').quad([SCX + Math.cos(a0) * r0, y, SCZ + Math.sin(a0) * r0], [SCX + Math.cos(a0) * r1, y, SCZ + Math.sin(a0) * r1], [SCX + Math.cos(a1) * r1, y, SCZ + Math.sin(a1) * r1], [SCX + Math.cos(a1) * r0, y, SCZ + Math.sin(a1) * r0], col('#e4dac4'), [0, 1, 0], [[0, 0], [1, 0], [1, 1], [0, 1]]) }
-    g.prism(Fq, 0, 0, 0.5, 0.4, 0.3, 1.25, col(stone), 'trim', 12); g.prism(Fq, 0, 0, 0.8, 0.8, 1.25, 1.33, col('#e4dac4'), 'trim', 14)
+    // three-tier pale-stone fountain: moulded pedestal, lower bowl, stem, upper bowl, finial; warm underwater + tier glow
+    g.prism(Fq, 0, 0, 0.62, 0.5, 0.3, 0.9, col(stone), 'trim', 16); g.prism(Fq, 0, 0, 0.78, 0.7, 0.9, 1.0, col('#e4dac4'), 'trim', 20)
+    g.prism(Fq, 0, 0, 1.45, 0.95, 1.0, 1.28, col(stone), 'trim', 28); g.prism(Fq, 0, 0, 1.5, 1.5, 1.28, 1.34, col('#e8dfca'), 'trim', 28)          // lower bowl
+    g.prism(Fq, 0, 0, 1.38, 1.38, 1.34, 1.37, col('#9ec0c6'), 'glass', 28)                                                                         // water skin in the bowl
+    g.prism(Fq, 0, 0, 0.26, 0.2, 1.34, 2.1, col(stone), 'trim', 12); g.prism(Fq, 0, 0, 0.78, 0.5, 2.1, 2.3, col(stone), 'trim', 20); g.prism(Fq, 0, 0, 0.82, 0.82, 2.3, 2.35, col('#e8dfca'), 'trim', 20)   // upper bowl
+    g.prism(Fq, 0, 0, 0.16, 0.1, 2.35, 2.75, col(stone), 'trim', 10); g.prism(Fq, 0, 0, 0.1, 0.0, 2.75, 2.95, col('#e4dac4'), 'trim', 10)      // stem + finial
+    g.prism(Fq, 0, 0, 1.52, 1.52, 0.96, 0.99, col('#ffd29a'), 'glow', 28); g.prism(Fq, 0, 0, 2.0, 2.0, 0.44, 0.46, col('#ffe0b0'), 'glow', 28, false)   // tier + basin glow
     g.solid(Fq, -2.5, 2.5, 0, 0.55, -2.5, 2.5, 'fountain'); g.cols[g.cols.length - 1].cyl = true; g.cols[g.cols.length - 1].r = 2.5
-    waters.push({ x: SCX, z: SCZ, r: 2.0, y: GY + 0.42, kind: 'fountain' }); jets.push({ x: SCX, z: SCZ, y: GY + 1.35 })
+    waters.push({ x: SCX, z: SCZ, r: 2.0, y: GY + 0.42, kind: 'fountain' }); jets.push({ x: SCX, z: SCZ, y: GY + 2.4 })
     pools.push([SCX, SCZ, 11])
     // perimeter: low stone wall + black railings + clipped hedge with four gates (N on the courtyard axis, W lane mouth, E, S)
     // (north + south runs are along x; west + east runs along z). Hedge sits inside the wall.
