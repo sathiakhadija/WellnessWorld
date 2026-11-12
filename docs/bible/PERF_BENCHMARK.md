@@ -21,3 +21,6 @@ Presets change cost only, never the art direction.
 
 ## Smoke test (headless software renderer — NOT M2 data)
 `?bench=1&quality=performance`, 8 s: 187 draw calls, 318,834 triangles, 341 geometries, 53 textures, 65 programs at the courtyard start pose; ~1 fps (SwiftShader), which says nothing about the M2. Harness verified to record and export.
+
+## Static street triangle count (headless measurement, 2026-11-12 after planting kit)
+Total 313,251 tris (promenade 81,976 · laneShops 83,328 · houses 56,180 · square 33,652 · terrace 14,830 · courtyard 9,846 · squareShops 13,582 · lobby 6,816 · other <9k). Earlier snapshot was 132k, before s12/s15 frontage, wisteria, baked props and planting. Build time ms: 270. True fps unknown (SwiftShader); owner should run `?bench=1` on M2 and compare presets. If frame time is poor, first levers: plant clusters (~300–600 tris each), wisteria strands, lane shop detail.
