@@ -19,3 +19,4 @@
 - BLENDER evidence: assets/blender/render_cafe_kit.py → evidence/blender_cafe_kit.png (Cycles render of baked café kit; exposure high, kit only — not a scene match). Capsule 1.54 m vs 1.1 m rabbit: owner decision.
 - D-008: mullions slimmed at load (24-vertex pier boxes scaled to 55–68% section, evidence/s01_glazing_slim.png). Remaining: balcony pink cherry tree not in approved AFTER (owner decision).
 - s03 (wall-side interior): removed raised-panel mouldings, fluted pilaster, ornate cornice, flanking panels and raised door-leaf panels (Plan.jsx) per audit items 01–03; flush doors. Still open: door casings (Blender arch_* kit) are heavier than the target, cove strip along the left wall, framed marble artwork, PBR variation on plaster.
+- s03: cove strip + framed artwork + picture light added (evidence/s03_door_wall.png). Door-head pediments (arch_* kit) still heavier than target.

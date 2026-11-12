@@ -66,7 +66,7 @@ function buildArch() {
     const [a, b] = segs[1], zc = (a + b) / 2, hw = 0.55
     add('brass', -4.45, -4.425, 1.05, 1.09, zc - hw - 0.04, zc + hw + 0.04); add('brass', -4.45, -4.425, 2.31, 2.35, zc - hw - 0.04, zc + hw + 0.04)
     add('brass', -4.45, -4.425, 1.05, 2.35, zc - hw - 0.04, zc - hw); add('brass', -4.45, -4.425, 1.05, 2.35, zc + hw, zc + hw + 0.04)
-    add('stone', -4.45, -4.435, 1.09, 2.31, zc - hw, zc + hw)
+    add('doorHi', -4.45, -4.435, 1.09, 2.31, zc - hw, zc + hw)
     add('brass', -4.45, -4.40, 2.45, 2.48, zc - 0.3, zc + 0.3); add('led', -4.45, -4.43, 2.42, 2.45, zc - 0.28, zc + 0.28)
   }
 
