@@ -111,6 +111,7 @@ function mergeByKey(list) {
 
 // merge [cx,cy,cz, sx,sy,sz] boxes
 function boxes(list, matrix) {
+  if (!list.length) return new THREE.BufferGeometry()
   const gs = list.map(([cx, cy, cz, sx, sy, sz]) => { const g = new THREE.BoxGeometry(sx, sy, sz); g.translate(cx, cy, cz); return g })
   const g = mergeGeometries(gs)
   if (matrix) g.applyMatrix4(matrix)
