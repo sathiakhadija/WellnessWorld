@@ -182,10 +182,10 @@ export function shopBuilding(ch, F, o) {
   const main = col(o.main), trim = col(PAL.white), stone = col(PAL.limestone), brick = o.wall === 'brick'
   const key = brick ? 'brick' : 'plaster', su = brick ? 0.9 : 3, sv = brick ? 1 : 3
   const ys = [ground]; for (let i = 0; i < nf - 1; i++) ys.push(ys[i] + fh[i])
-  if (nf >= 2 && R() < 0.5) {   // Bible s12: wisteria curtain trailing from the first-floor line over the shopfront
-    const cx = (R() - 0.5) * w * 0.5, span = Math.min(w * 0.45, 3.2), top = ys[0] + 0.55
-    for (let k = 0; k < 26; k++) {
-      const x = cx - span / 2 + R() * span, l = 0.5 + R() * 1.7, r0 = 0.05 + R() * 0.05
+  if (nf >= 2 && R() < 0.7) {   // Bible s12: wisteria curtain trailing from the first-floor line over the shopfront
+    const cx = (R() - 0.5) * w * 0.5, span = Math.min(w * 0.7, 5.0), top = ys[0] + 0.55
+    for (let k = 0; k < 64; k++) {
+      const x = cx - span / 2 + R() * span, l = 0.8 + R() * 2.0, r0 = 0.07 + R() * 0.07
       ch.prism(F, x, 0.34 + R() * 0.12, r0, 0.015, top - l, top, col(['#a58fc4', '#b9a6d6', '#8e76ae', '#c8b8e0'][(R() * 4) | 0]), 'leaf', 5)
       if (R() < 0.6) ch.prism(F, x + (R() - 0.5) * 0.1, 0.4, 0.045, 0.02, top - l * 0.4, top + 0.05, col(['#5b7243', '#6b7f4a', '#4e6139'][(R() * 3) | 0]), 'leaf', 5)
     }
