@@ -221,7 +221,15 @@ export function buildStreet() {
     surf(g, 'slab', cx - 8.4, CX0 + 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', cx + 8.4, CX1 - 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1)   // cross paths
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
     put('plane', cx, cz, 0.3, 1.5)
-    g.prism(frame(cx, cz, 0, GY), 0, 0, 2.3, 2.3, 0, 0.06, col('#6f655a'), 'gravel', 20); g.prism(frame(cx, cz, 0, GY), 0, 0, 0.9, 0.9, 0.0, 0.07, col('#3b3530'), 'metal', 16)
+    {
+      const FT = frame(cx, cz, 0, GY)
+      g.prism(FT, 0, 0, 2.6, 2.6, 0, 0.42, col('#e0d6c4'), 'ashlar', 36)                                                         // low circular limestone planter
+      g.prism(FT, 0, 0, 2.63, 2.63, 0.3, 0.33, col('#ffd29a'), 'glow', 36)                                                       // softly glowing recessed light strip
+      g.prism(FT, 0, 0, 2.62, 2.62, 0.42, 0.46, col('#efe7d8'), 'trim', 36)                                                      // coping
+      g.prism(FT, 0, 0, 2.3, 2.3, 0.42, 0.5, col('#5a4a3a'), 'gravel', 30)                                                       // soil bed
+      for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2, r = 1.55 + (i % 3) * 0.25; g.prism(frame(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 0, GY), 0, 0, 0.34, 0.16, 0.48, 0.68, col(['#edE6d7', '#82749a', '#718451'][i % 3]), 'leaf', 8) }   // off-white, lavender and sage planting
+      g.solid(FT, -2.3, 2.3, 0, 0.46, -2.3, 2.3, 'planter')
+    }
     const arc = (a0, a1, r = 3.6) => {
       const n = 11
       for (let i = 0; i < n; i++) {
