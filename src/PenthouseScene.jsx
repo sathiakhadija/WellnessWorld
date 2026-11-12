@@ -101,6 +101,18 @@ function Penthouse({ onSpawn, onMats }) {
         dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_WALL))                         // old front wall slab (rebuilt with the entrance)
       }
       if (o.isMesh && ['WW_Trim_Satin_GAME', 'WW_Skirting_GAME'].includes(o.material?.name)) dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_TRIM))
+      if (o.isMesh && o.name === 'WW_Window_Frames' && !o.geometry.userData.slimmed) {            // Bible s01: slim champagne-bronze mullions. Each pier is a 24-vertex box: shrink its x/z section about its own centre (height untouched).
+        o.geometry.userData.slimmed = true
+        const pa = o.geometry.attributes.position, fx = (w) => (w > 0.3 ? 0.55 : 0.68)
+        for (let g = 0; g + 24 <= pa.count; g += 24) {
+          let mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]
+          for (let i = g; i < g + 24; i++) for (let k = 0; k < 3; k++) { const v = k === 0 ? pa.getX(i) : k === 1 ? pa.getY(i) : pa.getZ(i); mn[k] = Math.min(mn[k], v); mx[k] = Math.max(mx[k], v) }
+          if (mx[1] - mn[1] < 3) continue
+          const cx = (mn[0] + mx[0]) / 2, cz = (mn[2] + mx[2]) / 2, sx = fx(mx[0] - mn[0]), sz = fx(mx[2] - mn[2])
+          for (let i = g; i < g + 24; i++) pa.setX(i, cx + (pa.getX(i) - cx) * sx), pa.setZ(i, cz + (pa.getZ(i) - cz) * sz)
+        }
+        pa.needsUpdate = true; o.geometry.computeBoundingSphere()
+      }
       if (o.isMesh && o.name === 'WW_Window_Glass') dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FAR_GLASS_BAY2))
       if (o.userData?.ww_collider) colliders.push(o)          // exported "extras" from Blender
       if (o.userData?.ww_role === 'player_spawn') onSpawn?.(o.getWorldPosition(new THREE.Vector3()))
