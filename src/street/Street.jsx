@@ -34,7 +34,7 @@ function makeMaterials() {
     slab: std({ map: T.slabTex(), normalMap: T.slabNormalTex(), normalScale: new THREE.Vector2(1, 1), ...off(1) }), sett: std({ map: T.settTex(), normalMap: T.settNormalTex(), normalScale: new THREE.Vector2(1, 1), ...off(1) }), road: std({ map: T.asphaltTex(), roughness: 0.96, ...off(1) }), gravel: std({ map: T.gravelTex(), roughness: 1, ...off(1) }),
     slab2: std({ map: T.slabTex(), ...off(2) }), sett2: std({ map: T.settTex(), ...off(2) }), road2: std({ map: T.asphaltTex(), roughness: 0.96, ...off(2) }), gravel2: std({ map: T.gravelTex(), roughness: 1, ...off(2) }),
     paint: std({ roughness: 0.9, ...off(3) }),
-    ao: new THREE.MeshBasicMaterial({ map: T.aoTex(), color: '#000000', transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }),
+    ao: new THREE.MeshBasicMaterial({ map: T.aoTex(), color: '#000000', transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }),
   }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'grass']) { M[k].map.repeat.set(1, 1) }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']) applyWet(M[k])       // rain: darker, glossier, puddles
