@@ -91,14 +91,15 @@ export const SIGNS = [
   { text: 'Café Violette', bg: '#3b2f3a', fg: '#efe3d0', sub: 'coffee · patisserie' },
   { text: 'The Quiet Page', bg: '#2f3d36', fg: '#efe3d0', sub: 'books' },
   { text: 'Fleur', bg: '#e9dfd2', fg: '#4a3a46', sub: 'florist' },
-  { text: 'Atelier Mauve', bg: '#6d5568', fg: '#f3ebe0', sub: 'boutique' },
-  { text: 'Maison Ivoire', bg: '#e6dcc9', fg: '#3b3338', sub: 'homewares' },
+  { text: 'Maison Sauvage', bg: '#6d5568', fg: '#f3ebe0', sub: 'boutique' },
+  { text: 'Maison Home', bg: '#e6dcc9', fg: '#3b3338', sub: 'boutique homewares' },
   { text: 'Boulangerie', bg: '#c9b79a', fg: '#33292b', sub: 'bread · pastry' },
-  { text: 'Papier', bg: '#37363f', fg: '#efe3d0', sub: 'stationery' },
-  { text: 'Salon Sauge', bg: '#8d9a85', fg: '#2e2f2b', sub: 'hair & beauty' },
+  { text: 'Papier & Co.', bg: '#37363f', fg: '#efe3d0', sub: 'books · stationery' },
+  { text: 'Café Vivienne', bg: '#2c3a31', fg: '#efe3d0', sub: 'café · brasserie' },
   { text: 'Wellness World', bg: '#ebe3d4', fg: '#3a3036', sub: 'residences' },
   { text: 'The Quay', bg: '#2f3d36', fg: '#efe3d0', sub: 'riverside kitchen' },
   { text: 'Quay & Co', bg: '#6d5568', fg: '#f3ebe0', sub: 'wine bar' },
+  { text: 'Atelier Bordeaux', bg: '#5a2a35', fg: '#efe3d0', sub: 'boutique' },
 ]
 export const signAtlas = () => mk(1024, 768, (g, w, h) => {
   const cw = w / 2, chh = h / 6

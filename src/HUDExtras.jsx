@@ -10,7 +10,7 @@ import { KINDS, KIND_ORDER, weatherStore, useWeather, setWeather } from './weath
 
 const X0 = -132, X1 = 88, Z0 = -168, Z1 = 130, S = 2.5                      // base map: world metres -> px (river at the top)
 const COL = { road: '#4c4a55', slab: '#d8cfbd', sett: '#b8a893', gravel: '#cfc3ab', grass: '#9bb872', paint: '#e8e1d2' }
-const FEATURES = [['lift', 'Lobby & lift'], ['courtyard', 'Courtyard'], ['fountain', 'Garden Square'], ['lane', 'Romantic Lane'], ['cafe', 'Café Violette'], ['books', 'The Quiet Page'], ['florist', 'Fleur'], ['boutique', 'Atelier Mauve'], ['bakery', 'Boulangerie'], ['viewpoint', 'Sunset viewpoint'], ['quayCafe', 'The Quay'], ['romantic', 'Romantic corner'], ['ferry', 'Ferry landing (reserved)']]
+const FEATURES = [['lift', 'Lobby & lift'], ['courtyard', 'Courtyard'], ['fountain', 'Garden Square'], ['lane', 'Romantic Lane'], ['cafe', 'Café Violette'], ['books', 'The Quiet Page'], ['florist', 'Fleur'], ['boutique', 'Maison Sauvage'], ['bakery', 'Boulangerie'], ['viewpoint', 'Sunset viewpoint'], ['quayCafe', 'The Quay'], ['romantic', 'Romantic corner'], ['ferry', 'Ferry landing (reserved)']]
 
 function bakeMap(built) {
   const W = Math.round((X1 - X0) * S), H = Math.round((Z1 - Z0) * S), cv = document.createElement('canvas'); cv.width = W; cv.height = H
