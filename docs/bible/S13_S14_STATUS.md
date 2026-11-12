@@ -7,4 +7,4 @@ Curved stone pastry counter with display detail, window-side study bar with stoo
 ## s14 present (NO FLOWERS respected)
 Walnut-toned walls, continuous bookshelf wall, central round display island, glass-tube chandelier (Blender), burgundy chairs, brass lamp, rug.
 ## s14 gaps vs p.60/61
-Arched opening to a second reading room, rolling ladder, layered crown mouldings/coffered ceiling depth, display books/props on the island, left-glazing view of Café Violette, richer lamp pools.
+Arched opening to a second reading room, (rolling ladder + rail already present, off-frame), layered crown mouldings/coffered ceiling depth, display books/props on the island, left-glazing view of Café Violette, richer lamp pools.
