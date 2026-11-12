@@ -476,7 +476,8 @@ export function buildStreet() {
       ch.box(FP, -5.7, 5.7, 3.1, 3.2, 2.9, 3.1, dk, 'metal', 'fulrbd', 1, 1, 0)
       ch.box(FP, -6.2, 6.2, 3.2, 3.55, -3.4, 3.9, burg, 'awning', 'fulrbd', 1, 1, 0)                               // burgundy canopy roof
       ch.box(FP, -5.5, 5.5, 3.0, 3.2, 3.9, 4.0, col('#ffd9a0'), 'glow', 'f', 1, 1, 0)                              // canopy under-light
-      ch.box(FP, -5.6, 5.6, 0.12, 3.2, -3.0, -2.9, col('#c9a98d'), 'wallplaster', 'fb', 1, 1, 0)
+      ch.acc('glow').quad(toWorld(FP, 5.6, 0.2, -3.02), toWorld(FP, -5.6, 0.2, -3.02), toWorld(FP, -5.6, 3.1, -3.02), toWorld(FP, 5.6, 3.1, -3.02), gl, dirWorld(FP, 0, 0, -1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+      for (let i = 0; i <= 8; i++) ch.box(FP, -5.6 + i * 1.4 - 0.05, -5.6 + i * 1.4 + 0.05, 0.12, 3.2, -3.1, -3.0, dk, 'metal', 'fulr', 1, 1, 0)
       ch.solid(FP, -6, 6, 0, 3.6, -3.2, 3.2, 'pavilion')
       for (const sx of [-4.2, -1.4, 1.4, 4.2]) { // terrace tables under umbrellas
         const tx = sx, tz = 6.2
