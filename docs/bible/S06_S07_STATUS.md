@@ -11,3 +11,4 @@ Blossom tree canopy overhead (Bible shows pink blossom; palette rules ban pink-b
 
 UPDATE s06: soft additive light pools under the lobby downlights and in front of the lift recess (evidence/s06_game_pools.png) give a polished-floor glow; true screen-space/planar reflections are NOT implemented (would be a High-preset option after owner M2 measurement). Lit niche with flowers still missing. Headless only.
 UPDATE s06: lit wall niche with marble shelf + Blender hydrangea/lavender arrangement on the east wall (evidence/s06_game_niche.png). Headless only; flowers still low-poly close up.
+UPDATE s07: glowing brass floor lanterns with Blender hydrangea now flank the entrance doors inside the glazing (evidence/s07_game_lanterns.png). Still open: blossom canopy (palette decision for the owner), layered ring chandelier, sliding-door detail, true marble reflections. Headless only.

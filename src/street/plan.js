@@ -206,6 +206,16 @@ export function buildStreet() {
     baked(ch, FP, 'armchair', -4.7, 2.9, 0.3, { fabric: '#eadfd0', brass: '#b58a4d' }, 0.04, 1.1)
     ch.solid(FP, -5.2, -4.2, 0, 0.95, 2.2, 3.2, 'armchair')
     ch.prism(FP, -3.7, 2.7, 0.22, 0.22, 0.05, 0.56, brass, 'metal', 14); ch.prism(FP, -3.7, 2.7, 0.26, 0.26, 0.56, 0.6, col('#efe6da'), 'slab', 14); ch.prism(FP, -3.7, 2.7, 0.12, 0.1, 0.6, 0.8, col('#c98f9f'), 'awning', 10); ch.solid(FP, -3.95, -3.45, 0, 0.8, 2.45, 2.95, 'table')
+    // Bible s07 p.26: glowing floor lanterns with hydrangea flanking the entrance doors (inside the glazing)
+    for (const sx of [-1, 1]) for (const [dx, dz, k] of [[2.3, 8.55, 1], [3.1, 8.45, 0.8]]) {
+      const x = sx * dx
+      ch.box(FP, x - 0.11 * k, x + 0.11 * k, 0.04, 0.07, dz - 0.11 * k, dz + 0.11 * k, brass, 'metal', 'fulrb', 1, 1, 0)
+      ch.box(FP, x - 0.09 * k, x + 0.09 * k, 0.07, 0.62 * k, dz - 0.09 * k, dz + 0.09 * k, col('#ffd9a0'), 'glow', 'fulrb', 1, 1, 0)
+      for (const [ox, oz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) ch.box(FP, x + ox * 0.1 * k - 0.01, x + ox * 0.1 * k + 0.01, 0.07, 0.62 * k, dz + oz * 0.1 * k - 0.01, dz + oz * 0.1 * k + 0.01, brass, 'metal', 'fulrb', 1, 1, 0)
+      ch.box(FP, x - 0.12 * k, x + 0.12 * k, 0.62 * k, 0.66 * k, dz - 0.12 * k, dz + 0.12 * k, brass, 'metal', 'fulrb', 1, 1, 0)
+      pools.push([BX + x, 4 + dz, 1.0, GY + 0.01])
+    }
+    for (const sx of [-1, 1]) for (const [dx, dz] of [[2.75, 8.9], [3.6, 8.7]]) baked(ch, FP, `hydrangea${dx > 3 ? 2 : 1}`, sx * dx, dz, R() * 6, { leaf: '#566e40', bloom: '#ecd9d6' }, 0.04, 1.1)
     // deliberately placed rug between lift, counter and door
     ch.box(FP, -2.6, 2.6, 0.05, 0.062, 3.4, 7.2, col('#c9b6a3'), 'trim', 'u', 1, 1, 0); ch.box(FP, -2.4, 2.4, 0.062, 0.07, 3.6, 7.0, col('#d9c9bc'), 'trim', 'u', 1, 1, 0)
     // sculptural pendant: stacked brass rings on a drop rod, warm glow core
