@@ -35,10 +35,10 @@ def noise(n, l, mp, scale, detail=6, rough=0.55):
 def mat_brick(name='WW_Brick_London', base='#9A6553'):
     m, n, l = nm(name); o = out(n); b = bsdf(n); mp = mapping(n, l, (1, 1, 1))
     br = n.new('ShaderNodeTexBrick'); br.inputs['Scale'].default_value = 1.0; br.inputs['Mortar Size'].default_value = 0.01; br.inputs['Brick Width'].default_value = 0.22; br.inputs['Row Height'].default_value = 0.075
-    br.inputs['Color1'].default_value = hexc(base); br.inputs['Color2'].default_value = hexc('#8a5646'); br.inputs['Mortar'].default_value = hexc('#c9b9a0'); br.inputs['Bias'].default_value = 0.0
+    br.inputs['Color1'].default_value = hexc('#8f4f3c'); br.inputs['Color2'].default_value = hexc('#7a4333'); br.inputs['Mortar'].default_value = hexc('#bfae96'); br.inputs['Bias'].default_value = 0.0
     l.new(mp.outputs[0], br.inputs['Vector'])
     ns = noise(n, l, mp, 22, 5); mixc = mix_rgb(n, l, br, hexc('#b27c63'), ns, 'MULTIPLY'); mixc.inputs[0].default_value = 0.25
-    l.new(br.outputs['Color'], mixc.inputs[1]); l.new(ns.outputs['Fac'], mixc.inputs[2]); mixc.inputs[0].default_value = 0.35
+    l.new(br.outputs['Color'], mixc.inputs[1]); l.new(ns.outputs['Fac'], mixc.inputs[2]); mixc.inputs[0].default_value = 0.15
     l.new(mixc.outputs[0], b.inputs['Base Color']); b.inputs['Roughness'].default_value = 0.82
     bump = n.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.6; bump.inputs['Distance'].default_value = 0.02; l.new(br.outputs['Fac'], bump.inputs['Height']); l.new(bump.outputs[0], b.inputs['Normal'])
     l.new(b.outputs[0], o.inputs[0]); return m
@@ -76,7 +76,7 @@ M = {
     'bronze': mat_simple('WW_Bronze_Dark', '#2b2623', 0.38, 1.0), 'brass': mat_simple('WW_Brass_Antique', '#b58a4d', 0.28, 1.0),
     'burg': mat_simple('WW_Burgundy', '#5a2230', 0.55), 'burgfab': mat_simple('WW_Burgundy_Canvas', '#6b2a38', 0.9),
     'soil': mat_simple('WW_Soil', '#4a382c', 0.95), 'glass': mat_glass(),
-    'glow': mat_simple('WW_Lantern_Glow', '#ffd29a', 0.4, 0, '#ffc477', 22.0), 'glowwin': mat_simple('WW_Window_Glow', '#ffd8a8', 0.4, 0, '#ffc98a', 7.0),
+    'glow': mat_simple('WW_Lantern_Glow', '#ffd29a', 0.4, 0, '#ffc477', 22.0), 'glowwin': mat_simple('WW_Window_Glow', '#ffd8a8', 0.4, 0, '#ffc98a', 2.2),
     'glowedge': mat_simple('WW_Planter_Edge_Glow', '#ffd29a', 0.4, 0, '#ffb867', 9.0),
     'bark': mat_bark(), 'leafA': mat_leaf('WW_Leaf_A', '#76905a'), 'leafB': mat_leaf('WW_Leaf_B', '#5e7a46'), 'leafC': mat_leaf('WW_Leaf_C', '#9db577'),
     'ivy': mat_leaf('WW_Ivy', '#3f5a36'), 'hydr': mat_simple('WW_Hydrangea', '#eee9e0', 0.7), 'lav': mat_simple('WW_Lavender', '#8a77a8', 0.8),
@@ -157,10 +157,10 @@ for i in range(10):
     box(f'PlanterCap_{i}', x - 1.76, x + 1.76, 3.94, 5.26, 0.62, 0.68, M['limestone'], 'Props', 0.01)
     box(f'PlanterGlow_{i}', x - 1.62, x + 1.62, 3.93, 3.97, 0.06, 0.1, M['glowedge'], 'Props', 0.0)
     box(f'Soil_{i}', x - 1.6, x + 1.6, 4.1, 5.1, 0.62, 0.7, M['soil'], 'Props', 0.0)
-    for k in range(9):
-        px = x - 1.4 + k * 0.35 + R.uniform(-0.05, 0.05); py = 4.6 + R.uniform(-0.3, 0.3)
+    for k in range(13):
+        px = x - 1.4 + k * 0.24 + R.uniform(-0.05, 0.05); py = 4.6 + R.uniform(-0.3, 0.3)
         kind = k % 3
-        if kind == 0: sphere('hydr', px, py, 0.95, 0.22, M['hydr'], (1, 1, 0.8), 'Foliage', 2, k + i * 9, 0.3)
+        if kind == 0: sphere('hydr', px, py, 0.95, 0.15, M['hydr'], (1, 1, 0.8), 'Foliage', 2, k + i * 9, 0.3)
         elif kind == 1: sphere('box', px, py, 0.9, 0.2, M['leafB'], (1, 1, 0.9), 'Foliage', 2, k + i * 9 + 3, 0.2)
         else: sphere('lav', px, py, 0.9, 0.12, M['lav'], (1, 1, 1.6), 'Foliage', 2, k + i * 9 + 7, 0.25)
 
@@ -193,7 +193,7 @@ box('TotemSign', 5.19, 5.21, -4.95, -4.65, 1.0, 2.4, M['sign'], 'Props', 0.0)
 # ---------------------------------------------------------------- trees: bark trunk with forked branches + layered leaf clusters (not spheres)
 def tree(x, y, h=8.5, seed=1):
     rr = random.Random(seed); c = coll('Trees')
-    cyl('Trunk', x, y, 0, h * 0.5, 0.26, 0.17, M['bark'], 14, 'Trees')
+    cyl('Trunk', x, y, 0, h * 0.5, 0.2, 0.13, M['bark'], 14, 'Trees')
     # branches: slanted cylinders
     tips = []
     for b in range(6):
@@ -205,8 +205,8 @@ def tree(x, y, h=8.5, seed=1):
         o.rotation_euler = (0, math.acos(d[2] / ln), math.atan2(d[1], d[0])); tips.append((ex, ey, ez))
     mats = [M['leafA'], M['leafB'], M['leafC']]
     for (ex, ey, ez) in tips:
-        for k in range(26):
-            sphere('Leaves', ex + rr.uniform(-1.9, 1.9), ey + rr.uniform(-1.9, 1.9), ez + rr.uniform(-1.2, 1.8), rr.uniform(0.3, 0.62), mats[rr.randint(0, 2)], (1.0, 1.0, 0.4), 'Trees', 2, rr.randint(0, 99999), 0.3)
+        for k in range(44):
+            sphere('Leaves', ex + rr.uniform(-1.9, 1.9), ey + rr.uniform(-1.9, 1.9), ez + rr.uniform(-1.2, 1.8), rr.uniform(0.22, 0.46), mats[rr.randint(0, 2)], (1.0, 1.0, 0.62), 'Trees', 2, rr.randint(0, 99999), 0.3)
 for i, x in enumerate([-1, 7, 16, 25, 34, 43, 52, 61]):
     tree(x, -5.0 + R.uniform(-0.3, 0.3), 8 + R.uniform(0, 2), i + 1)
     tree(x + 3.4, 3.3 + R.uniform(-0.3, 0.3), 8.5 + R.uniform(0, 2), i + 31)
@@ -231,8 +231,8 @@ box('RailTop', -6, L, -6.6, -6.5, 1.02, 1.07, M['bronze'], 'Props', 0.006); box(
 
 # ---------------------------------------------------------------- world + lighting (blue-hour/sunset)
 world = bpy.data.worlds.new('Dusk'); sc.world = world; world.use_nodes = True; wn = world.node_tree.nodes; wl = world.node_tree.links
-wn.clear(); sky = wn.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING'; sky.sun_elevation = math.radians(1.2); sky.sun_rotation = math.radians(70); sky.air_density = 1.6; sky.aerosol_density = 2.5; sky.sun_intensity = 0.55
-bg = wn.new('ShaderNodeBackground'); bg.inputs['Strength'].default_value = 0.9; wo = wn.new('ShaderNodeOutputWorld'); wl.new(sky.outputs[0], bg.inputs[0]); wl.new(bg.outputs[0], wo.inputs[0])
+wn.clear(); sky = wn.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING'; sky.sun_elevation = math.radians(1.2); sky.sun_rotation = math.radians(70); sky.air_density = 1.6; sky.aerosol_density = 2.5; sky.sun_intensity = 0.8
+bg = wn.new('ShaderNodeBackground'); bg.inputs['Strength'].default_value = 0.9; wo = wn.new('ShaderNodeOutputWorld'); hs = wn.new('ShaderNodeHueSaturation'); hs.inputs['Saturation'].default_value = 1.7; wl.new(sky.outputs[0], hs.inputs['Color']); wl.new(hs.outputs[0], bg.inputs[0]); wl.new(bg.outputs[0], wo.inputs[0])
 # warm low sun + cool fill
 sun = bpy.data.lights.new('Sun', 'SUN'); sun.energy = 2.0; sun.color = hexc('#ffb36b')[:3]; sun.angle = math.radians(2.0); so = bpy.data.objects.new('Sun', sun); so.rotation_euler = (math.radians(86), 0, math.radians(-100)); coll('Lights').objects.link(so)
 
