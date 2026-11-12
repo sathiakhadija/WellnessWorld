@@ -151,6 +151,7 @@ export function bookInterior(ch, F, c, L) {
   // ceiling: cream coffers + brass chandelier
   for (const z of [-3, -5.5, -8]) for (const x of [-1.8, 0, 1.8]) ch.box(F, x - 0.85, x + 0.85, CE - 0.05, CE, z - 0.9, z + 0.9, col('#e9d9c0'), 'trim', 'd', 1, 1, 0)
   ch.prism(F, 0, -6.5, 0.012, 0.012, 2.6, CE, col('#b58a4d'), 'metal', 4)
+  for (const [r, n, y0, len] of [[0.7, 28, 2.12, 0.58], [0.45, 20, 1.98, 0.5]]) for (let k = 0; k < n; k++) { const a = k * Math.PI * 2 / n; ch.prism(F, Math.cos(a) * r, -6.5 + Math.sin(a) * r, 0.016, 0.016, y0, y0 + len, col(k % 2 ? '#ffe8c0' : '#f4d9a8'), 'glow', 5, false) }   // glass-tube drops (Bible p.60)
   for (const [r, y] of [[0.7, 2.7], [0.45, 2.5]]) { ch.prism(F, 0, -6.5, r, r, y, y + 0.05, col('#b58a4d'), 'metal', 28); ch.prism(F, 0, -6.5, r - 0.05, r - 0.05, y - 0.05, y, col('#ffe0b0'), 'glow', 28, false) }
   // small brass wall sconces + sign
   for (const z of [-3.2, -6.5, -9.3]) ch.prism(F, x1 - 0.6, z, 0.08, 0.1, 2.7, 2.9, col('#ffe0b0'), 'glow', 8)
