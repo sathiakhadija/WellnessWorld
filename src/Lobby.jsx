@@ -36,7 +36,7 @@ function useMats() {
     const warm = new THREE.MeshBasicMaterial({ color: wwHex('WW_LAMP_WARM'), toneMapped: false })
     const marbleL = LT.marbleLight(), marbleD = LT.marbleDark(), gold = LT.brushedGold(); gold.wrapS = gold.wrapT = THREE.RepeatWrapping
     return {
-      blush: ww('WW_PLASTER_BLUSH', { roughness: 0.92, color: wwColor('WW_PLASTER_BLUSH').multiplyScalar(0.72), envMapIntensity: 0.35 }, 'lobby'),
+      blush: ww('WW_PLASTER_BLUSH', { roughness: 0.92, color: wwColor('WW_PLASTER_BLUSH').lerp(new THREE.Color('#9d8a86'), 0.45).multiplyScalar(0.8), envMapIntensity: 0.35 }, 'lobby'),
       trim: ww('WW_LIMESTONE_CREAM', { color: wwColor('WW_LIMESTONE_CREAM', true), roughness: 0.5 }, 'lobbyTrim'),
       floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.2, envMapIntensity: 0.8, color: wwColor('WW_MARBLE_LIGHT').multiplyScalar(0.75) }, 'lobbyFloor'),
       marble: ww('WW_MARBLE_DARK', { map: marbleD, color: new THREE.Color('#4a4340'), roughness: 0.26, envMapIntensity: 1.2 }, 'lobbyDark'),
