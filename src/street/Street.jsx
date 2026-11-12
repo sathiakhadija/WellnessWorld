@@ -183,7 +183,7 @@ export function StreetVisuals() {
     for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * (l.userData.always ? Math.max(LIVE.lamp, 0.6) : LIVE.lamp) : 0
     M.leaf.color.setScalar(1 - 0.3 * Math.min(1, LIVE.lamp))                                         // modelled planting (hydrangea/lavender/shrub) dims at night too
     for (const cm of props.canopyMats) cm.color.setScalar(1 - 0.42 * Math.min(1, LIVE.lamp))       // foliage sinks into the evening instead of glowing green at night
-    if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
+    if (props.pm) props.pm.material.opacity = Math.min(1, LIVE.lamp); if (haloMat.current) haloMat.current.opacity = 0.5 * Math.min(1, LIVE.lamp)           // (kept in the scene so toggling levels never recompiles shaders)
     if (t - last.current > 0.3) {                                                                 // chunk culling + detail LOD, a few times a second
       last.current = t
       if (treeRoot.current) {                                                                      // tree LOD: draw only the trees within TREE_DIST of the camera, nearest first
@@ -219,7 +219,7 @@ export function StreetVisuals() {
       {!OFF.has('sprops') && props.sets.map((m, i) => <primitive key={'s' + i} object={m} />)}
       <group ref={treeRoot}>{!OFF.has('strees') && props.trees.map((m, i) => <primitive key={'t' + i} object={m} />)}</group>
       <primitive object={props.pm} />
-      <points geometry={props.hg} frustumCulled={false}><pointsMaterial ref={haloMat} userData={{ noTint: true }} size={3.4} sizeAttenuation={false} map={dot} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></points>
+      <points geometry={props.hg} frustumCulled={false}><pointsMaterial ref={haloMat} userData={{ noTint: true }} size={22} sizeAttenuation={false} map={dot} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></points>
       <mesh ref={(m) => { lift.current.l = m }} geometry={liftGeo} material={liftMat} position={[BX - 0.465, GY + 1.3, 4.78]} castShadow />
       <mesh ref={(m) => { lift.current.r = m }} geometry={liftGeo} material={liftMat} position={[BX + 0.465, GY + 1.3, 4.78]} castShadow />
       {built.waters.map((w, i) => (
