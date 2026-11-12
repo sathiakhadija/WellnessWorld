@@ -7,7 +7,7 @@ const FL = 0.2, CE = 3.35
 // shared room shell: floor, ceiling, wall linings, front-wall lining beside window/door, walking surface + wall colliders handled by shopBuilding
 function shell(ch, F, c, o) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3, z1 = -1.1
-  ch.box(F, x0, x1, FL - 0.06, FL, z0, z1 + 0.02, col(o.floor), 'trim', 'u', 1.2, 1.2, 0)
+  ch.box(F, x0, x1, FL - 0.06, FL, z0, z1 + 0.02, col(o.floor), 'parquet', 'u', 1.2, 1.2, 0)
   ch.box(F, x0, x1, CE, CE + 0.1, z0, z1 + 0.02, col(o.ceil), 'trim', 'ud', 1, 1, 0)
   ch.box(F, x0, x0 + 0.02, FL, CE, z0, z1, col(o.wall), 'trim', 'r', 3, 3, 0)
   ch.box(F, x1 - 0.02, x1, FL, CE, z0, z1, col(o.wall), 'trim', 'l', 3, 3, 0)

@@ -124,8 +124,8 @@ export function buildStreet() {
     ch.box(FL, -hw, hw, H + 0.55, H + 0.6, -10, 0.3, col(PAL.slate), 'roof', 'u')
     // ---- the lobby interior (FP: lz 0 = the tower wall at z = 4; the lobby is lx -7..7, lz 0.9..9.55; ceiling 4.9)
     const iw = 7
-    ch.box(FP, -iw, iw, -0.01, 0.04, 0.9, 9.6, col('#f0dfca'), 'trim', 'u', 2.8, 2.8)                                                      // pale veined marble floor (large slabs)
-    ch.box(FP, -iw + 0.6, iw - 0.6, 0.04, 0.046, 1.5, 9.0, col('#e6d2bc'), 'trim', 'u', 2.8, 2.8, 0)                                      // inlaid border
+    ch.box(FP, -iw, iw, -0.01, 0.04, 0.9, 9.6, col('#f4e8d8'), 'marble', 'u', 2.4, 2.4)                                                      // pale veined marble floor (large slabs)
+    ch.box(FP, -iw + 0.6, iw - 0.6, 0.04, 0.046, 1.5, 9.0, col('#e8d6c2'), 'marble', 'u', 2.4, 2.4, 0)                                      // inlaid border
     for (const [x0, x1, z0, z1] of [[-iw + 0.6, iw - 0.6, 1.5, 1.54], [-iw + 0.6, iw - 0.6, 8.96, 9.0], [-iw + 0.6, -iw + 0.64, 1.5, 9.0], [iw - 0.64, iw - 0.6, 1.5, 9.0]]) ch.box(FP, x0, x1, 0.046, 0.052, z0, z1, brass, 'metal', 'u', 1, 1, 0)   // brass inlay line
     ch.box(FP, -iw, iw, 4.9, 5.2, 0.9, 9.6, col('#efe4d6'), 'trim', 'fd', 1, 1, 0)                                                          // ceiling
     for (const [x0, x1, z0, z1] of [[-iw, -iw + 0.9, 0.9, 9.6], [iw - 0.9, iw, 0.9, 9.6], [-iw + 0.9, iw - 0.9, 0.9, 1.7], [-iw + 0.9, iw - 0.9, 8.7, 9.6]]) ch.box(FP, x0, x1, 4.55, 4.9, z0, z1, col('#efe4d6'), 'trim', 'fd', 1, 1, 0)   // recessed ceiling soffit

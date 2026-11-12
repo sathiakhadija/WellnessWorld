@@ -6,3 +6,4 @@
 - s13 Café Violette + s14 The Quiet Page walkable interiors (D-006); rain exclusion zones (D-007).
 - Not started / partial: s10 Maison Home/Café Vivienne façades, s11 Maison Sauvage/Papier & Co., s12 shopping street cinematic pass, s15 riverside promenade, foliage rebuild, time-of-day matrix for new spaces, M2 perf, gate evidence G1–G8.
 - Shopping street pass 1: window boxes (not on the bookshop), A-frame blackboards, plum awning + wisteria on Café Violette, foliage greens/finer leaf cards. Still open: cobble variation, string-light density, Blender-baked props, matched-camera BEFORE/BLENDER/LOCALHOST triplets for every environment.
+- Textured materials: procedural herringbone parquet (café, bookshop) and veined marble (ground lobby) added to the street material set (src/street/textures.js, Street.jsx). Remaining untextured: plaster walls, slats, fabrics.

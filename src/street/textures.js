@@ -114,3 +114,34 @@ export const signAtlas = () => mk(1024, 896, (g, w, h) => {
   })
 })
 export const signUV = (i) => { const u0 = (i % 2) / 2, v1 = 1 - Math.floor(i / 2) / 7; return [u0, v1 - 1 / 7, u0 + 0.5, v1] }
+
+// herringbone/chevron timber floor: tile = 1.2 m. Plank 0.6 x 0.1 m; per-plank tonal variation, dark joints, faint grain (greyscale: multiplies the vertex colour).
+export const parquetTex = () => mk(512, 512, (g, w, h) => {
+  const R = rng(61); g.fillStyle = gray(150); g.fillRect(0, 0, w, h)
+  const pw = h / 12 * 0.98, L = h / 2, bands = 4, bw = w / bands
+  for (let b = 0; b < bands; b++) {
+    g.save(); g.beginPath(); g.rect(b * bw, 0, bw, h); g.clip()
+    g.translate(b * bw + bw / 2, h / 2); g.rotate((b % 2 ? 1 : -1) * Math.PI / 4)
+    const n = 14
+    for (let s = -n; s <= n; s++) {
+      const y = s * pw, off = ((s * 37) % 7) * L / 7
+      for (let x = -w - off; x < w; x += L) {
+        const v = 228 + (R() - 0.5) * 40; g.fillStyle = gray(v); g.fillRect(x + 1, y + 1, L - 2, pw - 2)
+        g.strokeStyle = 'rgba(120,90,60,0.10)'; g.lineWidth = 1; for (let k = 0; k < 3; k++) { g.beginPath(); g.moveTo(x + 4, y + 3 + k * pw / 3); g.lineTo(x + L - 4, y + 3 + k * pw / 3 + (R() - 0.5) * 2); g.stroke() }
+      }
+    }
+    g.restore()
+  }
+})
+// pale veined marble: tile = 2.4 m; soft grey veins, subtle cloud variation, thin joint lines at 1.2 m
+export const marbleTex = () => mk(512, 512, (g, w, h) => {
+  const R = rng(73); g.fillStyle = gray(244); g.fillRect(0, 0, w, h)
+  for (let i = 0; i < 40; i++) { const gr = g.createRadialGradient(R() * w, R() * h, 4, R() * w, R() * h, 60 + R() * 120); gr.addColorStop(0, `rgba(${200 + R() * 40},${196 + R() * 40},${190 + R() * 40},0.10)`); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h) }
+  for (let v = 0; v < 22; v++) {
+    g.strokeStyle = `rgba(${120 + R() * 40},${112 + R() * 40},${108 + R() * 40},${0.10 + R() * 0.16})`; g.lineWidth = 0.6 + R() * 1.8
+    let x = R() * w, y = R() * h; g.beginPath(); g.moveTo(x, y)
+    for (let k = 0; k < 6; k++) { x += (R() - 0.35) * 90; y += (R() - 0.5) * 90; g.quadraticCurveTo(x + (R() - 0.5) * 60, y + (R() - 0.5) * 60, x, y) }
+    g.stroke()
+  }
+  g.strokeStyle = 'rgba(150,140,130,0.5)'; g.lineWidth = 1.5; g.strokeRect(0.5, 0.5, w - 1, h - 1); g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke()
+})
