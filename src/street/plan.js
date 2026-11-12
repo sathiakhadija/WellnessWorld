@@ -689,6 +689,9 @@ export function buildStreet() {
     surf(g, 'sett', LX0, LX1, 87.5, 93.5, G.sett, 1.6, 1.6, 2)
     surf(g, 'slab', LX0, LX1, LN, 87.5, G.slab, 1.8, 1.2, 1); surf(g, 'slab', LX0, LX1, 93.5, LS, G.slab, 1.8, 1.2, 1)
     surf(g, 'slab', LX1, WS0 + 0.001, 86, 95, G.slab, 1.8, 1.2, 1)
+    // Bible s12: Blender planting kit at the foot of both lane facades (lavender, hydrangea, shrub), thin so the 1.5 m pavements stay walkable
+    { const K = ['l', 'h', 's', 'l', 'p', 'l']; let ki = 0
+      for (let x = LX0 + 1.5; x < LX1 - 2; x += 1.9) { plantAt(g, x + (R() - 0.5) * 0.5, 86.45 + R() * 0.15, K[ki++ % 6], 0.85); plantAt(g, x + 0.9 + (R() - 0.5) * 0.5, 94.55 - R() * 0.15, K[ki++ % 6], 0.85) } }
     const W_ = (a, p) => ({ sign: a, ...p })
     const NORTH = [
       { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#3a3331', door: '#2f3d36' },
