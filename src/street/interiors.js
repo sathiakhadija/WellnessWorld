@@ -3,7 +3,10 @@
 import * as THREE from 'three'
 import { toWorld, dirWorld } from './geo.js'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import BAKED from '../baked/cafe.json'   // produced by assets/blender/make_cafe.py (Blender)
+import CAFE from '../baked/cafe.json'   // produced by assets/blender/make_cafe.py (Blender)
+import PLANTS from '../baked/plants.json'   // produced by assets/blender/make_plants.py (Blender)
+const BAKED = { ...CAFE, ...PLANTS }
+const PLANT_RE = /^(hydrangea|lavender|shrub)/   // organic kit: smooth floret balls
 const col = (h) => new THREE.Color(h)
 
 // ---- Blender-baked furniture placement: bucket geometry (y-up, front +z) -> street chunk accumulators in the shop frame
@@ -15,11 +18,11 @@ function bakedGeo(name) {
     const n = d.p.length / 3, P = new Float32Array(d.p), g = new THREE.BufferGeometry(), uv = new Float32Array(n * 2)
     for (let i = 0; i < n; i++) { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] }
     g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
-    o[bucket] = toCreasedNormals(g, 0.7)
+    o[bucket] = toCreasedNormals(g, PLANT_RE.test(name) ? 1.3 : 0.7)
   }
   return (GEO[name] = o)
 }
-const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'fabric', seat: 'fabric', leather: 'fabric', marble: 'slab', glow: 'glow' }
+const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'fabric', seat: 'fabric', leather: 'fabric', marble: 'slab', glow: 'glow', leaf: 'leaf', stem: 'leaf', bloom: 'leaf', bloom2: 'leaf' }
 export function baked(ch, F, name, x, z, rot = 0, colors = {}, y = FL, scale = 1) {
   const cr = Math.cos(rot), sr = Math.sin(rot), geos = bakedGeo(name)
   for (const [bucket, g] of Object.entries(geos)) {

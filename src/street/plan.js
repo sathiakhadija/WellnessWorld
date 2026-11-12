@@ -33,6 +33,15 @@ export function buildStreet() {
   const pois = {}
   const R = rng(2026)
   const W0 = frame(0, 0, 0, GY)
+  // Blender-modelled planting kit (assets/blender/make_plants.py): h cream hydrangea, p lilac hydrangea, l lavender, s leafy shrub
+  const GREENS = ['#566e40', '#647a47', '#4f6a3d', '#6b8050']
+  const plantAt = (ch, x, z, kind, k = 1) => {
+    const gcol = GREENS[(R() * GREENS.length) | 0], rot = R() * Math.PI * 2, sc = (0.85 + R() * 0.5) * k
+    if (kind === 'h') baked(ch, W0, `hydrangea${(R() * 3) | 0}`, x, z, rot, { leaf: gcol, bloom: '#ebe5d6' }, 0, sc)
+    else if (kind === 'p') baked(ch, W0, 'hydrangea_lilac', x, z, rot, { leaf: gcol, bloom2: '#9a88b4' }, 0, sc)
+    else if (kind === 'l') baked(ch, W0, `lavender${(R() * 2) | 0}`, x, z, rot, { leaf: '#7a8a68', stem: '#7a8a68', bloom2: '#8b7b9c' }, 0, sc)
+    else baked(ch, W0, `shrub${(R() * 2) | 0}`, x, z, rot, { leaf: gcol }, 0, sc)
+  }
 
   // ---------- small helpers
   const mapSurf = [], mapRib = []
@@ -222,15 +231,10 @@ export function buildStreet() {
     surf(g, 'slab', cx - 8.4, CX0 + 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', cx + 8.4, CX1 - 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1)   // cross paths
     // Bible s08: layered hydrangea / lavender masses edging the path spine and the beds (restrained cream-lavender palette)
     {
-      const tones = ['#f1ebe2', '#e9e2dc', '#8a76b0', '#a08cc6', '#6b7f4a', '#5b7243', '#f1ebe2']
-      for (const sx of [-1, 1]) for (let z = cz + 9.5; z < CZ1 - 1.5; z += 1.15) {
-        const bx = cx + sx * (2.35 + R() * 0.9), n = 8 + ((R() * 4) | 0)
-        for (let k = 0; k < n; k++) { const r0 = 0.13 + R() * 0.13, h = 0.28 + R() * 0.4; g.prism(frame(bx + (R() - 0.5) * 0.7, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
-      }
-      for (const sx of [-1, 1]) for (let z = CZ0 + 7.5; z < cz - 9; z += 1.3) {
-        const bx = cx + sx * (3.0 + R() * 1.6)
-        for (let k = 0; k < 8; k++) { const r0 = 0.13 + R() * 0.12, h = 0.26 + R() * 0.38; g.prism(frame(bx + (R() - 0.5) * 0.8, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
-      }
+      const K = ['h', 'l', 'h', 'p', 'l', 's', 'h', 'l']
+      let ki = 0
+      for (const sx of [-1, 1]) for (let z = cz + 9.5; z < CZ1 - 1.5; z += 0.95) plantAt(g, cx + sx * (2.4 + R() * 0.8), z + (R() - 0.5) * 0.3, K[ki++ % K.length], 1.2)
+      for (const sx of [-1, 1]) for (let z = CZ0 + 7.5; z < cz - 9; z += 1.0) plantAt(g, cx + sx * (3.0 + R() * 1.4), z + (R() - 0.5) * 0.3, K[ki++ % K.length], 1.2)
     }
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
     put('plane', cx, cz, 0.3, 1.25)
@@ -608,14 +612,20 @@ export function buildStreet() {
     g.prism(Fq, 0, 0, 2.0, 2.0, 0.44, 0.46, col('#ffe0b0'), 'glow', 28, false)   // basin glow
     g.solid(Fq, -2.5, 2.5, 0, 0.55, -2.5, 2.5, 'fountain'); g.cols[g.cols.length - 1].cyl = true; g.cols[g.cols.length - 1].r = 2.5
     waters.push({ x: SCX, z: SCZ, r: 2.0, y: GY + 0.42, kind: 'fountain' }); jets.push({ x: SCX, z: SCZ, y: GY + 2.4 })
-    // Bible s09: cream hydrangea + lavender beds ringing the setts apron (kept open at the four path entries)
+    // Bible s09: Blender-modelled cream hydrangea + lavender + shrub clusters ringing the setts apron (kept open at the four path entries)
     {
-      const tones = ['#5b7243', '#6b7f4a', '#8a76b0', '#a08cc6', '#5b7243', '#e9e2dc']
-      for (let i2 = 0; i2 < 40; i2++) {
-        const a2 = (i2 / 40) * Math.PI * 2, q = Math.abs(((a2 / (Math.PI / 2)) % 1 + 1) % 1 - 0), nearPath = Math.min(q, 1 - q) < 0.11
+      const plant = (x, z, kind, k = 1) => plantAt(g, x, z, kind, k)
+      const kinds = ['s', 'h', 'l', 'h', 'p', 'l', 's', 'h']
+      for (let i2 = 0; i2 < 32; i2++) {
+        const a2 = (i2 / 32) * Math.PI * 2 + 0.05, q = ((a2 / (Math.PI / 2)) % 1 + 1) % 1, nearPath = Math.min(q, 1 - q) < 0.1
         if (nearPath) continue
-        const rr = 6.4 + R() * 0.9, n = 3 + ((R() * 2) | 0)
-        for (let k = 0; k < n; k++) { const r0 = 0.3 + R() * 0.2, h = 0.18 + R() * 0.2; g.prism(frame(SCX + Math.cos(a2) * rr + (R() - 0.5) * 0.5, SCZ + Math.sin(a2) * rr + (R() - 0.5) * 0.5, 0, GY), 0, 0, r0, r0 * 0.7, 0.04, 0.04 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+        const rr = 6.5 + R() * 0.6
+        plant(SCX + Math.cos(a2) * rr, SCZ + Math.sin(a2) * rr, kinds[i2 % kinds.length])
+      }
+      // Bible s11: drifts of white hydrangea + lavender along the south hedge, in front of the Maison Sauvage / Papier & Co. row
+      for (let x = SQ.x0 + 2; x < SQ.x1 - 2; x += 1.0) {
+        if (Math.abs(x - BX) < 3) continue
+        plant(x + (R() - 0.5) * 0.4, SQ.z1 - 2.1 - R() * 0.5, ['h', 'l', 'h', 'p', 'l', 'h'][((x - SQ.x0) | 0) % 6], 1.35)
       }
     }
     pools.push([SCX, SCZ, 11])
