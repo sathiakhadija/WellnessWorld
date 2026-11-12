@@ -24,3 +24,9 @@
 - s15: landward plane-tree row added (evidence/s15_c.png); brick/ivy wall with lit windows, burgundy umbrellas near centre, light pools still weaker than p.66.
 - s13: hydrangea posies + wisteria added; s14 sheet refreshed with Blender-furniture shot. Still missing vs p.56/60: bookshelf reading nook in café, glass-tube chandelier, globe, arch passage detail.
 - s14: glass-tube chandelier drops + floor globe added (evidence/s14_chand.png).
+
+## Owner decisions 2026-11-12
+- Balcony cherry tree + petals: REMOVE → done (PenthouseScene no longer renders them; src/Tree.jsx kept unused). Approved balcony AFTER is unfurnished.
+- Street layout 216×278 m: APPROVED by owner.
+- Collision capsule 1.54 m vs 1.1 m rabbit: OK as is.
+- Push: NOT until everything is checklisted.

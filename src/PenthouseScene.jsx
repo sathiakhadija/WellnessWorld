@@ -21,7 +21,6 @@ import { SkyDome, Skyline, HAZE, makeSkyMaterial } from './Skyline.jsx'
 import Atmosphere from './Atmosphere.jsx'
 import { LIVE, useAtmo, atmoStore } from './atmosphere.js'
 import Plan from './Plan.jsx'
-import CherryTree, { Petals } from './Tree.jsx'
 import { world, OFF } from './world.js'
 import { StreetPhysics } from './street/Street.jsx'
 import { BX } from './street/plan.js'
@@ -334,8 +333,7 @@ export default function PenthouseScene() {
             <Transit />
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
             <LevelGate level="penthouse">
-              {!OFF.has('tree') && <CherryTree />}
-              {!OFF.has('tree') && <Petals />}
+              {/* balcony cherry tree + petals removed (owner decision 2026-11-12: approved balcony AFTER is unfurnished) */}
               {LEGACY ? (PLAYER_KIND === 'rabbit' ? null : <CleanHide>{TEMP_PET ? <Suspense fallback={null}><Rabbit position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></Suspense> : <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />}</CleanHide>) : <Companion />}
             </LevelGate>
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
