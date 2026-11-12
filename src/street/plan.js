@@ -220,6 +220,18 @@ export function buildStreet() {
     surf(g, 'slab', cx - 6.6, cx + 6.6, cz - 6.6, cz + 6.6, G.slab, 1.8, 1.2, 2)
     surf(g, 'slab', CX0, CX0 + 2.4, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', CX1 - 2.4, CX1, CZ0 + 6.5, CZ1, G.slab, 1.8, 1.2, 1)     // side paths along the house gardens
     surf(g, 'slab', cx - 8.4, CX0 + 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1); surf(g, 'slab', cx + 8.4, CX1 - 2.4, cz - 1, cz + 1, G.slab, 1.8, 1.2, 1)   // cross paths
+    // Bible s08: layered hydrangea / lavender masses edging the path spine and the beds (restrained cream-lavender palette)
+    {
+      const tones = ['#f1ebe2', '#e9e2dc', '#8a76b0', '#a08cc6', '#6b7f4a', '#5b7243', '#f1ebe2']
+      for (const sx of [-1, 1]) for (let z = cz + 9.5; z < CZ1 - 1.5; z += 1.15) {
+        const bx = cx + sx * (2.35 + R() * 0.9), n = 3 + ((R() * 3) | 0)
+        for (let k = 0; k < n; k++) { const r0 = 0.26 + R() * 0.2, h = 0.45 + R() * 0.5; g.prism(frame(bx + (R() - 0.5) * 0.7, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+      }
+      for (const sx of [-1, 1]) for (let z = CZ0 + 7.5; z < cz - 9; z += 1.3) {
+        const bx = cx + sx * (3.0 + R() * 1.6)
+        for (let k = 0; k < 3; k++) { const r0 = 0.24 + R() * 0.2, h = 0.4 + R() * 0.45; g.prism(frame(bx + (R() - 0.5) * 0.8, z + (R() - 0.5) * 0.6, 0, GY), 0, 0, r0, r0 * 0.7, 0.05, 0.05 + h, col(tones[(R() * tones.length) | 0]), 'leaf', 8) }
+      }
+    }
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
     put('plane', cx, cz, 0.3, 1.25)
     {
