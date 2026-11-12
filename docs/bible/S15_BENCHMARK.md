@@ -14,8 +14,8 @@ Evidence: `evidence/s15_riverside_4way.jpg` (BEFORE p.65 / TARGET p.66 / LOCALHO
 
 ## Discrepancies vs TARGET (p.66)
 1. Shopfront glass is a flat cream plane: no interior depth, mullions only, no warm interior props.
-2. Tree canopies are too sparse/low-density compared with the dense overhead canopy; no fairy-light strings.
-3. Burgundy-canopied glass pavilion and terrace seating now **integrated** (evidence: s15_pavilion_bluehour.png); seating reads as stumpy stools (tables/chairs need real Blender-made models); still missing wall-mounted lanterns, hedges between trees, fairy lights.
+2. Tree canopies still sparser than the dense overhead canopy in the target; no fairy-light strings.
+3. Burgundy-canopied glass pavilion and terrace seating now **integrated** (evidence: s15_pavilion_bluehour.png); seating now uses the Blender-made bistro tables and bentwood chairs; canopy densified (15 cards/tip); still missing wall-mounted lanterns, hedges between trees, fairy lights.
 4. Ivy is blocky prisms (6-sided); needs leaf-card clusters.
 5. Paving is the generic slab texture; no warm light pools on the stone from lamps/windows at blue hour.
 6. Sky/river grade is cooler and less saturated than the target sunset; no bloom/halation (postprocessing absent).
