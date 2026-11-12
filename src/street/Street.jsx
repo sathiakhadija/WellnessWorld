@@ -26,7 +26,7 @@ function makeMaterials() {
   const M = {
     brick: std({ map: T.brickTex() }), ashlar: std({ map: T.ashlarTex() }), plaster: std({ map: T.plasterTex() }),
     parquet: std({ map: T.parquetTex(), roughness: 0.48, envMapIntensity: 0.6 }), marble: std({ map: T.marbleTex(), roughness: 0.2, envMapIntensity: 0.9 }),
-    trim: std({ roughness: 0.8 }), roof: std({ roughness: 0.78 }), metal: std({ roughness: 0.42, metalness: 0.65 }), wood: std({ roughness: 0.62 }),
+    trim: std({ roughness: 0.8 }), roof: std({ roughness: 0.78 }), metal: std({ roughness: 0.42, metalness: 0.65 }), wood: std({ map: T.woodTex(), roughness: 0.58 }),
     shopin: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: true }), shopglass: new THREE.MeshStandardMaterial({ color: '#cfe0e4', transparent: true, opacity: 0.14, roughness: 0.04, metalness: 0, envMapIntensity: 2.6, depthWrite: false }), glass: std({ roughness: 0.1, metalness: 0.0, envMapIntensity: 1.8 }), glow: Object.assign(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), { userData: { glow: true } }),
     awning: std({ side: THREE.DoubleSide, roughness: 0.95 }), leaf: std({ roughness: 1 }), trunk: std({ roughness: 1 }),
     sign: std({ map: T.signAtlas(), roughness: 0.65 }),
@@ -158,7 +158,7 @@ export function StreetVisuals() {
   }, [built, M, pool])
 
   const liftGeo = useMemo(() => new THREE.BoxGeometry(0.93, 2.55, 0.05), [])
-  const liftMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#c8a468', roughness: 0.32, metalness: 1, envMapIntensity: 1.8 }), [])
+  const liftMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#c8a468', map: T.brushedTex(), roughness: 0.34, metalness: 1, envMapIntensity: 1.8 }), [])
   const waterMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#4d4a63', roughness: 0.06, metalness: 0.15, transparent: true, opacity: 0.88, normalMap, normalScale: new THREE.Vector2(0.5, 0.5), envMapIntensity: 1.6 }), [normalMap])
   const jetRefs = useRef([]), haloMat = useRef()
   const last = useRef(-1)

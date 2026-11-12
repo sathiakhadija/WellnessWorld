@@ -145,3 +145,17 @@ export const marbleTex = () => mk(512, 512, (g, w, h) => {
   }
   g.strokeStyle = 'rgba(150,140,130,0.5)'; g.lineWidth = 1.5; g.strokeRect(0.5, 0.5, w - 1, h - 1); g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke()
 })
+
+// timber grain: tile = 1 m. Long streaks along v with knots, greyscale (multiplies the vertex colour)
+export const woodTex = () => mk(256, 512, (g, w, h) => {
+  const R = rng(83); g.fillStyle = gray(226); g.fillRect(0, 0, w, h)
+  for (let i = 0; i < 160; i++) { const x = R() * w, a = 0.05 + R() * 0.12, v = R() < 0.5 ? 60 : 255; g.strokeStyle = `rgba(${v},${v * 0.9},${v * 0.8},${a})`; g.lineWidth = 0.6 + R() * 1.6; g.beginPath(); g.moveTo(x, 0); g.bezierCurveTo(x + (R() - 0.5) * 14, h * 0.3, x + (R() - 0.5) * 14, h * 0.7, x + (R() - 0.5) * 6, h); g.stroke() }
+  for (let k = 0; k < 3; k++) { const x = R() * w, y = R() * h; g.strokeStyle = 'rgba(70,45,30,0.14)'; for (let r = 3; r < 16; r += 3) { g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, r * 0.6, r * 1.8, 0, 0, 6.3); g.stroke() } }
+})
+
+// brushed metal: fine vertical streaks (greyscale), tile 1 m
+export const brushedTex = () => mk(256, 256, (g, w, h) => {
+  const R = rng(97); g.fillStyle = gray(225); g.fillRect(0, 0, w, h)
+  for (let i = 0; i < 420; i++) { const x = R() * w, v = R() < 0.5 ? 90 : 255; g.strokeStyle = `rgba(${v},${v},${v},${0.04 + R() * 0.1})`; g.lineWidth = 0.5 + R(); g.beginPath(); g.moveTo(x, 0); g.lineTo(x + (R() - 0.5) * 2, h); g.stroke() }
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0.10)'); gr.addColorStop(0.5, 'rgba(0,0,0,0.06)'); gr.addColorStop(1, 'rgba(255,255,255,0.08)'); g.fillStyle = gr; g.fillRect(0, 0, w, h)
+})
