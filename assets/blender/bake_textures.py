@@ -64,6 +64,36 @@ def slab(bake_type, fn, cs):
     bpy.ops.object.bake(type=bake_type, margin=4); import statistics; print('MEAN', bake_type, sum(image.pixels[:40000])/40000, image.size[:], image.is_float)
     save(image, fn, cs)
 
+def brick(bake_type, fn, cs):
+    """0.9 m x 1.0 m stretcher-bond brick tile (4 x 12 courses), NEUTRAL grey albedo (the game multiplies by the facade colour)."""
+    sc = reset()
+    bpy.ops.mesh.primitive_plane_add(size=1); o = bpy.context.active_object; o.scale = (0.9, 1.0, 1); bpy.ops.object.transform_apply(scale=True)
+    m = bpy.data.materials.new('brick'); m.use_nodes = True; o.data.materials.append(m)
+    n = m.node_tree.nodes; l = m.node_tree.links; n.clear()
+    out = n.new('ShaderNodeOutputMaterial'); bs = n.new('ShaderNodeBsdfPrincipled'); tc = n.new('ShaderNodeTexCoord')
+    br = n.new('ShaderNodeTexBrick'); br.offset = 0.5; br.offset_frequency = 2; br.squash = 1.0
+    br.inputs['Scale'].default_value = 1.0; br.inputs['Brick Width'].default_value = 0.25; br.inputs['Row Height'].default_value = 1.0 / 12
+    br.inputs['Mortar Size'].default_value = 0.010; br.inputs['Mortar Smooth'].default_value = 0.10; br.inputs['Bias'].default_value = 0.0
+    br.inputs['Color1'].default_value = (0.74, 0.74, 0.74, 1); br.inputs['Color2'].default_value = (0.52, 0.52, 0.52, 1); br.inputs['Mortar'].default_value = (0.94, 0.94, 0.94, 1)
+    l.new(tc.outputs['UV'], br.inputs['Vector'])
+    nz = n.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 60; nz.inputs['Detail'].default_value = 6
+    l.new(tc.outputs['UV'], nz.inputs['Vector'])
+    mx = n.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs['Factor'].default_value = 0.35
+    rp = n.new('ShaderNodeValToRGB'); rp.color_ramp.elements[0].color = (0.8, 0.8, 0.8, 1); rp.color_ramp.elements[1].color = (1, 1, 1, 1)
+    l.new(nz.outputs['Fac'], rp.inputs['Fac']); l.new(br.outputs['Color'], mx.inputs[6]); l.new(rp.outputs['Color'], mx.inputs[7]); l.new(mx.outputs[2], bs.inputs['Base Color'])
+    hh = n.new('ShaderNodeMath'); hh.operation = 'MULTIPLY'; l.new(nz.outputs['Fac'], hh.inputs[0]); l.new(br.outputs['Fac'], hh.inputs[1])
+    hh2 = n.new('ShaderNodeMath'); hh2.operation = 'ADD'; hh2.inputs[1].default_value = 0.4; l.new(hh.outputs['Value'], hh2.inputs[0])
+    hh3 = n.new('ShaderNodeMath'); hh3.operation = 'MULTIPLY'; l.new(hh2.outputs['Value'], hh3.inputs[0]); l.new(br.outputs['Fac'], hh3.inputs[1])
+    bump = n.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 1.0; bump.inputs['Distance'].default_value = 0.012
+    l.new(hh3.outputs['Value'], bump.inputs['Height']); l.new(bump.outputs['Normal'], bs.inputs['Normal'])
+    bs.inputs['Roughness'].default_value = 0.9; l.new(bs.outputs['BSDF'], out.inputs['Surface'])
+    image = img(fn, 1024, 1024); image.colorspace_settings.name = cs; target(m, image)
+    bpy.context.view_layer.objects.active = o; o.select_set(True)
+    if bake_type == 'DIFFUSE':
+        sc.render.bake.use_pass_direct = False; sc.render.bake.use_pass_indirect = False; sc.render.bake.use_pass_color = True
+    sc.cycles.samples = 16
+    bpy.ops.object.bake(type=bake_type, margin=4); save(image, fn, cs)
+
 def ao():
     sc = reset(); sc.cycles.samples = 256
     W, D = 8, 128
@@ -94,5 +124,7 @@ def ao():
 
 slab('DIFFUSE', 'slab_albedo.png', 'sRGB')
 slab('NORMAL', 'slab_normal.png', 'Non-Color')
+brick('DIFFUSE', 'brick_albedo.png', 'sRGB')
+brick('NORMAL', 'brick_normal.png', 'Non-Color')
 ao()
 print('done')

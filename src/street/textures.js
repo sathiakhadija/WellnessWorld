@@ -14,7 +14,7 @@ const gray = (v) => { const c = Math.max(0, Math.min(255, Math.round(v))); retur
 const speckle = (g, w, h, R, n, amp, size = 1.5) => { for (let i = 0; i < n; i++) { const v = 128 + (R() - 0.5) * amp; g.fillStyle = `rgba(${v},${v},${v},0.18)`; g.fillRect(R() * w, R() * h, size * (0.5 + R()), size * (0.5 + R())) } }
 
 // brick: tile = 0.9 m x 1.0 m, 4 stretchers x 12 courses (stretcher bond)
-export const brickTex = () => mk(256, 256, (g, w, h) => {
+export const brickTexCanvas = () => mk(256, 256, (g, w, h) => {
   const R = rng(11); g.fillStyle = gray(196); g.fillRect(0, 0, w, h)
   const bw = w / 4, bh = h / 12
   for (let r = 0; r < 12; r++) for (let c = -1; c < 4; c++) {
@@ -193,3 +193,5 @@ const loadBaked = (url, fallback, srgb = true) => {
 export const slabTex = () => loadBaked('textures/slab_albedo.png', slabTexCanvas())
 export const slabNormalTex = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 4; const g = cv.getContext('2d'); g.fillStyle = 'rgb(128,128,255)'; g.fillRect(0, 0, 4, 4); const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.minFilter = THREE.LinearMipmapLinearFilter; return loadBaked('textures/slab_normal.png', t, false) }
 export const aoTex = () => loadBaked('textures/ao_contact.png', aoTexCanvas())
+export const brickTex = () => loadBaked('textures/brick_albedo.png', brickTexCanvas())
+export const brickNormalTex = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 4; const g = cv.getContext('2d'); g.fillStyle = 'rgb(128,128,255)'; g.fillRect(0, 0, 4, 4); const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.minFilter = THREE.LinearMipmapLinearFilter; return loadBaked('textures/brick_normal.png', t, false) }
