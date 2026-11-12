@@ -10,3 +10,8 @@
 - D-008 (partly fixed) Penthouse glazing frames were matte black; now muted champagne bronze (WW_BRONZE_CHAMPAGNE, PenthouseScene GRADE + Plan.jsx sliding frame). Frames remain structurally chunky in the GLB (nearest-pier depth) — slimming needs the GLB/Blender source. Balcony pink cherry tree still present (not in approved AFTER) — flag for owner.
 
 - D-006 (partial): interior limewash wall texture + woven fabric upholstery material added (café, bookshop). Still open: door leaf/interaction, wet-floor reflections on interior floors.
+
+## Update 2026-11-12
+- D-005 (courtyard trees): re-inspected (docs/bible/evidence/tree_b.png) — branching trunk, layered canopy, readable at courtyard distance; treated as acceptable pending M2 review (headless only).
+- D-006: interior floors use `parquet`/`marble` materials, which are NOT in the wet-reflection list (plan: only slab/sett/road/gravel are wetted) — wet-floor-in-interiors item closed. Open: no door leaf at café/bookshop (open archway by design).
+- s10: white hydrangea planters added beside topiary at every shopfront; s12 lane (docs/bible/evidence/s12_blue.png) matches p.52 composition (cobbles, string lights, wisteria, café tables). Not claimed visually approved — owner review required; no Blender renders for these sets.
