@@ -34,7 +34,7 @@ def noise(n, l, mp, scale, detail=6, rough=0.55):
 
 def mat_brick(name='WW_Brick_London', base='#9A6553'):
     m, n, l = nm(name); o = out(n); b = bsdf(n); mp = mapping(n, l, (1, 1, 1))
-    br = n.new('ShaderNodeTexBrick'); br.inputs['Scale'].default_value = 5.0; br.inputs['Mortar Size'].default_value = 0.012; br.inputs['Brick Width'].default_value = 0.5; br.inputs['Row Height'].default_value = 0.25
+    br = n.new('ShaderNodeTexBrick'); br.inputs['Scale'].default_value = 1.0; br.inputs['Mortar Size'].default_value = 0.01; br.inputs['Brick Width'].default_value = 0.22; br.inputs['Row Height'].default_value = 0.075
     br.inputs['Color1'].default_value = hexc(base); br.inputs['Color2'].default_value = hexc('#8a5646'); br.inputs['Mortar'].default_value = hexc('#c9b9a0'); br.inputs['Bias'].default_value = 0.0
     l.new(mp.outputs[0], br.inputs['Vector'])
     ns = noise(n, l, mp, 22, 5); mixc = mix_rgb(n, l, br, hexc('#b27c63'), ns, 'MULTIPLY'); mixc.inputs[0].default_value = 0.25
@@ -67,7 +67,7 @@ def mat_leaf(name, col):
     b.inputs['Subsurface Weight'].default_value = 0.25; b.inputs['Subsurface Radius'].default_value = (0.3, 0.5, 0.15); l.new(b.outputs[0], o.inputs[0]); return m
 def mat_bark(name='WW_Bark'):
     m, n, l = nm(name); o = out(n); b = bsdf(n); mp = mapping(n, l, (6, 6, 1.2)); ns = noise(n, l, mp, 5, 8, 0.6)
-    c = mix_rgb(n, l, hexc('#5a4636'), hexc('#8a7560'), ns, 'MIX'); l.new(c.outputs[0], b.inputs['Base Color']); b.inputs['Roughness'].default_value = 0.88
+    c = mix_rgb(n, l, hexc('#4a3d32'), hexc('#7d6d5c'), ns, 'MIX'); l.new(c.outputs[0], b.inputs['Base Color']); b.inputs['Roughness'].default_value = 0.88
     bump = n.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.8; l.new(ns.outputs['Fac'], bump.inputs['Height']); l.new(bump.outputs[0], b.inputs['Normal']); l.new(b.outputs[0], o.inputs[0]); return m
 
 M = {
@@ -135,20 +135,20 @@ for k in range(-1, 16):
     box(f'Pilaster_{k}', x - 0.25, x + 0.25, BY - 0.12, BY, 0.0, 9.0, M['limestone'], 'Architecture', 0.015)
     # arched ground window (lit) + upper sash windows
     box(f'Arch_Frame_{k}', x + 0.55, x + 3.85, BY - 0.07, BY, 0.35, 3.3, M['bronze'], 'Architecture', 0.01)
-    box(f'Arch_Glow_{k}', x + 0.7, x + 3.7, BY - 0.04, BY - 0.02, 0.5, 3.15, M['glowwin'], 'Architecture', 0.0)
-    for m_ in range(4): box(f'Mull_{k}_{m_}', x + 0.7 + m_ * 0.75 - 0.02, x + 0.7 + m_ * 0.75 + 0.02, BY - 0.09, BY - 0.03, 0.5, 3.15, M['bronze'], 'Architecture', 0.004)
+    box(f'Arch_Glow_{k}', x + 0.7, x + 3.7, BY - 0.079, BY - 0.077, 0.5, 3.15, M['glowwin'], 'Architecture', 0.0)
+    for m_ in range(4): box(f'Mull_{k}_{m_}', x + 0.7 + m_ * 0.75 - 0.02, x + 0.7 + m_ * 0.75 + 0.02, BY - 0.1, BY - 0.079, 0.5, 3.15, M['bronze'], 'Architecture', 0.004)
     for z0 in (4.6, 7.0):
         box(f'Sash_{k}_{z0}', x + 1.0, x + 3.4, BY - 0.07, BY, z0, z0 + 1.6, M['bronze'], 'Architecture', 0.01)
-        box(f'SashGlow_{k}_{z0}', x + 1.08, x + 3.32, BY - 0.04, BY - 0.02, z0 + 0.08, z0 + 1.52, M['glowwin'] if R.random() < 0.7 else mat_simple('WW_Window_Dark', '#2d3444', 0.1), 'Architecture', 0.0)
+        box(f'SashGlow_{k}_{z0}', x + 1.08, x + 3.32, BY - 0.079, BY - 0.077, z0 + 0.08, z0 + 1.52, M['glowwin'] if R.random() < 0.7 else mat_simple('WW_Window_Dark', '#2d3444', 0.1), 'Architecture', 0.0)
         box(f'Sill_{k}_{z0}', x + 0.9, x + 3.5, BY - 0.2, BY, z0 - 0.08, z0, M['limestone'], 'Architecture', 0.01)
 box('Cornice', -6, L, BY - 0.3, BY + 0.9, 9.0, 9.5, M['limestone'], 'Architecture', 0.02)
 box('Plinth', -6, L, BY - 0.15, BY, 0.0, 0.5, M['limestone'], 'Architecture', 0.01)
 # ivy blankets (clustered leaf cards as flattened icospheres on the wall)
 ivy = M['ivy']
-for _ in range(120):
+for _ in range(260):
     x = R.uniform(-4, 62); z = R.uniform(0.3, 6.8) if R.random() < 0.6 else R.uniform(0.3, 2.4)
     if int((x + 6) / 4.6) % 3 != 0 and R.random() < 0.75: continue
-    sphere('ivy', x, BY - 0.12, z, R.uniform(0.18, 0.4), ivy, (1, 0.35, 1), 'Foliage', 1, R.randint(0, 9999), 0.5)
+    sphere('ivy', x, BY - 0.12, z, R.uniform(0.1, 0.26), ivy, (1, 0.35, 1), 'Foliage', 2, R.randint(0, 9999), 0.3)
 
 # ---------------------------------------------------------------- planters with glowing edge + hydrangea / lavender / box
 for i in range(10):
@@ -160,9 +160,9 @@ for i in range(10):
     for k in range(9):
         px = x - 1.4 + k * 0.35 + R.uniform(-0.05, 0.05); py = 4.6 + R.uniform(-0.3, 0.3)
         kind = k % 3
-        if kind == 0: sphere('hydr', px, py, 0.95, 0.22, M['hydr'], (1, 1, 0.8), 'Foliage', 1, k + i * 9, 0.45)
-        elif kind == 1: sphere('box', px, py, 0.9, 0.2, M['leafB'], (1, 1, 0.9), 'Foliage', 1, k + i * 9 + 3, 0.3)
-        else: sphere('lav', px, py, 0.9, 0.12, M['lav'], (1, 1, 1.6), 'Foliage', 1, k + i * 9 + 7, 0.35)
+        if kind == 0: sphere('hydr', px, py, 0.95, 0.22, M['hydr'], (1, 1, 0.8), 'Foliage', 2, k + i * 9, 0.3)
+        elif kind == 1: sphere('box', px, py, 0.9, 0.2, M['leafB'], (1, 1, 0.9), 'Foliage', 2, k + i * 9 + 3, 0.2)
+        else: sphere('lav', px, py, 0.9, 0.12, M['lav'], (1, 1, 1.6), 'Foliage', 2, k + i * 9 + 7, 0.25)
 
 # ---------------------------------------------------------------- lamps (black/brass lanterns with glow + real light) along both sides
 def lamp(x, y):
@@ -205,11 +205,11 @@ def tree(x, y, h=8.5, seed=1):
         o.rotation_euler = (0, math.acos(d[2] / ln), math.atan2(d[1], d[0])); tips.append((ex, ey, ez))
     mats = [M['leafA'], M['leafB'], M['leafC']]
     for (ex, ey, ez) in tips:
-        for k in range(16):
-            sphere('Leaves', ex + rr.uniform(-1.6, 1.6), ey + rr.uniform(-1.6, 1.6), ez + rr.uniform(-1.0, 1.6), rr.uniform(0.45, 0.85), mats[rr.randint(0, 2)], (1.0, 1.0, 0.45), 'Trees', 1, rr.randint(0, 99999), 0.6)
+        for k in range(26):
+            sphere('Leaves', ex + rr.uniform(-1.9, 1.9), ey + rr.uniform(-1.9, 1.9), ez + rr.uniform(-1.2, 1.8), rr.uniform(0.3, 0.62), mats[rr.randint(0, 2)], (1.0, 1.0, 0.4), 'Trees', 2, rr.randint(0, 99999), 0.3)
 for i, x in enumerate([-1, 7, 16, 25, 34, 43, 52, 61]):
-    tree(x, -2.0 + R.uniform(-0.3, 0.3), 8 + R.uniform(0, 2), i + 1)
-    tree(x + 3.4, 2.4 + R.uniform(-0.3, 0.3), 8.5 + R.uniform(0, 2), i + 31)
+    tree(x, -5.0 + R.uniform(-0.3, 0.3), 8 + R.uniform(0, 2), i + 1)
+    tree(x + 3.4, 3.3 + R.uniform(-0.3, 0.3), 8.5 + R.uniform(0, 2), i + 31)
 
 # ---------------------------------------------------------------- café pavilion (distance, right): glass + burgundy umbrellas + warm glow
 box('Pavilion_Base', 38, 52, 3.0, 7.0, 0.0, 0.3, M['limestone'], 'Architecture', 0.01)
@@ -231,13 +231,13 @@ box('RailTop', -6, L, -6.6, -6.5, 1.02, 1.07, M['bronze'], 'Props', 0.006); box(
 
 # ---------------------------------------------------------------- world + lighting (blue-hour/sunset)
 world = bpy.data.worlds.new('Dusk'); sc.world = world; world.use_nodes = True; wn = world.node_tree.nodes; wl = world.node_tree.links
-wn.clear(); sky = wn.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING'; sky.sun_elevation = math.radians(2.5); sky.sun_rotation = math.radians(70); sky.air_density = 1.6; sky.aerosol_density = 2.5; sky.sun_intensity = 0.55
+wn.clear(); sky = wn.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING'; sky.sun_elevation = math.radians(1.2); sky.sun_rotation = math.radians(70); sky.air_density = 1.6; sky.aerosol_density = 2.5; sky.sun_intensity = 0.55
 bg = wn.new('ShaderNodeBackground'); bg.inputs['Strength'].default_value = 0.9; wo = wn.new('ShaderNodeOutputWorld'); wl.new(sky.outputs[0], bg.inputs[0]); wl.new(bg.outputs[0], wo.inputs[0])
 # warm low sun + cool fill
 sun = bpy.data.lights.new('Sun', 'SUN'); sun.energy = 2.0; sun.color = hexc('#ffb36b')[:3]; sun.angle = math.radians(2.0); so = bpy.data.objects.new('Sun', sun); so.rotation_euler = (math.radians(86), 0, math.radians(-100)); coll('Lights').objects.link(so)
 
 # ---------------------------------------------------------------- camera (eye height, looking down the promenade; ~Bible p.66 framing)
-cam = bpy.data.cameras.new('Cam'); cam.lens = 24; co = bpy.data.objects.new('Cam', cam); sc.collection.objects.link(co); co.location = (-4.5, -1.2, 1.65); co.rotation_euler = (math.radians(89.5), 0, math.radians(-90 + 4)); sc.camera = co
+cam = bpy.data.cameras.new('Cam'); cam.lens = 24; co = bpy.data.objects.new('Cam', cam); sc.collection.objects.link(co); co.location = (-4.5, 0.2, 1.65); co.rotation_euler = (math.radians(89.5), 0, math.radians(-90 + 4)); sc.camera = co
 # ---------------------------------------------------------------- render
 sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = int(os.environ.get('SAMPLES', 40)); sc.cycles.use_denoising = True; sc.cycles.max_bounces = 6; sc.cycles.diffuse_bounces = 3; sc.cycles.glossy_bounces = 3; sc.cycles.transmission_bounces = 4
 sc.render.resolution_x = 1280; sc.render.resolution_y = 780; sc.view_settings.view_transform = 'AgX'; sc.view_settings.look = 'AgX - Medium High Contrast'; sc.view_settings.exposure = 0.3
