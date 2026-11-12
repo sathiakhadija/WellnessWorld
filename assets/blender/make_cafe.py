@@ -71,6 +71,23 @@ def globe():
     keep(lathe('ring', [(0.205, 0.2), (0.215, 0.2), (0.215, 0.64), (0.205, 0.64)], 24, False), 'brass', C)
     return finish('globe')
 
+def fountain():
+    """Three-tier pale-stone fountain (Bible s09): moulded plinth, fluted-profile pedestal, scalloped lower + upper bowls, baluster stem, finial, glowing tier lip. Origin on the ground."""
+    reset(); PARTS.clear()
+    keep(lathe('plinth', [(0.0, 0.3), (0.95, 0.3), (0.98, 0.34), (0.9, 0.4), (0.86, 0.5), (0.7, 0.6), (0.52, 0.72), (0.46, 0.95), (0.5, 1.0), (0.0, 1.0)], 40), 'marble', C)
+    # lower bowl: ogee profile with a rolled lip, thin wall
+    keep(lathe('bowl1', [(0.0, 0.98), (0.55, 1.0), (1.0, 1.1), (1.38, 1.26), (1.52, 1.38), (1.56, 1.46), (1.5, 1.5), (1.44, 1.45), (1.4, 1.36), (1.0, 1.22), (0.5, 1.12), (0.0, 1.12)], 48), 'marble', C)
+    keep(lathe('lip1', [(1.45, 1.44), (1.57, 1.46), (1.57, 1.49), (1.45, 1.49)], 48), 'glow', C)
+    keep(lathe('stem1', [(0.0, 1.1), (0.26, 1.12), (0.18, 1.35), (0.14, 1.6), (0.22, 1.8), (0.14, 1.95), (0.3, 2.08), (0.0, 2.1)], 24), 'marble', C)
+    keep(lathe('bowl2', [(0.0, 2.08), (0.35, 2.1), (0.62, 2.2), (0.84, 2.34), (0.88, 2.42), (0.82, 2.44), (0.78, 2.38), (0.6, 2.28), (0.3, 2.2), (0.0, 2.2)], 36), 'marble', C)
+    keep(lathe('lip2', [(0.8, 2.4), (0.89, 2.42), (0.89, 2.45), (0.8, 2.45)], 36), 'glow', C)
+    keep(lathe('stem2', [(0.0, 2.2), (0.16, 2.22), (0.1, 2.45), (0.15, 2.62), (0.07, 2.8), (0.12, 2.9), (0.0, 3.15)], 20), 'marble', C)
+    for k in range(16):
+        a = k / 16 * math.tau
+        keep(sweep(f'jet{k}', [(math.cos(a) * 0.15, 2.9, math.sin(a) * 0.15), (math.cos(a) * 0.55, 3.0, math.sin(a) * 0.55), (math.cos(a) * 0.82, 2.46, math.sin(a) * 0.82)], 0.012), 'glow', C)
+    return finish('fountain')
+
+LIB['fountain'] = fountain()
 LIB['bistro_chair'] = bistro_chair(); LIB['bistro_table'] = bistro_table(); LIB['armchair'] = armchair(); LIB['club_chair'] = armchair(0.92, 0.9, 0.92, 'leather')
 LIB['brass_lamp'] = brass_lamp(); LIB['stool'] = stool(); LIB['pendant'] = pendant(); LIB['globe'] = globe()
 os.makedirs(f'{ROOT}/src/baked', exist_ok=True)
