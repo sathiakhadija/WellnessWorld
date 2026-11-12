@@ -24,3 +24,5 @@ Presets change cost only, never the art direction.
 
 ## Static street triangle count (headless measurement, 2026-11-12 after planting kit)
 Total 313,251 tris (promenade 81,976 · laneShops 83,328 · houses 56,180 · square 33,652 · terrace 14,830 · courtyard 9,846 · squareShops 13,582 · lobby 6,816 · other <9k). Earlier snapshot was 132k, before s12/s15 frontage, wisteria, baked props and planting. Build time ms: 270. True fps unknown (SwiftShader); owner should run `?bench=1` on M2 and compare presets. If frame time is poor, first levers: plant clusters (~300–600 tris each), wisteria strands, lane shop detail.
+
+Update after rounder blooms: static total 383,103 tris (lane 47,964 from planting, promenade 93,396, square 44,412). Lane plant spacing then widened 1.9 -> 2.9 m to cut cost (re-measure on next build). Plant levers: spacing, subdivision (make_plants.py `sub`), instancing (not yet done — baked plants are merged geometry; GPU instancing would cut memory/draw cost).

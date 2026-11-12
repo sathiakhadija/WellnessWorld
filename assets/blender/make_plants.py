@@ -11,12 +11,13 @@ C = '#ffffff'
 def leaf_obj(name, specs):
     """specs: list of (base(x,y,z), dir unit vec, length, width). Closed lens leaf with a mid-rib bend."""
     bm = bmesh.new()
-    for base, d, L, W in specs:
+    for base, d, L, W, *rest in specs:
+        droop = rest[0] if rest else 0.18
         d = Vector(d).normalized(); up = Vector((0, 0, 1)); side = d.cross(up)
         if side.length < 1e-3: side = Vector((1, 0, 0))
         side.normalize(); nrm = side.cross(d).normalized(); b = Vector(base)
-        tip = b + d * L + Vector((0, 0, -0.18 * L))          # leaf droops at the tip
-        mid = b + d * L * 0.5 + Vector((0, 0, 0.04 * L))
+        tip = b + d * L + Vector((0, 0, -droop * L))          # leaf droops at the tip
+        mid = b + d * L * 0.5 + Vector((0, 0, 0.04 * L * (droop / 0.18)))
         a = bm.verts.new(b); t = bm.verts.new(tip)
         l = bm.verts.new(mid + side * W * 0.5); r = bm.verts.new(mid - side * W * 0.5)
         u = bm.verts.new(mid + nrm * W * 0.12); dn = bm.verts.new(mid - nrm * W * 0.12)
@@ -68,7 +69,7 @@ def lavender(seed, n=11, h=0.5):
     for i in range(n):
         a = rnd.random() * math.tau; rr = rnd.random() * 0.12; lean = 0.08 + rnd.random() * 0.12
         top = (math.cos(a) * (rr + lean), math.sin(a) * (rr + lean), h * (0.8 + rnd.random() * 0.25))
-        stems.append(((math.cos(a) * rr * 0.4, math.sin(a) * rr * 0.4, 0.05), Vector((top[0] - math.cos(a) * rr * 0.4, top[1] - math.sin(a) * rr * 0.4, top[2] - 0.05)).normalized(), math.dist(top, (0, 0, 0.05)) * 0.95, 0.014))
+        stems.append(((math.cos(a) * rr * 0.4, math.sin(a) * rr * 0.4, 0.05), Vector((top[0] - math.cos(a) * rr * 0.4, top[1] - math.sin(a) * rr * 0.4, top[2] - 0.05)).normalized(), math.dist(top, (0, 0, 0.05)) * 0.95, 0.014, 0.0))
         for k in range(2): spikes.append(((top[0], top[1], top[2] - 0.03 * k + 0.03), 0.02 - 0.002 * k))
     keep(leaf_obj('stems', stems), 'stem', C)
     keep(ball_obj('spikes', spikes, 0.3, seed + 3), 'bloom2', C)
