@@ -163,7 +163,7 @@ function makeMats(src = {}) {
     door: std('#efe5d2', { roughness: 0.55 }),
     dk: std('#2d2019', { roughness: 0.5 }),
     doorHi: std('#d6c4a6', { roughness: 0.5 }),
-    blush: std('#a58e88', { roughness: 0.92, envMapIntensity: 0.2 }),                                      // taupe-blush panel (Bible s05 flanking walls)
+    blush: std('#85706a', { roughness: 0.92, envMapIntensity: 0.15 }),                                      // taupe-blush panel (Bible s05 flanking walls)
     walnutHi: std(wwHex('WW_WALNUT_DARK', true), { roughness: 0.38 }),                                          // cream satin paint
     walnut: std(wwHex('WW_WALNUT_DARK'), { roughness: 0.42 }),                                          // espresso entrance door
     limestone: (() => { const m = new THREE.MeshStandardMaterial({ map: limestoneTexture(), roughness: 0.78, color: '#ffffff' }); applyWet(m); return m })(),

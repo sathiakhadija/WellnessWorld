@@ -34,3 +34,5 @@
 ## Update 2026-11-12 (s05 lift lobby, headless)
 - D-001 partial: taupe-blush flanking panels with slim mouldings + tall vertical tube sconces with brass caps added on the penthouse-side entrance wall (p.17). Evidence: `evidence/s05_lift_doorway_golden.png`.
 - Still open: golden-hour sun blows out the cream door leaf and 0.4 m jambs so the doorway still reads paler than p.17; marble floor reflection faint; Lift pictogram sign small. Not claimed approved.
+
+## s05 update (2026-11-12, later): flanking taupe-blush panels darkened (#a58e88 -> #85706a) so they read against the cream mouldings under golden hour (evidence/s05_doorway_golden_v2.png). D-001/D-002 still open: golden-hour sun still washes the door leaf/jambs and plaster pink; floor reflection faint; Lift sign small. Headless only.
