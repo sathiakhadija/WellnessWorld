@@ -487,6 +487,17 @@ export function buildStreet() {
     }
     // terrace café seating: Blender-made bistro tables + bentwood chairs (assets/blender/make_cafe.py)
     for (const x of [-54, -48, -42, -36, -30]) bistroSet(frame(x, -135.4, 0, T), 0, 0, 2 + (x % 2 === 0 ? 1 : 0))
+    // fairy-light swags between the plane trees + wall lanterns on the brick piers (Bible s15 warm canopy glow)
+    for (const [xa, xb] of [[-44, -32], [-32, -20], [18, 28], [28, 38]]) {
+      const N = 14
+      for (let i = 0; i <= N; i++) { const t = i / N, x = xa + (xb - xa) * t, y = 5.2 - Math.sin(t * Math.PI) * 0.0 - (1 - Math.pow(2 * t - 1, 2)) * -0.0 - Math.sin(t * Math.PI) * 0.55
+        ch.box(FT, x - 0.05, x + 0.05, y, y + 0.1, -137.65, -137.55, col('#ffd9a0'), 'glow', 'fulrbd', 1, 1, 0) }
+      for (let i = 0; i <= 3; i++) { const t = i / 3; ch.box(FT, xa + (xb - xa) * t - 0.01, xa + (xb - xa) * t + 0.01, 4.7 - Math.sin(t * Math.PI) * 0.6, 5.1, -137.61, -137.59, col('#3a3128'), 'metal', 'fulr', 1, 1, 0) }
+    }
+    for (const [bx0, bx1] of [[-62, -14], [16, 34]]) for (let x = bx0 + 1.8; x < bx1 - 1; x += 3.6) {
+      const FL2 = frame(x, -132.45, Math.PI, T)
+      ch.box(FL2, -0.08, 0.08, 3.9, 4.3, 0.0, 0.14, col('#2b2523'), 'metal', 'fulrbd', 1, 1, 0); ch.box(FL2, -0.06, 0.06, 3.95, 4.25, 0.14, 0.26, col('#ffd9a0'), 'glow', 'fulrbd', 1, 1, 0)
+    }
     // Bible s15: layered mature planes along the landward edge of the central promenade (kept clear of the BX viewpoint corridor)
     for (const x of [-44, -32, -20, 18, 28, 38]) { grate(ch, x, -137.6, 1.3); put('plane', x, -137.6, R() * 6, 0.9 + R() * 0.2, T) }
     // ---- Zone A: peaceful riverside trees (kept off the central view) + benches
