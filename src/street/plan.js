@@ -441,6 +441,8 @@ export function buildStreet() {
       ch.solid(F2, x0, x1, -0.5, 0, z0, zr, 'pierdeck')
       pois.ferry = { x: (x0 + x1) / 2, z: -150 }
     }
+    // Bible s15: layered mature planes along the landward edge of the central promenade (kept clear of the BX viewpoint corridor)
+    for (const x of [-44, -32, -20, 18, 28, 38]) { grate(ch, x, -137.6, 1.3); put('plane', x, -137.6, R() * 6, 0.9 + R() * 0.2, T) }
     // ---- Zone A: peaceful riverside trees (kept off the central view) + benches
     for (const x of [-104, -92, -80, -68, -56]) { grate(ch, x, -139.5, 1.3); put('plane', x, -139.5, R() * 6, 0.85 + R() * 0.25, T) }
     for (const x of [-98, -74, -62]) { put('bench', x, -135.2, 0, 1.0, T); ch.solid(frame(x, -135.2, 0, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench') }
