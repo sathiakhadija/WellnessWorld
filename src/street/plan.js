@@ -442,6 +442,27 @@ export function buildStreet() {
       ch.solid(F2, x0, x1, -0.5, 0, z0, zr, 'pierdeck')
       pois.ferry = { x: (x0 + x1) / 2, z: -150 }
     }
+    // ---- Bible s15 landward frontage: brick-and-limestone mansion blocks rising behind the retaining wall, shopfront glazing glowing at terrace level, ivy, uplit cornice
+    for (const [bx0, bx1] of [[-62, -14], [16, 34]]) {
+      const FB = frame((bx0 + bx1) / 2, -132.3, Math.PI, GY), w = (bx1 - bx0) / 2, HH = T - GY, top = 15, brickC = col('#8d5a45'), lim = col('#d9cdb7'), dark = col('#2f2a27')
+      ch.box(FB, -w, w, HH - 0.2, top, -6, 0, brickC, 'brick', 'fulr', 1.2, 1.2, 0.1)
+      ch.box(FB, -w - 0.2, w + 0.2, top, top + 0.35, -6.2, 0.35, lim, 'trim', 'fulrbd', 1, 1, 0)
+      ch.box(FB, -w - 0.1, w + 0.1, HH - 0.2, HH + 0.25, -6, 0.3, lim, 'ashlar', 'fulr', 2.4, 1.2, 0)       // plinth at terrace level
+      ch.box(FB, -w - 0.05, w + 0.05, top - 0.12, top - 0.04, 0.05, 0.33, col('#ffd9a0'), 'glow', 'f', 1, 1, 0)   // uplit cornice
+      const bays = Math.floor((2 * w) / 3.6)
+      for (let i = 0; i < bays; i++) {
+        const cx = -w + (i + 0.5) * ((2 * w) / bays), gw = 1.5
+        ch.acc('glow').quad(toWorld(FB, cx - gw, HH + 0.35, 0.03), toWorld(FB, cx + gw, HH + 0.35, 0.03), toWorld(FB, cx + gw, HH + 3.6, 0.03), toWorld(FB, cx - gw, HH + 3.6, 0.03), col('#ffdca8'), dirWorld(FB, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+        for (const m of [-gw, 0, gw]) ch.box(FB, cx + m - 0.04, cx + m + 0.04, HH + 0.3, HH + 3.65, 0.03, 0.1, dark, 'metal', 'fulr', 1, 1, 0)        // mullions
+        ch.box(FB, cx - gw - 0.04, cx + gw + 0.04, HH + 3.6, HH + 3.7, 0.03, 0.1, dark, 'metal', 'fulr', 1, 1, 0)
+        for (const y0 of [HH + 5.1, HH + 8.1]) {
+          ch.acc('glow').quad(toWorld(FB, cx - 0.55, y0, 0.03), toWorld(FB, cx + 0.55, y0, 0.03), toWorld(FB, cx + 0.55, y0 + 1.9, 0.03), toWorld(FB, cx - 0.55, y0 + 1.9, 0.03), col(i % 3 === 1 ? '#c9d2d8' : '#ffd3a0'), dirWorld(FB, 0, 0, 1), [[0, 0], [1, 0], [1, 1], [0, 1]])
+          ch.box(FB, cx - 0.68, cx + 0.68, y0 - 0.1, y0, 0.0, 0.18, lim, 'trim', 'fulrbd', 1, 1, 0); ch.box(FB, cx - 0.62, cx + 0.62, y0 + 1.9, y0 + 2.02, 0.0, 0.12, lim, 'trim', 'fulrbd', 1, 1, 0)
+        }
+        for (let k = 0; k < 3; k++) ch.prism(FB, cx - 1.9 + R() * 0.4, 0.14, 0.34, 0.28, HH + 1.0 + R() * 5.5, HH + 1.5 + R() * 6.5, col(['#4e6139', '#5b7243', '#3f5230'][k]), 'leaf', 7)   // ivy clumps on the brick
+      }
+      ch.solid(FB, -w, w, HH - 0.5, top, -6, 0.3, 'frontage')
+    }
     // Bible s15: layered mature planes along the landward edge of the central promenade (kept clear of the BX viewpoint corridor)
     for (const x of [-44, -32, -20, 18, 28, 38]) { grate(ch, x, -137.6, 1.3); put('plane', x, -137.6, R() * 6, 0.9 + R() * 0.2, T) }
     // ---- Zone A: peaceful riverside trees (kept off the central view) + benches
