@@ -25,4 +25,4 @@ Evidence: `evidence/s15_riverside_4way.jpg` (BEFORE p.65 / TARGET p.66 / LOCALHO
 Burgundy pavilion + café seating, denser canopy cards, interior depth behind glazing, Blender-baked neutral AO texture on the paving, owner M2 run.
 
 ## Regression (headless)
-Day, blue hour and night shots load with no page errors after the baked brick/ashlar/sett/slab texture sets (`evidence/s15_game_night.png`). Fixed: canopy now dims with the lamp factor at night (viewed). Open: rain preset not exercised by the script's `W=` variable (the weather toggle still showed Sunny) — rain regression still to run.
+Day, blue hour and night shots load with no page errors after the baked brick/ashlar/sett/slab texture sets (`evidence/s15_game_night.png`). Fixed: canopy now dims with the lamp factor at night (viewed). Rain regression run with the real weather kind `moderate` (earlier "rain" tests were invalid: valid kinds are sunny|cloudy|light|moderate|heavy): paving darkens and glosses, streaks and grey sky render, no page errors (`evidence/s15_game_rain.png`).
