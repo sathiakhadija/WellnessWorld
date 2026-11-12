@@ -10,5 +10,5 @@ Rule: Section 04 stays "TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION
 ## CHECKPOINT 2026-11-12 (end of s15 benchmark pass)
 - Branch impl/design-bible-v16, all committed locally, NOT pushed (owner: push only after full checklist).
 - s15 done so far: Blender master render, landward brick frontage w/ lit glazing + ivy, glow planters, burgundy glass pavilion, Blender bistro sets, Blender-baked slab albedo/normal + contact-AO decal (assets/blender/bake_textures.py -> public/textures). See docs/bible/S15_BENCHMARK.md for discrepancies.
-- Next: hedges for s15; interior depth behind glazing; apply the same bake pipeline (brick/ashlar/plaster/sett textures) to the rest of the street; lift lobby pink (D-001/2); s04 corrections for owner approval; other envs' Blender masters; owner runs M2 benchmark (docs/bible/PERF_BENCHMARK.md).
+- Next: interior depth behind glazing; apply the same bake pipeline (brick/ashlar/plaster/sett textures) to the rest of the street; lift lobby pink (D-001/2); s04 corrections for owner approval; other envs' Blender masters; owner runs M2 benchmark (docs/bible/PERF_BENCHMARK.md).
 - Test tooling: /tmp/serve.sh serves dist4 on :4176 (npx vite build --outDir dist4); /tmp/gl.cjs (afternoon) and /tmp/glb.cjs (blue hour) take `outdir '{"name":[x,y,z,yaw,pitch,fov]}'`.
