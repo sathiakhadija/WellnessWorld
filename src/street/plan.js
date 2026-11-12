@@ -104,11 +104,17 @@ export function buildStreet() {
     ch.box(FL, -hw - 0.15, hw + 0.15, H - 0.1, H + 0.3, -t, 0.5, lim, 'trim', 'fulrbd'); ch.box(FL, -hw - 0.2, hw + 0.2, H + 0.3, H + 0.55, -t, 0.62, lim, 'trim', 'fulrbd')
     // ---- bronze shopfront-style glazing frame + entrance portal at the centre
     const zf = -0.08
-    for (const x of [-7, -5.2, -3.4, -1.45, 1.45, 3.4, 5.2, 7]) ch.box(FL, x - 0.03, x + 0.03, 0, 4.7, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
-    for (const y of [2.55, 4.7]) ch.box(FL, -7, 7, y - 0.035, y + 0.035, zf - 0.1, zf + 0.1, bronze, 'metal+', 'fulrb', 1, 1, 0)
-    for (const s of [-1, 1]) ch.box(FL, s * 1.45 - 0.09, s * 1.45 + 0.09, 0, 3.2, zf - 0.12, zf + 0.14, bronze, 'metal', 'fulrb', 1, 1, 0)
-    ch.box(FL, -1.55, 1.55, 3.2, 3.38, zf - 0.12, zf + 0.14, bronze, 'metal', 'fulrb', 1, 1, 0)
-    ch.box(FL, -1.2, 1.2, 3.38, 3.5, zf - 0.02, zf + 0.04, brass, 'metal', 'fu', 1, 1, 0)
+    const bz = col('#A77D4D')
+    for (const x of [-7, -5.6, -4.2, -2.8, -1.45, 1.45, 2.8, 4.2, 5.6, 7]) ch.box(FL, x - 0.025, x + 0.025, 0, 4.7, zf - 0.07, zf + 0.07, bz, 'metal+', 'fulrb', 1, 1, 0)       // slim champagne-bronze mullions
+    for (const y of [0.1, 3.2, 4.7]) ch.box(FL, -7, 7, y - 0.03, y + 0.03, zf - 0.07, zf + 0.07, bz, 'metal+', 'fulrb', 1, 1, 0)
+    for (const s of [-1, 1]) ch.box(FL, s * 1.45 - 0.06, s * 1.45 + 0.06, 0, 3.3, zf - 0.1, zf + 0.12, bz, 'metal', 'fulrb', 1, 1, 0)
+    ch.box(FL, -1.55, 1.55, 3.2, 3.4, zf - 0.1, zf + 0.12, bz, 'metal', 'fulrb', 1, 1, 0)
+    ch.box(FL, -1.2, 1.2, 3.4, 3.5, zf - 0.02, zf + 0.04, brass, 'metal', 'fu', 1, 1, 0)
+    // sliding door track + leaves (glass with slim frames), centre seam
+    ch.box(FL, -1.45, 1.45, 0, 0.02, zf - 0.08, zf + 0.1, brass, 'metal', 'u', 1, 1, 0)
+    for (const x of [-0.72, 0.72]) { ch.box(FL, x - 0.7, x + 0.7, 0.02, 3.18, zf - 0.02, zf + 0.02, col('#cfe0e4'), 'shopglass', 'fb', 1, 1, 0); for (const dx of [-0.7, 0.7]) ch.box(FL, x + dx - 0.025, x + dx + 0.025, 0.02, 3.18, zf - 0.04, zf + 0.04, bz, 'metal', 'fulrb', 1, 1, 0) }
+    // glass panes in the glazing grid (slightly tinted, low opacity so the courtyard shows through)
+    for (const [x0, x1] of [[-7, -5.6], [-5.6, -4.2], [-4.2, -2.8], [-2.8, -1.45], [1.45, 2.8], [2.8, 4.2], [4.2, 5.6], [5.6, 7]]) ch.box(FL, x0, x1, 0.1, 4.7, zf - 0.01, zf + 0.01, col('#cfe0e4'), 'shopglass', 'fb', 1, 1, 0)
     for (const x of [-4.2, 4.2]) ch.box(FL, x - 0.3, x + 0.3, 2.62, 4.6, zf - 0.02, zf, col('#ffe2b0'), 'glow', 'f', 1, 1, 0)                // warm glow behind the upper lobby glazing
     ch.solid(FL, -7, -1.55, 0, 4.7, -0.3, 0.0, 'lobbyglass'); ch.solid(FL, 1.55, 7, 0, 4.7, -0.3, 0.0, 'lobbyglass')
     // wing masses + back-of-house
@@ -186,6 +192,8 @@ export function buildStreet() {
     for (const [r, y] of [[1.15, 3.85], [0.82, 3.52], [0.5, 3.2]]) { ch.prism(FD, 0, 0, r, r, y, y + 0.05, brass, 'metal', 40); ch.prism(FD, 0, 0, r - 0.05, r - 0.05, y - 0.04, y, col('#ffe0b0'), 'glow', 40) }
     // restrained greenery: two stone planters at the lift wall, a pair of potted trees by the doors
     for (const s of [-1, 1]) { put('planter', BX + s * 5.0, 5.7, 0, 1.0, GY); put('shrub', BX + s * 5.0 + 0.2, 5.7, 0, 1.0, GY + 0.62) }
+    for (const sd of [-1, 1]) for (const [dx, dz, hh] of [[3.35, 8.4, 0.42], [3.75, 8.85, 0.3]]) { const x = sd * dx; ch.box(FP, x - 0.14, x + 0.14, 0.04, 0.04 + hh, dz - 0.14, dz + 0.14, col('#ffdca8'), 'glow', 'fulrb', 1, 1, 0); ch.box(FP, x - 0.17, x + 0.17, 0.0, 0.05, dz - 0.17, dz + 0.17, brass, 'metal', 'fulrbu', 1, 1, 0); ch.box(FP, x - 0.17, x + 0.17, 0.04 + hh, 0.08 + hh, dz - 0.17, dz + 0.17, brass, 'metal', 'fulrbu', 1, 1, 0); for (const [ax, az] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) ch.box(FP, x + ax * 0.16 - 0.012, x + ax * 0.16 + 0.012, 0.05, 0.04 + hh, dz + az * 0.16 - 0.012, dz + az * 0.16 + 0.012, brass, 'metal', 'fulrb', 1, 1, 0) }   // brass lanterns
+    for (const sd of [-1, 1]) ch.prism(FP, sd * 3.0, 8.35, 0.26, 0.2, 0.04, 0.5, col('#c98f9f'), 'awning', 12)                                                                                   // hydrangea mound
     for (const s of [-1, 1]) { put('urn', BX + s * 2.7, 8.7, 0, 1.0, GY); put('ornamental', BX + s * 2.7, 8.7, 0, 0.42, GY + 0.9) }
     lightsAt.push({ x: BX, y: GY + 3.4, z: 4 + 5.2, color: '#ffd5a8', intensity: 5, distance: 14 })
     halos.push([BX, GY + 3.2, 4 + 5.2], [BX, GY + 4.0, 14.6])
