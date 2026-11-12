@@ -8,7 +8,7 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { GROUPS } from './CameraRig.jsx'
 
-export const TREE_POS = [3.95, 0, -13.1]    // planter base on the balcony deck (deck top y = -0.35)
+export const TREE_POS = [-3.7, 0, -13.1]    // planter base on the balcony deck (deck top y = -0.35)
 
 function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
 
