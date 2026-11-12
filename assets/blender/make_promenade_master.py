@@ -231,7 +231,7 @@ box('RailTop', -6, L, -6.6, -6.5, 1.02, 1.07, M['bronze'], 'Props', 0.006); box(
 
 # ---------------------------------------------------------------- world + lighting (blue-hour/sunset)
 world = bpy.data.worlds.new('Dusk'); sc.world = world; world.use_nodes = True; wn = world.node_tree.nodes; wl = world.node_tree.links
-wn.clear(); sky = wn.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING'; sky.sun_elevation = math.radians(2.5); sky.sun_rotation = math.radians(70); sky.air_density = 1.6; sky.dust_density = 3.0; sky.sun_intensity = 0.55
+wn.clear(); sky = wn.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING'; sky.sun_elevation = math.radians(2.5); sky.sun_rotation = math.radians(70); sky.air_density = 1.6; sky.aerosol_density = 2.5; sky.sun_intensity = 0.55
 bg = wn.new('ShaderNodeBackground'); bg.inputs['Strength'].default_value = 0.9; wo = wn.new('ShaderNodeOutputWorld'); wl.new(sky.outputs[0], bg.inputs[0]); wl.new(bg.outputs[0], wo.inputs[0])
 # warm low sun + cool fill
 sun = bpy.data.lights.new('Sun', 'SUN'); sun.energy = 2.0; sun.color = hexc('#ffb36b')[:3]; sun.angle = math.radians(2.0); so = bpy.data.objects.new('Sun', sun); so.rotation_euler = (math.radians(86), 0, math.radians(-100)); coll('Lights').objects.link(so)
