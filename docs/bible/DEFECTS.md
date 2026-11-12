@@ -30,3 +30,7 @@
 - Street layout 216×278 m: APPROVED by owner.
 - Collision capsule 1.54 m vs 1.1 m rabbit: OK as is.
 - Push: NOT until everything is checklisted.
+
+## Update 2026-11-12 (s05 lift lobby, headless)
+- D-001 partial: taupe-blush flanking panels with slim mouldings + tall vertical tube sconces with brass caps added on the penthouse-side entrance wall (p.17). Evidence: `evidence/s05_lift_doorway_golden.png`.
+- Still open: golden-hour sun blows out the cream door leaf and 0.4 m jambs so the doorway still reads paler than p.17; marble floor reflection faint; Lift pictogram sign small. Not claimed approved.
