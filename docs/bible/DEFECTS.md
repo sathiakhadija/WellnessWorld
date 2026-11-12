@@ -39,3 +39,6 @@
 
 ## D-008 (fixed 2026-11-12): player fell through the lift-lobby floor
 Reported by owner on localhost: the rabbit falls before reaching the lift. Cause: Lobby.jsx had wall colliders but no floor collider (the visual marble plane was render-only). Reproduced headless by walking (ArrowUp) through the open entrance door: y dropped to -1.24 at z≈1.3. Fix: floor CuboidCollider under the lobby. Re-test: walk from the penthouse door to the lift door stays at y=0 and stops at z=2.48. Earlier "ride round-trip" tests used teleports, so they missed this — walking tests added to the checklist.
+
+## D-009 (fixed 2026-11-12): rain animation shimmer / popping
+Cause 1: drop positions were `vel * uTime`, so every time rain intensity or wind eased (6–8 s builds) all drops were teleported by Δvel·t. Cause 2: drops wrapped at the edge of the 34 m follow-box while still visible (fade used camera distance only), so they popped. Fix (src/weather/Rain.jsx): CPU-integrated fall/drift phases (uFall, uDrift) so velocity changes only change speed, and an edge fade toward the box boundary. Verified headless (renders, no page errors); real smoothness needs the owner's eyes on M2/Safari.

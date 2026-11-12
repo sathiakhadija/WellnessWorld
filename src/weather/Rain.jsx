@@ -19,7 +19,7 @@ bool insideHome(vec3 p) { if (uLevel >= .5) return ${SI}; return ((p.x > -9.95 &
 `
 const streakVS = /* glsl */`
 attribute vec4 aSeed;
-uniform float uTime, uRain, uWind, uFar, uGround;
+uniform float uTime, uRain, uWind, uFar, uGround, uFall, uDrift;
 uniform vec3 uVol;
 varying float vA; varying vec3 vWP;
 ${INSIDE}
@@ -28,7 +28,9 @@ void main() {
   float k1 = fract(aSeed.x * 7.31), k2 = fract(aSeed.y * 5.17), k3 = fract(aSeed.z * 3.77), k4 = fract(aSeed.w * 11.9);
   float speed = (8. + 7. * k1) * (.8 + .5 * uRain);                       // m/s: bigger drops fall faster
   vec3 vel = vec3(uWind * (2.2 + 1.6 * k2), -speed, uWind * (k3 - .5) * 1.8 + (k2 - .5) * .6);
-  vec3 p = (aSeed.xyz - .5) * uVol + vel * uTime;
+  // positions use time INTEGRALS accumulated on the CPU (uFall = integral of the rain speed factor, uDrift = integral of the wind), so a changing rain
+  // intensity / wind only changes the drops' velocity, never teleports them (vel * uTime used to shift every drop whenever rain or wind eased)
+  vec3 p = (aSeed.xyz - .5) * uVol + vec3((2.2 + 1.6 * k2) * uDrift, -(8. + 7. * k1) * uFall, (k3 - .5) * 1.8 * uDrift + (k2 - .5) * .6 * uTime);
   vec3 rel = mod(p - cameraPosition + uVol * .5, uVol) - uVol * .5;
   vec3 head = cameraPosition + rel;
   vec3 dir = normalize(vel);
@@ -40,7 +42,9 @@ void main() {
   vec3 wp = mid + side * position.x * w;
   vWP = wp;
   float d = distance(wp, cameraPosition);
-  float a = (.22 + .5 * k2) * vis * smoothstep(.5, 2.5, d) * (1. - smoothstep(uFar * .55, uFar, d));
+  vec3 ev = abs(rel) / (uVol * .5);                                      // fade out toward the edges of the follow-box so drops never pop when they wrap
+  float edge = 1. - smoothstep(.72, 1., max(ev.x, max(ev.y, ev.z)));
+  float a = (.22 + .5 * k2) * vis * edge * smoothstep(.5, 2.5, d) * (1. - smoothstep(uFar * .55, uFar, d));
   if (wp.y < uGround || insideHome(wp)) a = 0.;
   vA = a * (1. - smoothstep(.5, 1., position.y + .5) * .4);              // fade the tail end
   gl_Position = projectionMatrix * viewMatrix * vec4(wp, 1.);
@@ -87,11 +91,12 @@ export default function Rain() {
   const sg = useMemo(() => { const g = new THREE.InstancedBufferGeometry().copy(quad()); g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds(COUNT.high, 11), 4)); g.instanceCount = n; return g }, [])
   const pg = useMemo(() => { const g = new THREE.InstancedBufferGeometry().copy(quad()); g.rotateX(-Math.PI / 2); g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds(1100, 29), 4)); g.instanceCount = NS; return g }, [])
   useEffect(() => { sg.instanceCount = n; pg.instanceCount = NS }, [n, NS, sg, pg])
-  const U = useMemo(() => ({ uTime: { value: 0 }, uRain: { value: 0 }, uWind: { value: 0 }, uFar: { value: 40 }, uGround: { value: -1e4 }, uVol: { value: VOL }, uLevel: { value: 0 }, uColor: { value: new THREE.Color('#cfd8e4') }, uCenter: { value: new THREE.Vector3() } }), [])
+  const U = useMemo(() => ({ uTime: { value: 0 }, uFall: { value: 0 }, uDrift: { value: 0 }, uRain: { value: 0 }, uWind: { value: 0 }, uFar: { value: 40 }, uGround: { value: -1e4 }, uVol: { value: VOL }, uLevel: { value: 0 }, uColor: { value: new THREE.Color('#cfd8e4') }, uCenter: { value: new THREE.Vector3() } }), [])
   const sm = useMemo(() => new THREE.ShaderMaterial({ vertexShader: streakVS, fragmentShader: streakFS, uniforms: U, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: false }), [U])
   const pm = useMemo(() => new THREE.ShaderMaterial({ vertexShader: splashVS, fragmentShader: splashFS, uniforms: U, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: false }), [U])
-  useFrame(({ camera }) => {
-    const street = world.level === 'street'
+  useFrame(({ camera }, dt) => {
+    const street = world.level === 'street', d = Math.min(dt, 0.05)
+    U.uFall.value += d * (.8 + .5 * WX.rain); U.uDrift.value += d * WX.wind                                  // time integrals (see streakVS)
     U.uTime.value = WX.time; U.uRain.value = WX.rain; U.uWind.value = WX.wind
     U.uLevel.value = street ? 1 : 0
     U.uGround.value = street ? GY + 0.02 : -60                              // street: stop at the pavement; penthouse: fall past the tower
