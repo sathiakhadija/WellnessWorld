@@ -59,7 +59,8 @@ export function buildStreet() {
   const lamp = (x, z, ry = 0) => { put('lamp', x, z, ry); pools.push([x, z, 7.5]); halos.push([x, GY + 4.9, z]) }
   const tree = (kind, x, z, s = 1, ry) => put(kind, x, z, ry ?? R() * 6.28, s)
   const grate = (ch, x, z, s = 1.3) => { ch.flat(frame(x, z, 0, GY + 0.03), -s / 2, s / 2, -s / 2, s / 2, 0, col('#5d5750'), 'sett', 1.6, 1.6); }
-  const bench = (x, z, ry) => { put('bench', x, z, ry); const F = frame(x, z, ry, GY); mk('furniture').solid(F, -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench') }
+  const bench = (x, z, ry) => { put('bench', x, z, ry); pools.push([x, z, 1.15, GY]);   // soft warm pool under/around each bench (Bible s08: uplit seating)
+    const F = frame(x, z, ry, GY); mk('furniture').solid(F, -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench') }
 
   // =====================================================================================================================================
   // 1. TOWER PODIUM: dresses the 7.5 m base of the existing tower on all four sides with real stone piers, deep-set glazing and a cornice
