@@ -42,3 +42,6 @@ Reported by owner on localhost: the rabbit falls before reaching the lift. Cause
 
 ## D-009 (fixed 2026-11-12): rain animation shimmer / popping
 Cause 1: drop positions were `vel * uTime`, so every time rain intensity or wind eased (6–8 s builds) all drops were teleported by Δvel·t. Cause 2: drops wrapped at the edge of the 34 m follow-box while still visible (fade used camera distance only), so they popped. Fix (src/weather/Rain.jsx): CPU-integrated fall/drift phases (uFall, uDrift) so velocity changes only change speed, and an edge fade toward the box boundary. Verified headless (renders, no page errors); real smoothness needs the owner's eyes on M2/Safari.
+
+## D-010 (addressed 2026-11-12, owner to judge): oversized empty great lawn (rule 05)
+Overhead audit showed ~100 x 85 m of bare lawn between the riverside piazza and the house. Added: axial walk, cross walk, a small fountain plaza (Blender fountain at 0.55 scale) with 4 lamps + 4 benches, planted borders (Blender kit), meadow tufts, corner trees (evidence/garden_overview_bluehour.png, garden_axis_bluehour.png). Not in the Bible images — owner should confirm this layout/palette is acceptable (rule 14: major changes need review).

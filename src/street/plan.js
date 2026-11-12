@@ -351,6 +351,25 @@ export function buildStreet() {
     // lawn groves: soft, layered, never dense enough to hide the architecture
     const grove = (x0, x1, z0, z1, n) => { for (let i = 0; i < n; i++) { const x = x0 + R() * (x1 - x0), z = z0 + R() * (z1 - z0); const k = R(); if (k < 0.45) tree('plane', x, z, 0.85 + R() * 0.4); else if (k < 0.8) tree('ornamental', x, z, 0.85 + R() * 0.35); else put('shrub', x, z, R() * 6, 0.9 + R() * 0.6) } }
     grove(-124, -92, -128, -100, 9); grove(-124, -92, -90, 44, 16); grove(-80, -64, -128, 44, 12); grove(34, 62, -128, -100, 7); grove(34, 62, -90, 44, 7); grove(72, 80, -128, 44, 6)
+    // Bible rule 05 (no oversized empty world): the great lawn gets a formal garden — axial walk from the piazza toward the house, a cross walk, a small
+    // fountain plaza with lamps + benches, planted borders (Blender kit), meadow tufts and clipped trees at the quadrant corners
+    {
+      const PZ = -44.8
+      surf(g, 'slab', BX - 2.2, BX + 2.2, -92, 2, G.slab, 1.8, 1.2, 1)                                                  // axial walk
+      surf(g, 'slab', -64, 34, PZ - 1.2, PZ + 1.2, G.slab, 1.8, 1.2, 1)                                                // cross walk
+      surf(g, 'sett', BX - 7.5, BX + 7.5, PZ - 7.5, PZ + 7.5, G.sett, 1.6, 1.6, 2)                                      // fountain plaza
+      const FQ = frame(BX, PZ, 0, GY)
+      baked(g, FQ, 'fountain', 0, 0, 0, { marble: '#e6dcc6', glow: '#ffd9a0' }, 0, 0.55)
+      g.solid(FQ, -1.4, 1.4, 0, 0.5, -1.4, 1.4, 'fountain'); g.cols[g.cols.length - 1].cyl = true; g.cols[g.cols.length - 1].r = 1.4
+      waters.push({ x: BX, z: PZ, r: 1.1, y: GY + 0.25, kind: 'fountain' }); jets.push({ x: BX, z: PZ, y: GY + 1.5 }); pools.push([BX, PZ, 8, GY])
+      for (const [dx, dz] of [[-6, -6], [6, -6], [-6, 6], [6, 6]]) lamp(BX + dx, PZ + dz, 0)
+      for (const a of [0.78, 2.35, 3.93, 5.5]) bench(BX + Math.cos(a) * 5.3, PZ + Math.sin(a) * 5.3, -a + Math.PI / 2 + Math.PI)
+      const K = ['h', 'l', 'p', 'l', 'h', 's']; let ki = 0
+      for (let z = -90; z < 0; z += 2.1) { if (Math.abs(z - PZ) < 9) continue; for (const sx of [-1, 1]) plantAt(g, BX + sx * (3.4 + R() * 0.5), z + (R() - 0.5) * 0.4, K[ki++ % 6], 1.15) }
+      for (let x = -62; x < 33; x += 2.4) { if (Math.abs(x - BX) < 9) continue; for (const sz of [-1, 1]) plantAt(g, x + (R() - 0.5) * 0.4, PZ + sz * 2.3, K[ki++ % 6], 1.0) }
+      for (let i = 0; i < 90; i++) { const x = -62 + R() * 94, z = -88 + R() * 86; if (Math.abs(x - BX) < 4 || Math.abs(z - PZ) < 4 || (Math.abs(x - BX) < 9 && Math.abs(z - PZ) < 9)) continue; put(R() < 0.7 ? 'grass' : 'shrub', x, z, R() * 6, 0.9 + R() * 0.5) }
+      for (const [x, z] of [[-48, -66], [-30, -66], [-48, -22], [-30, -22], [30, -66], [12, -66], [30, -22], [12, -22], [-56, -44], [24, -44]]) tree(R() < 0.5 ? 'ornamental' : 'plane', x, z, 0.85 + R() * 0.3)
+    }
     // west + east boundary of the neighbourhood (a stone plinth with a tall clipped hedge) so the world has a clear edge
     wall(g, WEST - 0.6, WEST, -132, SOUTH, 1.2); hedge(g, WEST + 0.0, WEST + 1.4, -132, SOUTH, 2.2, '#46583a'); wall(g, EAST, EAST + 0.6, -132, SOUTH, 1.2); hedge(g, EAST - 1.4, EAST, -132, SOUTH, 2.2, '#46583a')
     wall(g, WEST, EAST, SOUTH, SOUTH + 0.8, 2.4, { col: PAL.stock, key: 'brick' })
