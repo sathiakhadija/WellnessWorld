@@ -174,11 +174,14 @@ function Transit() {
       world.teleportPlayer && world.teleportPlayer(BX, GY + 0.05, 7.4)
       world.setPlayerYaw && world.setPlayerYaw(0); world.setFollowYaw && world.setFollowYaw(Math.PI)
       const d = world.doors.entrance; if (d) { d.t = 0; d.target = 0; d.force = undefined; d.hold = 0 }
+      const lf = world.doors.lift; if (lf) { lf.t = 0; lf.target = 0; lf.force = undefined; lf.hold = 0 }
     }
     const toPenthouse = () => {
       world.level = 'penthouse'
-      world.teleportPlayer && world.teleportPlayer(1.2, 0.05, -1.6)
+      world.teleportPlayer && world.teleportPlayer(1.2, 0.05, 2.15)                       // arrive in the private lift lobby, facing the entrance door; the lift doors open behind
       world.setPlayerYaw && world.setPlayerYaw(Math.PI); world.setFollowYaw && world.setFollowYaw(0)
+      const lf = world.doors.lift; if (lf) { lf.t = 1; lf.target = 1; lf.force = undefined; lf.hold = 0; setTimeout(() => { lf.target = 0 }, 3500) }
+      const d = world.doors.entrance; if (d) { d.t = 0; d.target = 0; d.force = undefined; d.hold = 0 }
     }
     world.enterStreet = toStreet; world.enterPenthouse = toPenthouse
     // The ride is a short, skippable fade (about 1.7 s); with prefers-reduced-motion it is a 0.35 s cut. Space / Enter / Escape / a click skips straight to the arrival.

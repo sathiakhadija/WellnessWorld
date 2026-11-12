@@ -13,7 +13,7 @@ const VOL = new THREE.Vector3(34, 22, 34)
 
 const INSIDE = /* glsl */`
 uniform float uLevel;
-bool insideHome(vec3 p) { return uLevel < .5 && p.x > -9.95 && p.x < 4.05 && p.z > -11.95 && p.z < 0.45; }   // penthouse footprint (rooms + roof) - NO rain in here
+bool insideHome(vec3 p) { return uLevel < .5 && ((p.x > -9.95 && p.x < 4.05 && p.z > -11.95 && p.z < 0.45) || (p.x > -0.7 && p.x < 3.1 && p.z > 0.0 && p.z < 4.9)); }   // penthouse footprint (rooms + roof) - NO rain in here
 `
 const streakVS = /* glsl */`
 attribute vec4 aSeed;

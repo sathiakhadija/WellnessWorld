@@ -14,6 +14,7 @@ import { world, occupied } from './world.js'
 import { camStore, toast } from './camStore.js'
 import { applyWet } from './weather/wet.js'
 import KIT from './baked/interior.json'
+import Lobby from './Lobby.jsx'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 const WORLD = interactionGroups([GROUPS.world])
@@ -293,13 +294,10 @@ function Entrance({ M }) {
   const X0 = 0.585, W = 1.22, Z = 0.33
   useEffect(() => {
     const it = {
-      id: 'entrance', label: 'main entrance', x: 1.2, z: -0.2, range: 2.3,
-      prompt: () => '🚪 Go Outside',
+      id: 'entrance', label: 'main entrance', x: 1.2, z: 0.15, range: 2.0,
+      prompt: () => (st.current.target === 1 ? '🚪 Close the door' : '🚪 Open the door'),
       isOpen: () => st.current.target === 1,
-      toggle: () => {
-        if (camStore.get().transition !== 'idle') return false
-        st.current.target = 1; camStore.set({ transition: 'opening', dest: 'down' }); return false
-      },
+      toggle: () => { st.current.target = st.current.target === 1 ? 0 : 1; return false },
     }
     world.interactables.push(it); world.doors.entrance = st.current
     return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); delete world.doors.entrance }
@@ -311,9 +309,7 @@ function Entrance({ M }) {
     if (dir) s.t = clamp01(s.t + dir * step / 1.3)
     if (rot.current) rot.current.rotation.y = -smooth(s.t) * 1.75               // swings outward (+z) into the light
     if (light.current) light.current.intensity = 9 * smooth(s.t)
-    if (glow.current) glow.current.visible = s.t > 0.01
     const tr = camStore.get().transition
-    if (tr === 'opening' && s.t >= 1) { s.hold += step; if (s.hold > 0.5) { s.hold = 0; world.rideLift ? world.rideLift('down') : camStore.set({ transition: 'idle' }) } }
     if (tr === 'closing' && s.t <= 0) camStore.set({ transition: 'idle' })
     const should = s.target === 0 && s.t < 0.04
     if (should !== blockRef.current) { blockRef.current = should; setBlock(should) }
@@ -323,10 +319,7 @@ function Entrance({ M }) {
       <group position={[X0, 0, Z]} rotation={[0, Math.PI / 2, 0]}>
         <Leaf lw={W} dir={1} hingeZ={0} hingeX={0} M={M} rotRef={rot} mat={M.door} entrance />
       </group>
-      <mesh ref={glow} position={[1.2, 1.7, 2.2]} visible={false}>
-        <planeGeometry args={[5, 4.2]} /><meshBasicMaterial color="#ffd9a0" toneMapped={false} />
-      </mesh>
-      <pointLight ref={light} position={[1.2, 2.0, 0.9]} intensity={0} distance={7} decay={1.4} color="#ffcf94" />
+      <pointLight ref={light} position={[1.2, 2.0, 0.9]} intensity={0} distance={3} decay={1.4} color="#ffcf94" />
       {block && (
         <RigidBody type="fixed" colliders={false}>
           <CuboidCollider args={[W / 2 + 0.04, DOOR_H / 2, 0.06]} position={[1.2, DOOR_H / 2, Z]} collisionGroups={WORLD} />
@@ -594,6 +587,7 @@ export default function Plan({ mats }) {
       <InteriorKit M={M} />
       <Slider M={M} />
       <Entrance M={M} />
+      <Lobby />
       <Balcony M={M} />
       <BedroomWindow M={M} />
       <RoomLights M={M} />

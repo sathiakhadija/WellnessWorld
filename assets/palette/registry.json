@@ -953,11 +953,145 @@
     0.35153
    ],
    "verified": false
+  },
+  {
+   "id": "WW_PLASTER_BLUSH",
+   "name": "Blush plaster (lift lobbies)",
+   "cat": "paint",
+   "hex": "#E5D3C4",
+   "rough": 0.9,
+   "metal": 0,
+   "normal": 0.05,
+   "tex": [],
+   "env": [
+    "lobby_private",
+    "lobby_public"
+   ],
+   "light": "warm blush; lit by 3000 K cove it reads pinker than the swatch",
+   "page": 18,
+   "status": "specified",
+   "note": "label printed on the p.18 concept sheet ('Wall #E5D3C4'); sheet dimensions/swatches are design suggestions",
+   "linear": [
+    0.78354,
+    0.65141,
+    0.55201
+   ],
+   "verified": false
+  },
+  {
+   "id": "WW_MARBLE_DARK",
+   "name": "Dark veined marble (lift surround)",
+   "cat": "stone",
+   "hex": "#2B211D",
+   "rough": 0.28,
+   "metal": 0,
+   "normal": 0.1,
+   "tex": [
+    "marble_dark"
+   ],
+   "env": [
+    "lobby_private",
+    "lobby_public"
+   ],
+   "light": "gold/white veining",
+   "page": 18,
+   "status": "provisional",
+   "note": "sampled from the p.18 swatch (lit render), not a printed value",
+   "linear": [
+    0.02416,
+    0.01521,
+    0.01229
+   ],
+   "verified": false
+  },
+  {
+   "id": "WW_MARBLE_LIGHT",
+   "name": "Light marble floor",
+   "cat": "stone",
+   "hex": "#E6DCD2",
+   "alt": "#D8B5A3",
+   "rough": 0.22,
+   "metal": 0,
+   "normal": 0.05,
+   "tex": [
+    "marble_light"
+   ],
+   "env": [
+    "lobby_private",
+    "lobby_public"
+   ],
+   "light": "soft reflections, not mirror",
+   "page": 18,
+   "status": "provisional",
+   "note": "estimated albedo; the p.18 swatch renders #D8B5A3 under 3000 K warm light (alt)",
+   "linear": [
+    0.7913,
+    0.71569,
+    0.64448
+   ],
+   "altLinear": [
+    0.68669,
+    0.46208,
+    0.36625
+   ],
+   "verified": false
+  },
+  {
+   "id": "WW_RUG_CREAM",
+   "name": "Woven round rug",
+   "cat": "textile",
+   "hex": "#D9C9BC",
+   "rough": 1,
+   "metal": 0,
+   "normal": 0.4,
+   "tex": [
+    "rug"
+   ],
+   "env": [
+    "lobby_private"
+   ],
+   "light": "",
+   "page": 17,
+   "status": "provisional",
+   "note": "estimated from p.17/18 images",
+   "linear": [
+    0.69387,
+    0.58408,
+    0.50289
+   ],
+   "verified": false
+  },
+  {
+   "id": "WW_FLOWER_PINK_MUTED",
+   "name": "Muted pink hydrangea (small accent)",
+   "cat": "foliage",
+   "hex": "#C98F9F",
+   "alt": "#E3B7C2",
+   "rough": 0.9,
+   "metal": 0,
+   "normal": 0,
+   "tex": [],
+   "env": [
+    "lobby_private"
+   ],
+   "light": "accent only; Bible: no excessive pink",
+   "page": 17,
+   "status": "provisional",
+   "note": "estimated from p.17 bouquet",
+   "linear": [
+    0.58408,
+    0.27468,
+    0.3467
+   ],
+   "altLinear": [
+    0.76815,
+    0.47353,
+    0.53948
+   ],
+   "verified": false
   }
  ],
  "gaps": [
-  "Blush plaster (private lift lobby, pp.17-18): no hex in the Bible; sample from the approved image before adding.",
-  "Marble / dark veined stone (lift lobbies, p.19): no hex; sample from approved image.",
   "Water colour: not specified; derive from approved renders."
  ]
 }
