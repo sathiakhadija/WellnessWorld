@@ -14,3 +14,4 @@ The "gaps" above are partly stale: interiors.js already builds the curved patiss
 UPDATE: café walls warmed (#E6D3CB -> #dccbb6), back-lit shelving strips added under the back-bar shelves (not framed in the check shot), modelled planting (M.leaf) now dims at night. Headless only.
 UPDATE s14: layered crown mouldings on both side walls + picture-rail bead added (evidence/s14_game_mouldings.png). Still open: close-up book/furniture detail, richer lamp pools. No flowers (rule respected). Headless only.
 UPDATE s13: patisserie counter now has a fluted front, brass foot rail and a lit second tier with pastries/tarts (evidence/s13_game_counter.png). Still open: menu board, richer back-bar bottles/cups, rattan chairs. Headless only.
+UPDATE s13: back bar now has jars/cups on the shelves, an espresso machine and a chalk menu board (evidence/s13_game_backbar.png). Detail is simple low-poly at this scale. Headless only.

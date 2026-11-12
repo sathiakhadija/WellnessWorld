@@ -108,6 +108,15 @@ export function cafeInterior(ch, F, c, L) {
   ch.box(F, x1 - 2.6, x1, FL, FL + 0.95, z0 + 0.02, z0 + 0.6, col('#38261F'), 'wood', 'fulb', 1, 1, 0.01)
   ch.box(F, x1 - 2.6, x1, FL + 0.95, FL + 1.0, z0 + 0.02, z0 + 0.65, col('#efe6da'), 'slab', 'fulrbd', 1, 1, 0)
   for (const y of [1.6, 2.1, 2.6]) ch.box(F, x1 - 2.6, x1, FL + y, FL + y + 0.04, z0 + 0.02, z0 + 0.3, col('#B58A4D'), 'metal', 'fud', 1, 1, 0)
+  // back-bar life: jars, cups, bottles on the shelves; an espresso machine on the bar; a chalk menu board (Bible s13)
+  { const R2 = ch.R, jars = ['#e8d9c0', '#c98f9f', '#7a5a8a', '#b58a4d', '#f1ece2']
+    for (const y of [1.6, 2.1, 2.6]) for (let x = x1 - 2.45; x < x1 - 0.15; x += 0.22 + R2() * 0.12) { const h = 0.1 + R2() * 0.16, r = 0.035 + R2() * 0.03; ch.prism(F, x, z0 + 0.17, r, r * 0.9, FL + y + 0.04, FL + y + 0.04 + h, col(jars[(R2() * jars.length) | 0]), 'awning', 7) }
+    ch.box(F, x1 - 1.9, x1 - 1.1, FL + 1.0, FL + 1.38, z0 + 0.08, z0 + 0.46, col('#8d8a85'), 'metal', 'fulrb', 1, 1, 0.01)   // espresso machine body
+    ch.box(F, x1 - 1.9, x1 - 1.1, FL + 1.38, FL + 1.42, z0 + 0.08, z0 + 0.46, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0)
+    for (const x of [x1 - 1.7, x1 - 1.3]) ch.prism(F, x, z0 + 0.5, 0.03, 0.03, FL + 1.1, FL + 1.22, col('#2b2630'), 'metal', 6)
+    ch.box(F, x1 - 2.55, x1 - 0.2, FL + 2.72, FL + 3.28, z0 + 0.02, z0 + 0.05, col('#2b2a2a'), 'trim', 'f', 1, 1, 0)           // chalk menu board
+    ch.box(F, x1 - 2.55, x1 - 0.2, FL + 2.72, FL + 2.75, z0 + 0.02, z0 + 0.06, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0); ch.box(F, x1 - 2.55, x1 - 0.2, FL + 3.25, FL + 3.28, z0 + 0.02, z0 + 0.06, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0)
+    for (let i = 0; i < 6; i++) ch.box(F, x1 - 2.4, x1 - 0.5 - (i % 3) * 0.3, FL + 2.85 + (i >> 1) * 0.12, FL + 2.88 + (i >> 1) * 0.12, z0 + 0.05, z0 + 0.06, col('#efe6da'), 'trim', 'f', 1, 1, 0) }
   for (const y of [1.6, 2.1, 2.6]) ch.box(F, x1 - 2.55, x1 - 0.05, FL + y - 0.02, FL + y, z0 + 0.04, z0 + 0.28, col('#ffd9a0'), 'glow', 'd', 1, 1, 0)   // back-lit shelving strips
   // window-side study bar with stools (along the glazing)
   ch.box(F, c.winX0 + 0.2, c.winX1 - 0.2, FL + 0.98, FL + 1.04, -1.75, -1.3, col('#38261F'), 'wood', 'fulrbd', 1, 1, 0)
