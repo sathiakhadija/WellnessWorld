@@ -22,3 +22,4 @@
 - s03: cove strip + framed artwork + picture light added (evidence/s03_door_wall.png). Door casings slimmed to flat 7 cm architrave (Blender rebake).
 - s02: cherry tree moved to the west corner (Tree.jsx TREE_POS) so the reference balcony sightline shows skyline/river/boat like p.6; tree remains as a user feature (owner may remove). Towers still lower/less dense than target.
 - s15: landward plane-tree row added (evidence/s15_c.png); brick/ivy wall with lit windows, burgundy umbrellas near centre, light pools still weaker than p.66.
+- s13: hydrangea posies + wisteria added; s14 sheet refreshed with Blender-furniture shot. Still missing vs p.56/60: bookshelf reading nook in café, glass-tube chandelier, globe, arch passage detail.
