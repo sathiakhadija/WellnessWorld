@@ -491,6 +491,8 @@ export function buildStreet() {
         bistroSet(FP, tx, tz, 3)
       }
     }
+    // low clipped hedges between the plane trees on the river-side edge (Bible s15 layered planting); kept below the railing line of sight
+    for (const [hx0, hx1] of [[-58, -49], [-43, -34], [-27, -18], [20, 26], [30, 36]]) hedgeT(hx0, hx1, -146.0, -145.2, 0.7)
     // terrace café seating: Blender-made bistro tables + bentwood chairs (assets/blender/make_cafe.py)
     for (const x of [-54, -48, -42, -36, -30]) bistroSet(frame(x, -135.4, 0, T), 0, 0, 2 + (x % 2 === 0 ? 1 : 0))
     // fairy-light swags between the plane trees + wall lanterns on the brick piers (Bible s15 warm canopy glow)
