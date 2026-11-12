@@ -1,7 +1,8 @@
 # RESUME
-Branch impl/design-bible-v16 (rollback tag backup/pre-design-bible-v16 = main@0af21b1). Not pushed.
-Docs: docs/bible/ROADMAP.md (full plan), docs/bible/MATRIX.md (per-environment matrix), docs/bible/pages (80 page thumbnails), /tmp/bible.pdf text via pdftotext.
-Done: Stage 1 audit (matrix, palette extraction), src/palette.js created (not yet wired in).
-Next: Addendum A (palette registry + calibration studio + audit) and Addendum B (s04 measurements) in docs/bible/ROADMAP.md, then Stage 3 lift lobby.
-Then Stage 3 benchmark: Private Lift Lobby (pp.16-20).
-Build: npx vite build --outDir dist4 ; /tmp/serve.sh (port 4176). Blender: python3.13 (bpy 5.3).
+Branch impl/design-bible-v16 (rollback tag backup/pre-design-bible-v16 = main@0af21b1). NOT pushed — push/deploy/merge only with explicit owner authorisation.
+Docs: docs/bible/CHECKLIST.md (honest status, latest block "STATUS UPDATE 2026-11-12"), DEFECTS.md, PROGRESS.md, ASSETS.md, evidence/ (4-way sheets s01–s15 via scripts/make_sheet.py), ROADMAP.md, MATRIX.md, MCP_AUDIT.md. Bible text: pdftotext of /mnt/user-data/uploads/WELLNESSWORLDREFINE.pdf; page JPGs docs/bible/pages/p-NN.jpg.
+Build/test: `npx vite build --outDir dist4`; serve dist4 on :4176 (python3 -m http.server from dist4; restart if refused); headless Playwright/SwiftShader only (~0.3–2 fps, M2 perf not measurable). Test hooks window.__ww (setFree, doorForce, teleport, fastAnim, game), window.__atmo.set({preset}).
+Blender (bpy 5.3 headless): assets/blender/make_props.py helpers; make_lobby.py, make_interior.py, make_cafe.py bake to src/baked/*.json; render_cafe_kit.py renders the café kit.
+Done this stretch: slim glazing mullions; s03 clean walls/flush doors/slim casings/cove/artwork; balcony tree moved west; shop rows renamed/re-ordered to Bible s10/s11; hydrangea planters; interior limewash + woven fabric; café posies + wisteria; bookshop globe; promenade plane-tree row; palette audit 0 errors; lift round trip passes.
+Open (see DEFECTS.md): AO/contact shadows, M2 perf (G7), Blender scene renders + matched-camera triplets, foliage/tree Blender rebuild, café reading nook/glass-tube chandelier, riverside brick wall/pavilion lighting, Section 04 corrections + owner approval, street layout size approval, balcony cherry tree decision, capsule 1.54 m vs rabbit 1.1 m.
+Rule: Section 04 stays "TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION PENDING USER APPROVAL"; never claim an environment complete without owner review; no invented similarity percentages.
