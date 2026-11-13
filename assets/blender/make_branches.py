@@ -27,6 +27,17 @@ def spray(seed, L=3.2):
     keep(leaf_obj('leaves', leaves), 'leaf', C)
     return finish(f'branch_{seed}')
 
+def puff(seed, R=1.3, n=70):
+    reset(); PARTS.clear(); rnd = random.Random(100 + seed)
+    leaves = []
+    for _ in range(n):
+        d = Vector((rnd.random() - 0.5, rnd.random() - 0.5, rnd.random() - 0.7)).normalized()
+        p0 = (rnd.gauss(0, R * 0.55), rnd.gauss(0, R * 0.3), rnd.gauss(-0.2, R * 0.3))
+        size = 0.3 + rnd.random() * 0.12
+        leaves.append((p0, d, size, size * 0.5, 0.25))
+    keep(leaf_obj('leaves', leaves), 'leaf', C)
+    return finish(f'leafpuff_{seed}')
+for sd in (1, 2): LIB[f'leafpuff_{sd}'] = puff(sd)
 for sd in (1, 2, 3): LIB[f'branch_{sd}'] = spray(sd, 3.0 + 0.4 * sd)
 os.makedirs(f'{ROOT}/src/baked', exist_ok=True)
 for v in LIB.values():
