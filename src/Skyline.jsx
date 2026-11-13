@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { Boats } from './Boats.jsx'
 import { ATMO_U, patchHaze, hazeVertex, hazeFragment } from './exteriorAtmo.js'
 import { Waterfront } from './Waterfront.jsx'
+import { NearBank } from './NearBank.jsx'
 import { StreetVisuals } from './street/Street.jsx'
 import { world, OFF } from './world.js'
 import { WX } from './weather/weather.js'
@@ -436,10 +437,7 @@ export function Skyline() {
       <FacadeMeshes geoms={geoms} />
       <Roofs layout={layout} />
       {!OFF.has('hood') && <Boats />}
-      {/* near-bank ground out to the haze: the compact neighbourhood no longer floats in the void now the old V10 sprawl is gone */}
-      <mesh position={[0, -EYE_ABOVE_WATER - 0.45, 2000]} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}>
-        <planeGeometry args={[9000, 4290]} /><meshLambertMaterial color="#b4c19c" />
-      </mesh>
+      <NearBank />
       <PyramidCap b={one} />
       <Waterfront />
       {!OFF.has('street') && <StreetVisuals />}

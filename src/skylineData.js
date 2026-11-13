@@ -134,6 +134,29 @@ export function buildLayout() {
     const sr = rs(), shape = h > 60 ? (sr < 0.28 ? 'chamfer' : sr < 0.46 ? 'taper' : sr < 0.62 ? 'slant' : sr < 0.74 ? 'round' : 'box') : (sr < 0.12 ? 'chamfer' : sr < 0.2 ? 'slant' : 'box'), tex = rs() < 0.55 ? BG_TEX[(rs() * BG_TEX.length) | 0] : undefined
     out.push({ name: 'bg' + i, style: rnd() > 0.7 ? 'stone' : 'glass', shape, tex, hero: false, x: D * Math.sin(a), z: bz, w, d: w * (0.7 + rnd() * 0.6), h, rot: a + (rnd() - 0.5) * 0.6, shade: rnd() })
   }
+  addNearBank(out)
   addCrowns(out)
   return out
+}
+
+// Audit B03: the near-bank land used to be one raw green plane. It is now a real district: axis-aligned perimeter blocks (56 x 52 m, 14 m streets) of 4-9 storey
+// townhouse / mansion-block massing on both sides of the playable neighbourhood and behind it, aligned to the ground-street texture in NearBank.jsx
+// (street centres at x = 50 + 70k, z = -145 + 66j). The playable parcel (x -140..95, z -150..125) stays empty: the street plan owns it.
+export const NB = { PX: 70, PZ: 66, X0: 50, Z0: -145, PARCEL: [-140, 95, -150, 125] }
+function addNearBank(out) {
+  const R = seeded(909), TEX = ['warm', 'stone', 'band', 'warm', 'stone']
+  const [px0, px1, pz0, pz1] = NB.PARCEL
+  let n = 0
+  for (let k = -14; k <= 13; k++) for (let j = 0; j < 9; j++) {
+    const bx0 = NB.X0 + NB.PX * k + 7, bx1 = NB.X0 + NB.PX * (k + 1) - 7, bz0 = NB.Z0 + NB.PZ * j + 7, bz1 = NB.Z0 + NB.PZ * (j + 1) - 7
+    if (bx1 > px0 && bx0 < px1 && bz1 > pz0 && bz0 < pz1) continue
+    const dist = Math.min(1, Math.abs((bx0 + bx1) / 2) / 900), baseH = 15 + R() * 10 + dist * 8 + j * 1.2
+    for (const row of [0, 1]) {                                          // river-side row and landward row (courtyard between)
+      const z0 = row ? bz1 - 15 : bz0, d = 15, split = R() < 0.55, cuts = split ? [bx0, bx0 + 14 + R() * 28, bx1] : [bx0, bx1]
+      for (let i = 0; i < cuts.length - 1; i++) {
+        const w = cuts[i + 1] - cuts[i], h = baseH + (R() - 0.35) * 9 + (row ? 3 : 0), stone = R() < 0.5
+        out.push({ name: 'nb' + n++, style: 'stone', tex: TEX[(R() * TEX.length) | 0], shape: 'box', hero: false, nearBank: true, x: cuts[i] + w / 2, z: z0 + d / 2, w, d, h: Math.max(13, h), rot: TWIST, shade: R() })
+      }
+    }
+  }
 }
