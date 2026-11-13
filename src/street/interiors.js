@@ -84,6 +84,11 @@ function wisteria(ch, F, x, z, len = 0.9, s = 1) {
 export function cafeInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
   shell(ch, F, c, { floor: '#876349', ceil: '#e8d4bc', wall: '#dccbb6', skirt: '#F7EADA' })
+  // café ceiling (audit: flat peach plane): stained-oak cross beams every 1.9 m, a longitudinal spine beam, plaster cove and recessed lit panels between the beams
+  for (let z = z0 + 1.2; z < -1.6; z += 1.9) { ch.box(F, x0, x1, CE - 0.24, CE, z - 0.1, z + 0.1, col('#5a3b28'), 'wood', 'fulrbd', 1, 1, 0.01); ch.box(F, x0, x1, CE - 0.27, CE - 0.24, z - 0.12, z + 0.12, col('#3f281b'), 'wood', 'd', 1, 1, 0) }
+  ch.box(F, -0.1, 0.1, CE - 0.3, CE - 0.06, z0, -1.2, col('#4b3022'), 'wood', 'fulrbd', 1, 1, 0.01)
+  for (const sx of [x0, x1 - 0.22]) ch.box(F, sx, sx + 0.22, CE - 0.14, CE - 0.02, z0, -1.2, col('#f3e6d3'), 'trim', 'fud', 1, 1, 0.01)
+  for (let z = z0 + 2.15; z < -2; z += 1.9) for (const sx of [-1, 1]) ch.box(F, sx * 1.4 - 0.7, sx * 1.4 + 0.7, CE - 0.045, CE - 0.04, z - 0.75, z + 0.75, col('#fff0cf'), 'glow', 'd', 1, 1, 0)
   // marble inlay strip + rug-like central runner
   ch.box(F, -0.9, 0.9, FL, FL + 0.01, z0 + 0.4, -1.5, col('#e6dcd2'), 'slab', 'u', 1.2, 1.2, 0)
   // plum velvet banquette along the left wall with 3 round bistro tables

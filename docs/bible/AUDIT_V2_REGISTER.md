@@ -45,3 +45,6 @@ New Blender kit `assets/blender/make_flowers.py` → `src/baked/flowers.json`: c
 
 ## RESHAPE 4 — Hedges + riverside parterres — PARTIAL
 Blender `make_hedge.py` (bumpy superellipse hedge segment + leaf fringe, tiled/non-uniformly scaled; `baked()` now accepts [sx,sy,sz]) replaces flat green hedge boxes (garden + terrace). Two formal rose parterres (gravel cross-walks, hedge-bordered beds, urn, benches, clipped trees) and a ramp-foot garden room replace the empty riverside lawns (reshape_rose_parterre.png, reshape_rampfoot_garden.png). OPEN: bed soil colour pale, plant density modest, hedge fringe not yet visible at distance, lawn strip z -100..-93 still plain, static street total measured 1.31M tris headless after trimming (gardens 572k; was 548k total at last benchmark) — NOT verified on M2.
+
+## RESHAPE 5 — Café ceiling + remaining blob flowers — PARTIAL
+Café ceiling (was flat peach plane): stained-oak cross beams + spine beam, plaster cove, recessed lit panels (reshape_cafe_ceiling_beams.png). All remaining prism-blob flowers (fountain ring, terrace planters, florist buckets, window boxes, lawn beds) replaced with the organic Blender flowers. Library shelves/café verified populated in same-viewpoint renders. OPEN: topiary balls, topiary-on-stick, wisteria strands, café chairs/tables still simple, glazing operability/rain exclusion untested.
