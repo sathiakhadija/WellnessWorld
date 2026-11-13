@@ -28,3 +28,6 @@ Total 313,251 tris (promenade 81,976 · laneShops 83,328 · houses 56,180 · squ
 Update after rounder blooms: static total 383,103 tris (lane 47,964 from planting, promenade 93,396, square 44,412). Lane plant spacing then widened 1.9 -> 2.9 m to cut cost (re-measure on next build). Plant levers: spacing, subdivision (make_plants.py `sub`), instancing (not yet done — baked plants are merged geometry; GPU instancing would cut memory/draw cost).
 
 Update after the great-lawn formal garden: static total 444,812 tris (gardens 76,356). Chunks are frustum-culled per chunk, but this needs real M2 measurement; first levers: plant spacing/`sub`, fewer meadow instances, instancing plants.
+
+## Static count 2026-11-13 (headless; NOT frame time)
+Street static triangles 548,063 (was 445k): lane 90.8k (Blender branches + leaf puffs ≈ 55k), laneShops 91.3k (window flower boxes), courtyard 41.4k (hero canopy puffs), promenade 95.3k, gardens 76.2k, houses 56.0k, square 44.7k. Instanced/static geometry; no LOD yet for the new foliage. M2 fps is the owner's measurement (`?bench=1`).
