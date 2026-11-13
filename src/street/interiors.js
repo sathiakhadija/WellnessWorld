@@ -5,8 +5,9 @@ import { toWorld, dirWorld } from './geo.js'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import CAFE from '../baked/cafe.json'   // produced by assets/blender/make_cafe.py (Blender)
 import LANTERNS from '../baked/lanterns.json'   // produced by assets/blender/make_lanterns.py (Blender)
+import BRANCHES from '../baked/branches.json'   // produced by assets/blender/make_branches.py (Blender)
 import PLANTS from '../baked/plants.json'   // produced by assets/blender/make_plants.py (Blender)
-const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS }
+const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...BRANCHES }
 const PLANT_RE = /^(hydrangea|lavender|shrub)/   // organic kit: smooth floret balls
 const col = (h) => new THREE.Color(h)
 

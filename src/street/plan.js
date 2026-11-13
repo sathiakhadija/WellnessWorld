@@ -350,7 +350,7 @@ export function buildStreet() {
     surf(g, 'slab', BX - 11, BX + 11, -132, -88, G.slab, 1.8, 1.2, 1); surf(g, 'slab', -64, 34, -97, -92, G.slab, 1.8, 1.2, 1)
     surf(g, 'gravel', BX - 8, BX - 6.5, -131, -97, G.gravel, 2, 2, 1); surf(g, 'gravel', BX + 6.5, BX + 8, -131, -97, G.gravel, 2, 2, 1)
     for (const s of [-1, 1]) for (let z = -128; z < -98; z += 6) { hedge(g, BX + s * 8.6 - 0.45, BX + s * 8.6 + 0.45, z, z + 3.6, 0.8, '#4e6139') }
-    for (let z = -126; z < -98; z += 9) for (const s of [-1, 1]) { put('shrub', BX + s * 9.8, z, 0, 0.9 + R() * 0.3); put('grass', BX + s * 10.6, z + 1.5, R() * 6, 1.1) }
+    for (let z = -126; z < -98; z += 9) for (const s of [-1, 1]) { put('shrub', BX + s * 9.8, z, 0, 1.5 + R() * 0.5); put('grass', BX + s * 10.6, z + 1.5, R() * 6, 1.1) }
     for (const s of [-1, 1]) for (const z of [-124, -112, -100]) { tree('clipped', BX + s * 11.5, z, 1.0, Math.PI / 2); grate(g, BX + s * 11.5, z, 1.5) }
     // paths from the ramps' feet to the two side routes
     surf(g, 'slab', -90, -64, -97, -92, G.slab, 1.8, 1.2, 1); surf(g, 'slab', 34, 70, -97, -92, G.slab, 1.8, 1.2, 1)
@@ -360,7 +360,7 @@ export function buildStreet() {
       const hw2 = xc === -86 ? 4 : 3.5
       surf(g, 'slab', xc - hw2, xc + hw2, -97, 50, G.slab, 1.8, 1.2, 1)
       for (const s of [-1, 1]) for (let z = -90; z < 44; z += 12) if (!(side === 'W' && Math.abs(z + 0) < 0)) hedge(g, xc + s * (hw2 + 0.6) - 0.4, xc + s * (hw2 + 0.6) + 0.4, z, z + 8.4, 0.9, '#4e6139')
-      for (let z = -88; z < 46; z += 11) for (const s of [-1, 1]) { tree(R() < 0.45 ? 'plane' : 'ornamental', xc + s * (hw2 + 2.6), z + (R() - 0.5) * 2, 0.9 + R() * 0.3) }
+      for (let z = -88; z < 46; z += 11) for (const s of [-1, 1]) { tree(R() < 0.45 ? 'plane' : 'ornamental', xc + s * (hw2 + 2.6), z + (R() - 0.5) * 2, 1.5 + R() * 0.5) }
       for (let z = -84; z < 46; z += 22) { bench(xc - hw2 + 0.8, z, Math.PI / 2); bench(xc + hw2 - 0.8, z + 11, -Math.PI / 2) }
       for (let z = -92; z < 46; z += 20) lamp(xc + (z % 40 === 0 ? -1 : 1) * (hw2 - 0.5), z, 0)
     }
@@ -747,6 +747,12 @@ export function buildStreet() {
         g.box(W0, x - 0.012, x + 0.012, y - 0.03, y, z, z + 0.52, col('#3a3128'), 'metal', 'fulr', 1, 1, 0)
         if (i % 2 === 0) g.box(W0, x - 0.06, x + 0.06, y - 0.16, y - 0.04, z - 0.06, z + 0.06, col('#ffd9a0'), 'glow', 'fulrbd', 1, 1, 0) }
     }
+    // Bible s12 (p.52): leafy branches overhanging the lane from both facades, framing the top of the street (Blender kit: assets/blender/make_branches.py)
+    { const BR = { leaf: '#5b7a46', stem: '#4a3b2e' }; let bi = 0
+      for (let x = LX0 + 7; x < LX1 - 6; x += 6.2) {
+        baked(g, W0, `branch_${1 + (bi++ % 3)}`, x + (R() - 0.5) * 3, 86.05, -Math.PI / 2 + (R() - 0.5) * 0.4, { ...BR, leaf: R() < 0.5 ? '#5b7a46' : '#6c8a4c' }, 6.3 + R() * 0.9, 1.5 + R() * 0.5)
+        baked(g, W0, `branch_${1 + (bi++ % 3)}`, x + 4.2 + (R() - 0.5) * 3, 94.95, Math.PI / 2 + (R() - 0.5) * 0.4, { ...BR, leaf: R() < 0.5 ? '#5b7a46' : '#6c8a4c' }, 6.3 + R() * 0.9, 1.5 + R() * 0.5)
+      } }
     const W_ = (a, p) => ({ sign: a, ...p })
     const NORTH = [
       { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#3a3331', door: '#2f3d36' },
