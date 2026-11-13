@@ -254,6 +254,13 @@ export function shopBuilding(ch, F, o) {
     for (let b = 0; b < nb; b++) { const cx = (b + 0.5) * w / nb - w / 2; ops.push({ x0: cx - ww / 2, x1: cx + ww / 2, sill, head: sill + winH }) }
     rowWall(ch, F, -w / 2, w / 2, yy0, yy1, ops, t, main, key, su, sv)
     for (let b = 0; b < nb; b++) { const cx = (b + 0.5) * w / nb - w / 2; sash(ch, F, cx, yy0 + sill, ww, winH, t, { lit: R() < 0.3, stone, trim }); if (f === 1 && o.balc) { balconette(ch, F, cx, yy0 + sill, ww, {}); if (!o.noFlowers) { ch.box(F, cx - ww / 2, cx + ww / 2, yy0 + sill + 0.62, yy0 + sill + 0.84, 0.82, 1.1, col('#2b2623'), 'metal', 'fulrb', 1, 1, 0); for (let k = 0; k < 5; k++) ch.prism(F, cx - ww / 2 + 0.1 + k * (ww - 0.2) / 4, 0.96, 0.14, 0.09, yy0 + sill + 0.84, yy0 + sill + 1.08 + (k % 2) * 0.06, col(['#edE6d7', '#4e6139', '#82749a', '#edE6d7', '#718451'][k]), 'leaf', 7) } } }
+    for (let b = 0; b < nb; b++) {            // Bible s10/s11: window flower boxes under about half of the upper windows (trough + foliage mound + blooms), sits on the sill ledge
+      const cx = (b + 0.5) * w / nb - w / 2; if (o.balc && f === 1) continue; if (R() > 0.55) continue
+      const sy = yy0 + sill + 0.02, bl = [['#e8c9d2', '#f3f0ea', '#b9a5c9'], ['#f3f0ea', '#d9a8ae', '#cfa9c6']][R() < 0.5 ? 0 : 1]
+      ch.box(F, cx - 0.52, cx + 0.52, sy, sy + 0.24, 0.1, 0.34, col('#4a3b30'), 'wood', 'fulrb', 1, 1, 0)
+      ch.box(F, cx - 0.5, cx + 0.5, sy + 0.24, sy + 0.4, 0.12, 0.32, col('#5d7a46'), 'leaf', 'fulr', 1, 1, 0)
+      for (let k = 0; k < 6; k++) ch.prism(F, cx - 0.42 + k * 0.168, 0.23 + (k % 2) * 0.03, 0.09, 0.08, sy + 0.38, sy + 0.54 + (k % 3) * 0.04, col(bl[k % 3]), 'leaf', 6)
+    }
     ch.box(F, -w / 2 - 0.02, w / 2 + 0.02, yy0 - 0.06, yy0 + 0.06, -0.02, 0.06, stone, 'trim', 'fu')
   }
   void top

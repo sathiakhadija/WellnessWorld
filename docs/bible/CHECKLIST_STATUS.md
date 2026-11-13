@@ -34,3 +34,6 @@ Owner-only decisions: s04 visual approval; s07 blossom canopy vs palette; final 
 
 ## s08 courtyard hero tree (2026-11-13)
 Hero plane scaled 1.25→1.5 with 7 Blender branch sprays spreading the canopy; warm under-bench glow strips. Evidence: `evidence/s08_game_hero_tree_bluehour.png` (no page errors). v2: 14 Blender leaf-puff masses + brighter bench glow; canopy now full and mature like p.31. Still partial: tree shadows on paving and bloom close-up fidelity unverified. Not approved; M2 not measured.
+
+## s10/s11/s12 window flower boxes (2026-11-13)
+Procedural trough + foliage + blooms under ~55% of upper windows in shopBuilding (buildings.js); evidence `evidence/s10_s11_game_flowerboxes_golden.png`. PARTIAL: boxes are procedural (not a Blender kit), façade module Blender masters still open. Not approved.
