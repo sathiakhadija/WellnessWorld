@@ -14,3 +14,8 @@ Evidence (same camera as the earlier s04 evidence: 2.9,1.55,-11.15, yaw .55, pit
 | 5 | Do not modify balcony / glass / tiles / doors / weather | None of these files touched (Skyline.jsx, skylineData.js, Waterfront.jsx, new exteriorAtmo.js only). Weather state is only read. | Respected. |
 | 6 | M2 performance | NOT tested — no M2 here. Extra cost: one mirrored far-bank copy, two canopy instances, two textured strips, per-fragment haze. Run `?bench=1`, `?quality=performance|balanced|high` on the M2 and report fps; I will optimise from numbers. | OPEN (owner) |
 | 7 | Evidence | Before/after at the same camera for golden, night, heavy rain, afternoon. No separate Blender render for skyline (see 1). | Done |
+
+## Overnight additions (2026-11-13)
+- Blender roof kit (`assets/blender/make_skyline_kit.py` -> `src/baked/skyline_kit.json`): gable, hip, mansard (+dormers), sawtooth (glazed north lights), plant-room roofs, instanced on far-bank low-rise and background buildings (`Roofs` in Skyline.jsx, haze-aware). Effect is modest at 1 km; heights raised after the first render (evidence/s04_after_roofkit_zoom_afternoon.png shows the first pass).
+- Paving lamp reflections (`src/weather/wet.js` applyLampReflect): analytic warm streaks under the nearest 12 lamps/lanterns at blue hour/night/rain; evidence/s08_game_lamp_reflections_bluehour.png, s12_game_lamp_reflections_bluehour.png.
+- Still NOT approved; M2 not measured.

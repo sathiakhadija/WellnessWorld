@@ -9,6 +9,7 @@ import { Waterfront } from './Waterfront.jsx'
 import { StreetVisuals } from './street/Street.jsx'
 import { world, OFF } from './world.js'
 import { WX } from './weather/weather.js'
+import KIT from './baked/skyline_kit.json'   // produced by assets/blender/make_skyline_kit.py (Blender)
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { buildLayout, SCALE, EYE_ABOVE_WATER, SUN_AZ_DEG, SUN_EL_DEG, TWIST } from './skylineData.js'
 
@@ -244,6 +245,45 @@ export function FacadeMeshes({ geoms, mirrored = false }) {
   return <>{Object.keys(geoms).map((k) => <mesh key={k} geometry={geoms[k]} material={mats[k]} frustumCulled={false} renderOrder={mirrored ? 5 : 0} />)}</>
 }
 
+
+// Blender-modelled roof kit (gable / hip / mansard / sawtooth / plant) placed on the low-rise far bank + background buildings: real rooflines instead of flat lids.
+const ROOF_TINTS = { stone: ['#5a4d58', '#6b5a58', '#4d4a58', '#7a5d52'], modern: ['#6c6a78', '#7c7b86', '#5a5d6e'] }
+function kitGeometry(name, bucket) {
+  const d = KIT[name][bucket], n = d.p.length / 3, P = new Float32Array(d.p), C = new Float32Array(n * 3), g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.computeVertexNormals()
+  const nr = g.attributes.normal
+  for (let i = 0; i < n; i++) {                                    // per-face shade baked into vertex colour (sun side lighter, shadow side cooler)
+    const sun = Math.max(0, nr.getX(i) * SUN_H.x + nr.getZ(i) * SUN_H.y), k = 0.62 + 0.3 * Math.max(0, nr.getY(i)) + 0.28 * sun
+    C[i * 3] = k * (1 + 0.04 * sun); C[i * 3 + 1] = k; C[i * 3 + 2] = k * (1 - 0.03 * sun + 0.04 * (1 - sun))
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(C, 3)); return g
+}
+function Roofs({ layout }) {
+  const sets = useMemo(() => {
+    const byKind = {}
+    for (const b of layout) if (b.roof) (byKind[b.roof] ||= []).push(b)
+    const out = [], m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), col = new THREE.Color(); let seed = 11
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
+    for (const [kind, list] of Object.entries(byKind)) {
+      const name = 'roof_' + kind
+      if (!KIT[name]) continue
+      for (const bucket of Object.keys(KIT[name])) {
+        const mat = patchHaze(new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }), false)
+        const mesh = new THREE.InstancedMesh(kitGeometry(name, bucket), mat, list.length)
+        list.forEach((b, i) => {
+          q.setFromEuler(e.set(0, -b.rot + TWIST, 0))
+          m4.compose(new THREE.Vector3(b.x, -EYE_ABOVE_WATER + (b.y0 || 0) + b.h, b.z), q, new THREE.Vector3(b.w, b.roofH, b.d)); mesh.setMatrixAt(i, m4)  
+          const pal = b.style === 'stone' ? ROOF_TINTS.stone : ROOF_TINTS.modern
+          mesh.setColorAt(i, bucket === 'glass' ? col.set('#9fb0c8') : col.set(pal[(rnd() * pal.length) | 0]).multiplyScalar(0.85 + rnd() * 0.3))
+        })
+        mesh.frustumCulled = false; out.push(mesh)
+      }
+    }
+    return out
+  }, [layout])
+  return <>{sets.map((m, i) => <primitive key={i} object={m} />)}</>
+}
+
 function PyramidCap({ b }) {
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: C(0.70, 0.64, 0.66), toneMapped: false }), [])
   return (
@@ -394,6 +434,7 @@ export function Skyline() {
   return (
     <group ref={g} name="exterior" position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
       <FacadeMeshes geoms={geoms} />
+      <Roofs layout={layout} />
       {!OFF.has('hood') && <Boats />}
       {/* near-bank ground out to the haze: the compact neighbourhood no longer floats in the void now the old V10 sprawl is gone */}
       <mesh position={[0, -EYE_ABOVE_WATER - 0.45, 2000]} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}>

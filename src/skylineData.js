@@ -72,6 +72,10 @@ function addCrowns(out) {
       }
       continue
     }
+    const ROOF_STONE = ['gable', 'mansard', 'hip', 'gable'], ROOF_MODERN = ['plant', 'sawtooth', 'plant']
+    const assignRoof = () => { const k = (b.style === 'stone' ? ROOF_STONE : ROOF_MODERN)[(R() * 4) | 0] || 'plant'; b.roof = k; b.roofH = Math.max(2.4, Math.min(k === 'mansard' ? 10 : 9, Math.min(b.w, b.d) * (k === 'plant' ? 0.14 : 0.34))) }
+    if (b.band && R() < 0.62) { assignRoof(); continue }                                                                      // Blender roof kit (assets/blender/make_skyline_kit.py)
+    if (!b.band && !b.hero && b.h < 45 && (b.shape || 'box') === 'box' && R() < 0.5) { assignRoof(); continue }
     if (b.band) { if (R() < 0.45) part(b, 'p', b.w * 0.45, b.d * 0.45, 2.5 + R() * 3, b.h, { dx: (R() - 0.5) * b.w * 0.25, dz: (R() - 0.5) * b.d * 0.25 }); continue }
     if (R() < 0.6) part(b, 'p', b.w * 0.42, b.d * 0.42, 3 + R() * 5, b.h, { dx: (R() - 0.5) * b.w * 0.3, dz: (R() - 0.5) * b.d * 0.3 })
     if (b.h > 60 && R() < 0.4) { const y = part(b, 's1', b.w * 0.82, b.d * 0.82, 5, b.h); part(b, 's2', b.w * 0.55, b.d * 0.55, 6 + R() * 4, y) }
