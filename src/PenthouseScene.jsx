@@ -13,7 +13,8 @@ import { Avatar, Cat } from './Avatar.jsx'
 import Rain from './weather/Rain.jsx'
 import RainAudio from './weather/RainAudio.jsx'
 import { applyWindowRain } from './weather/windowRain.js'
-import { LemonGirl, Rabbit, RabbitPlayer, PLAYER_KIND, TEMP_PLAYER, TEMP_PET } from './TempModels.jsx'
+import { LemonGirl, Rabbit, RabbitPlayer, PLAYER_KIND, PLAYER_GLTF_ID, TEMP_PLAYER, TEMP_PET } from './TempModels.jsx'
+import { GltfPlayer } from './characters/GltfCharacter.jsx'
 import { PlayerModel } from './character'
 import Companion from './companion/Companion.jsx'
 import { input } from './input.js'
@@ -291,7 +292,7 @@ function Player({ spawn, bodyRef, meshRef }) {
     <RigidBody ref={bodyRef} position={[spawn.x, spawn.y + 1, spawn.z]} enabledRotations={[false, false, false]} colliders={false}>
       {/* 1.54 m tall capsule (2 x 0.55 + 2 x 0.22), 0.44 m wide: a real person, not a pill */}
       <CapsuleCollider args={[0.55, 0.22]} position={[0, 0.77, 0]} collisionGroups={interactionGroups([GROUPS.player], [GROUPS.world, GROUPS.glass])} />
-      <group ref={meshRef}>{LEGACY ? (PLAYER_KIND === 'rabbit' ? <Suspense fallback={null}><RabbitPlayer speedRef={speedRef} /></Suspense> : PLAYER_KIND === 'lemon' ? <Suspense fallback={<Avatar speedRef={speedRef} />}><LemonGirl speedRef={speedRef} /></Suspense> : <Avatar speedRef={speedRef} />) : <PlayerModel speedRef={speedRef} />}</group>
+      <group ref={meshRef}>{LEGACY ? (PLAYER_KIND === 'gltf' ? <GltfPlayer id={PLAYER_GLTF_ID} speedRef={speedRef} fallback={<Suspense fallback={null}><RabbitPlayer speedRef={speedRef} /></Suspense>} /> : PLAYER_KIND === 'rabbit' ? <Suspense fallback={null}><RabbitPlayer speedRef={speedRef} /></Suspense> : PLAYER_KIND === 'lemon' ? <Suspense fallback={<Avatar speedRef={speedRef} />}><LemonGirl speedRef={speedRef} /></Suspense> : <Avatar speedRef={speedRef} />) : <PlayerModel speedRef={speedRef} />}</group>
     </RigidBody>
   )
 }
@@ -336,7 +337,7 @@ export default function PenthouseScene() {
             <Player spawn={spawn.current} bodyRef={bodyRef} meshRef={meshRef} />
             <LevelGate level="penthouse">
               {/* balcony cherry tree + petals removed (owner decision 2026-11-12: approved balcony AFTER is unfurnished) */}
-              {LEGACY ? (PLAYER_KIND === 'rabbit' ? null : <CleanHide>{TEMP_PET ? <Suspense fallback={null}><Rabbit position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></Suspense> : <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />}</CleanHide>) : <Companion />}
+              {LEGACY ? (PLAYER_KIND === 'rabbit' || PLAYER_KIND === 'gltf' ? null : <CleanHide>{TEMP_PET ? <Suspense fallback={null}><Rabbit position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} /></Suspense> : <Cat position={[-0.70, 0, -4.48]} rotationY={Math.PI + 0.25} />}</CleanHide>) : <Companion />}
             </LevelGate>
             <CameraRig playerRef={bodyRef} playerMeshRef={meshRef} />
           </Physics>

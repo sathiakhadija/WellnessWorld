@@ -1,6 +1,6 @@
 // Street level: turns the masterplan (plan.js) into meshes, instanced props, colliders, lights, water and the lift. Everything here lives ~87 m below the
 // penthouse, in the same world coordinates, so the penthouse's rear windows look straight down onto it.
-import { applyWet } from '../weather/wet.js'
+import { applyWet, applyLampReflect, LAMP_U, LAMP_N } from '../weather/wet.js'
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { RigidBody, CuboidCollider, CylinderCollider } from '@react-three/rapier'
@@ -13,6 +13,7 @@ import { LIVE } from '../atmosphere.js'
 import { discoStore } from '../discoveries.js'
 import { buildStreet, BX, hash } from './plan.js'
 import { GY } from './geo.js'
+import { WX } from '../weather/weather.js'
 import * as T from './textures.js'
 import * as P from './props.js'
 
@@ -37,7 +38,7 @@ function makeMaterials() {
     ao: new THREE.MeshBasicMaterial({ map: T.aoTex(), color: '#000000', transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }),
   }
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'grass']) { M[k].map.repeat.set(1, 1) }
-  for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']) applyWet(M[k])       // rain: darker, glossier, puddles
+  for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']) { applyWet(M[k]); applyLampReflect(M[k]) }       // rain: darker, glossier, puddles + lamp reflections
   return M
 }
 const GROUND_LIT = ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']
@@ -180,6 +181,15 @@ export function StreetVisuals() {
     jetRefs.current.forEach((m) => { if (!m) return; const s = 0.82 + 0.18 * Math.sin(t * 2.1 + m.userData.k * 1.7); m.scale.y = s; m.position.y = m.userData.y + (s * 1.5) / 2 })
     const onStreet = world.level === 'street'
     { const w = Math.min(1, LIVE.win), k = 0.55 + 0.62 * w; M.shopin.color.setRGB(k, k * (1 - 0.07 * w), k * (1 - 0.22 * w)) }   // Bible s12: shop interiors turn amber-gold at dusk (p.52), not flat cream
+    // lamp reflections on the paving: nearest lamps to the camera, strength from blue-hour/night factor + rain wetness
+    { const cam = state.camera.position, lamps = (built._lamps ||= built.halos.concat(built.reflects || [])), K = Math.max(0, Math.min(1, (LIVE.tint.b - LIVE.tint.r) / 0.26)) * 0.9 + (LIVE.lamp > 0.5 ? 0.0 : 0) + WX.wet
+      LAMP_U.uLampK.value = onStreet ? Math.min(1.2, K * Math.min(1, LIVE.lamp)) : 0; LAMP_U.uCamW.value.x = cam.x; LAMP_U.uCamW.value.y = cam.y - GY; LAMP_U.uCamW.value.z = cam.z
+      if (onStreet && LAMP_U.uLampK.value > 0.001) {
+        const best = []; for (let i = 0; i < lamps.length; i++) { const l = lamps[i], dx = l[0] - cam.x, dz = l[2] - cam.z, d = dx * dx + dz * dz; if (d < 900) best.push([d, i]) }
+        best.sort((a, b) => a[0] - b[0])
+        for (let j = 0; j < LAMP_N; j++) { const u = LAMP_U.uLamp.value[j]; if (j < best.length) { const l = lamps[best[j][1]]; u.x = l[0]; u.y = l[2]; u.z = Math.max(0.6, l[1] - GY); u.w = 1 } else u.w = 0 }
+      }
+    }
     // Bible s08/s12 blue hour: the target paving is dark, cool and slightly glossy (wet-look setts catching lamp glow), not pale pink limestone
     { const bl = Math.max(0, Math.min(1, (LIVE.tint.b - LIVE.tint.r) / 0.26)); for (const k of GROUND_LIT) { const m = M[k]; if (!m) continue; m.color.setRGB(1 - 0.34 * bl, 1 - 0.28 * bl, 1 - 0.06 * bl); m.roughness = (m.userData.r0 ??= m.roughness) * (1 - 0.42 * bl) } }
     //                                        // interiors read dim by day, glow at dusk

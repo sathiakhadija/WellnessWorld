@@ -93,6 +93,8 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
     // test / debug handle (also handy in the console)
     window.__ww = {
       mode: () => camStore.get().mode,
+      get charClips() { return shared.charClips || null },                                                                      // character-pipeline test hooks
+      charAction: (n) => (shared.charAction ? (shared.charAction(n), true) : false),
       doorForce: (id, f) => { const d = shared.doors[id]; if (d) d.force = f },                                                  // test hook
       scene: () => scene,                                                                                                       // test / audit hook
       cam: () => ({ pos: camera.position.toArray(), fov: camera.fov }),

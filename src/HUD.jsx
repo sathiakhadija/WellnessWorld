@@ -3,6 +3,7 @@ import { DESTINATIONS } from './destinations.js'
 import { world } from './world.js'
 import { useCam, camStore } from './camStore.js'
 import { Atmospheres, Minimap, Grade, WeatherPanel } from './HUDExtras.jsx'
+import { CharacterPicker } from './characters/CharacterPicker.jsx'
 
 const MODES = [
   { id: 'follow', key: '1', label: 'Follow' },
@@ -95,6 +96,7 @@ export default function HUD() {
             <div><kbd>C</kbd> next camera · <kbd>R</kbd> reset view · <kbd>H</kbd> hide help</div>
             <div><kbd>N</kbd> collision <b>{c.collide ? 'on' : 'off'}</b> · <kbd>T</kbd> scroll = <b>{c.scrollMode}</b> · <kbd>I</kbd> invert scroll{c.invertScroll ? ' (on)' : ''}</div>
           </div>
+          <CharacterPicker />
         </div>
       ) : (
         <div className="ww-min" onClick={() => camStore.set({ help: true })}>Controls · H</div>

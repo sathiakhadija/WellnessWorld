@@ -9,11 +9,15 @@ import * as THREE from 'three'
 const BASE = import.meta.env.BASE_URL || '/'
 const Q = new URLSearchParams(window.location.search)
 // Player model: default = the rabbit (playable pet). ?model=lemon brings back the lemon girl, ?model=pill the original pill avatar, ?model=v12 the experimental rig.
-const MODEL = Q.get('model') || 'rabbit'
-export const PLAYER_KIND = ['rabbit', 'lemon', 'pill', 'v12'].includes(MODEL) ? MODEL : 'rabbit'
-export const TEMP_PLAYER = PLAYER_KIND === 'lemon' || PLAYER_KIND === 'rabbit'
+import { requestedId, byId } from './characters/registry.js'
+const MODEL = Q.get('model') === 'v12' ? 'v12' : requestedId()          // ?model= (session) > persisted choice (localStorage) > rabbit
+const REQ = byId(MODEL)
+// 'gltf' = an imported rigged character (Momo, or the dev-only technical placeholder); GltfPlayer falls back to the rabbit if the file is missing
+export const PLAYER_KIND = ['rabbit', 'lemon', 'pill', 'v12'].includes(MODEL) ? MODEL : REQ && REQ.kind === 'gltf' ? 'gltf' : 'rabbit'
+export const PLAYER_GLTF_ID = REQ && REQ.kind === 'gltf' ? REQ.id : null
+export const TEMP_PLAYER = PLAYER_KIND === 'lemon' || PLAYER_KIND === 'rabbit' || PLAYER_KIND === 'gltf'
 // the standalone idle pet only shows when the player is NOT the rabbit (otherwise there would be two rabbits)
-export const TEMP_PET = PLAYER_KIND !== 'rabbit' && Q.get('pet') !== 'cat' && PLAYER_KIND !== 'v12'
+export const TEMP_PET = PLAYER_KIND !== 'rabbit' && PLAYER_KIND !== 'gltf' && Q.get('pet') !== 'cat' && PLAYER_KIND !== 'v12'
 
 // scale a model to `height` metres, feet on y=0, centred on x/z, then rotate by `faceFix` about y so it faces +z
 function useNormalised(url, height, faceFix) {

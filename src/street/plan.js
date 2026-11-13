@@ -29,7 +29,7 @@ export function buildStreet() {
   const chunks = {}, mk = (n) => chunks[n] || (chunks[n] = new Chunk(n, rng(hash(n))))
   const inst = { plane: [], ornamental: [], clipped: [], lamp: [], bench: [], bollard: [], pathLight: [], table: [], chair: [], urn: [], car1: [], car2: [], car3: [], car4: [], bike: [], shrub: [], grass: [], planter: [] }
   const put = (k, x, z, ry = 0, s = 1, y = GY) => inst[k].push([x, y, z, ry, s])
-  const pools = [], halos = [], waters = [], jets = [], lightsAt = []
+  const pools = [], halos = [], reflects = [], waters = [], jets = [], lightsAt = []
   const pois = {}
   const R = rng(2026)
   const W0 = frame(0, 0, 0, GY)
@@ -296,9 +296,9 @@ export function buildStreet() {
     put('ornamental', CX0 + 4.5, CZ0 + 14, 0, 0.8); put('ornamental', CX1 - 4.5, CZ0 + 17, 1, 0.85); put('ornamental', CX0 + 4.5, CZ1 - 6, 2, 0.8); put('ornamental', CX1 - 4.5, CZ1 - 8, 3, 0.8)
     // discreet lighting: low path lights along the spine, two lamps at the gate, soft pools
     const LAN = { metal: '#1f1d22', brass: PAL.brass, glow: '#ffdca2' }
-    for (let z = CZ0 + 8; z <= CZ1 - 2; z += 5.2) for (const s of [-1, 1]) { baked(g, W0, 'bollard_lantern', cx + s * 2.3, z, 0, LAN, 0, 1); pools.push([cx + s * 2.3, z, 3.6, GY]) }
+    for (let z = CZ0 + 8; z <= CZ1 - 2; z += 5.2) for (const s of [-1, 1]) { baked(g, W0, 'bollard_lantern', cx + s * 2.3, z, 0, LAN, 0, 1); reflects.push([cx + s * 2.3, GY + 0.75, z]); pools.push([cx + s * 2.3, z, 3.6, GY]) }
     // Bible s08: the sett room under the tree is framed by four taller lanterns at its corners, and the tree is up-lit warm from below (target p.31)
-    for (const [dx, dz] of [[-8.9, -8.9], [8.9, -8.9], [-8.9, 8.9], [8.9, 8.9]]) { baked(g, W0, 'bollard_lantern', cx + dx, cz + dz, 0, LAN, 0, 1.15); pools.push([cx + dx, cz + dz, 4.2, GY]) }
+    for (const [dx, dz] of [[-8.9, -8.9], [8.9, -8.9], [-8.9, 8.9], [8.9, 8.9]]) { baked(g, W0, 'bollard_lantern', cx + dx, cz + dz, 0, LAN, 0, 1.15); reflects.push([cx + dx, GY + 0.85, cz + dz]); pools.push([cx + dx, cz + dz, 4.2, GY]) }
     lightsAt.push({ x: cx, y: GY + 1.1, z: cz, color: '#ffc98a', intensity: 9, distance: 12 })
     pools.push([cx, cz, 9]); halos.push([cx + 2.4, GY + 2.6, cz - 1])
     pois.courtyard = { x: BX, z: 30 }
@@ -864,7 +864,7 @@ export function buildStreet() {
   const colliders = []
   for (const c of Object.values(chunks)) colliders.push(...c.cols)
   const stats = {}; for (const [k, c] of Object.entries(chunks)) stats[k] = c.tris
-  return { chunks, inst, pools, halos, waters, jets, lightsAt, colliders, pois, stats, discoveries, map: { surf: mapSurf, rib: mapRib } }
+  return { chunks, inst, pools, halos, reflects, waters, jets, lightsAt, colliders, pois, stats, discoveries, map: { surf: mapSurf, rib: mapRib } }
 }
 
 const rw_ = () => -5.8 - 6.2, re_ = () => 8.2 + 6.2
