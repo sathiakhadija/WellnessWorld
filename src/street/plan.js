@@ -399,15 +399,15 @@ export function buildStreet() {
   // 4. THAMES TERRACE: raised promenade over the quay wall, ramps + grand stair, balustrade, lamps, benches, trees; the river + skyline beyond
   // =====================================================================================================================================
   {
-    const ch = mk('terrace'), x0 = -125, x1 = 80, zr = -146.6, zw = -132, H = TERR_H, stone = col(PAL.limestone)
+    const ch = mk('terrace'), x0 = -125, x1 = 80, zr = -146.6, zw = -132, zq = -150, H = TERR_H, stone = col(PAL.limestone)   // Audit B03.01: one cross-section = water | quay wall face at zq | railing | promenade (no outboard apron)
     const FT = frame(0, 0, 0, GY)
     ch.box(FT, x0, x1, 0, H, zr, zw, stone, 'ashlar', 'f', 2.4, 1.2)                                                      // retaining wall (street side)
-    ch.box(FT, x0, x1, -0.3, H, zr - 5.4, zr, col('#8e8579'), 'ashlar', 'b', 2.4, 1.2)                                   // quay wall (river side), the face the skyline view sees
-    ch.box(FT, x0, x1, H - 0.02, H, zr - 5.4, zr, col('#cdbfa6'), 'slab', 'u', 1.8, 1.2, 0)
+    ch.box(FT, x0, x1, -0.3, H, zq, zr, col('#8e8579'), 'ashlar', 'b', 2.4, 1.2)                                   // quay wall (river side), the face the skyline view sees
+    ch.box(FT, x0, x1, H - 0.02, H, zq, zr, col(G.slab), 'slab', 'u', 1.8, 1.2, 0)
     ch.box(FT, x0, x1, H - 0.001, H, zr, zw, col(G.slab), 'slab', 'u', 1.8, 1.2, 0)
     ch.box(FT, x0, x1, H + 0.0, H + 0.011, zw - 3.5, zw - 0.0, col('#d1c6b2'), 'sett', 'u', 1.6, 1.6, 0)                    // setts band along the stair edge
-    ch.solid(FT, x0, x1, -0.5, H, zr, zw, 'terrace')
-    ch.solid(FT, x0, x1, 0, H + 1.2, zr - 0.7, zr - 0.2, 'balustrade')
+    ch.solid(FT, x0, x1, -0.5, H, zq, zw, 'terrace')
+    ch.solid(FT, x0, x1, 0, H + 1.2, zq - 0.7, zq - 0.2, 'balustrade')
     // balustrade along the river edge + the street-side edge (gaps at the stairs/ramps); balusters are detail geometry (LOD)
     const gaps = [[BX - 10, BX + 10], [-87, -77], [47, 57]]
     const bal = (xa, xb, z) => {
@@ -416,11 +416,11 @@ export function buildStreet() {
       const n = Math.max(1, Math.round((xb - xa) / 0.28)); for (let i = 0; i <= n; i++) { const x = xa + (i / n) * (xb - xa); ch.prism(FT, x, z, 0.018, 0.018, H + 0.14, H + 0.96, ironB, 'metal+', 4, false) }
       for (let x = xa; x <= xb; x += 3) { ch.box(FT, x - 0.12, x + 0.12, H + 0.14, H + 1.0, z - 0.12, z + 0.12, stone, 'trim', 'fulrb'); ch.prism(FT, x, z, 0.07, 0.01, H + 1.0, H + 1.16, ironB, 'metal', 6) }
     }
-    bal(x0, -50, zr + 0.35); bal(-40, x1, zr + 0.35)                                                                         // gap = the reserved ferry landing
+    bal(x0, -50, zq + 0.4); bal(-40, x1, zq + 0.4)                                                                         // gap = the reserved ferry landing
     let cur = x0; for (const [a, b] of gaps.slice().sort((p, q) => p[0] - q[0])) { if (a > cur) bal(cur, a, zw - 0.4); cur = b } if (cur < x1) bal(cur, x1, zw - 0.4)
-    ch.solid(FT, x0, -50, H, H + 1.1, zr + 0.15, zr + 0.55, 'rail'); ch.solid(FT, -40, x1, H, H + 1.1, zr + 0.15, zr + 0.55, 'rail')
+    ch.solid(FT, x0, -50, H, H + 1.1, zq + 0.2, zq + 0.6, 'rail'); ch.solid(FT, -40, x1, H, H + 1.1, zq + 0.2, zq + 0.6, 'rail')
     cur = x0; for (const [a, b] of gaps.slice().sort((p, q) => p[0] - q[0])) { if (a > cur) ch.solid(FT, cur, a, H, H + 1.1, zw - 0.6, zw - 0.2, 'rail'); cur = b } if (cur < x1) ch.solid(FT, cur, x1, H, H + 1.1, zw - 0.6, zw - 0.2, 'rail')
-    for (const x of [x0, x1]) ch.solid(FT, x - 0.4, x + 0.4, H, H + 1.6, zr - 0.2, zw, 'endwall')
+    for (const x of [x0, x1]) ch.solid(FT, x - 0.4, x + 0.4, H, H + 1.6, zq - 0.2, zw, 'endwall')
     // ramps (gentle, 8°) and the grand stair on the axis
     const ramp = (xc, w) => {
       const F = frame(xc, -102, Math.PI, GY), L = 30, h = H
@@ -449,7 +449,9 @@ export function buildStreet() {
   // =====================================================================================================================================
   {
     const ch = mk('promenade'), T = TERRACE_Y, FT = frame(0, 0, 0, T), stone = col(PAL.limestone), timber = col('#6a4d3a'), bronze = col('#4b3c2b')
-    const hedgeT = (x0, x1, z0, z1, h = 1.0) => { ch.box(FT, x0, x1, 0, h, z0, z1, col('#4e6139'), 'leaf', 'fulrb', 1, 1, 0.1); ch.box(FT, x0 + 0.05, x1 - 0.05, h, h + 0.12, z0 + 0.05, z1 - 0.05, col('#586d41'), 'leaf', 'u', 1, 1, 0.1); ch.solid(FT, x0, x1, 0, h + 0.1, z0, z1, 'hedge') }
+    const hedgeT = (x0, x1, z0, z1, h = 1.0) => { ch.box(FT, x0, x1, 0, h, z0, z1, col('#4e6139'), 'leaf', 'fulrb', 1, 1, 0.1); ch.box(FT, x0 + 0.05, x1 - 0.05, h, h + 0.12, z0 + 0.05, z1 - 0.05, col('#586d41'), 'leaf', 'u', 1, 1, 0.1); ch.solid(FT, x0, x1, 0, h + 0.1, z0, z1, 'hedge')
+      { const alongX = (x1 - x0) >= (z1 - z0), len = alongX ? x1 - x0 : z1 - z0, rad = Math.max(0.45, (alongX ? z1 - z0 : x1 - x0) * 0.62)       // Audit: scalloped clipped-box crown instead of a flat slab
+        for (let t = 0.4; t < len; t += 0.85) { const cx = alongX ? x0 + t : (x0 + x1) / 2, cz = alongX ? (z0 + z1) / 2 : z0 + t; ch.prism(FT, cx, cz, rad, rad * 0.95, h - 0.15, h + 0.32 + ((t * 13) % 1) * 0.12, col(((t * 7) % 1) > 0.5 ? '#5a7043' : '#506639'), 'leaf', 9, true) } } }
     // ---- Zone B: a stone dais on the axis with framing lantern piers and two benches turned to the river (nothing tall in the view)
     ch.box(FT, BX - 9, BX + 9, 0, 0.14, -145.2, -136.8, col('#e2d8c3'), 'slab', 'fulu', 1.8, 1.2, 0.0)
     for (const s of [-1, 1]) {
@@ -493,7 +495,8 @@ export function buildStreet() {
     cafe(56, 13, 9); cafe(73, 11, 10)
     pois.quayCafe = { x: 56, z: -141 }
     // ---- Zone D: romantic corner (west end): a hedged alcove with two benches, a lantern, a clipped tree and a view straight down the river
-    hedgeT(-123, -108, -134.2, -133.2, 1.5); hedgeT(-123, -122, -145, -134.2, 1.5); hedgeT(-110, -109, -141, -134.2, 1.5)
+    hedgeT(-123, -118.2, -134.2, -133.2, 1.2); hedgeT(-115.6, -108, -134.2, -133.2, 1.2); put('ornamental', -116.9, -133.7, 0, 0.7, T); hedgeT(-123, -122, -145, -134.2, 1.2); hedgeT(-110, -109, -141, -134.2, 1.0)   // Audit B03.05: broken, lower hedge with a clipped tree gap instead of one 15 m green slab
+    for (let x = -122; x < -109; x += 1.7) plantAt(ch, x + (x * 7 % 1) * 0.3, -132.7, ['l', 'h', 's', 'p'][Math.abs(Math.round(x)) % 4], 0.9, FT)
     put('bench', -116.5, -140.4, Math.PI, 1.0, T); ch.solid(frame(-116.5, -140.4, Math.PI, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench')
     put('bench', -121.2, -141.5, -Math.PI / 2, 1.0, T); ch.solid(frame(-121.2, -141.5, -Math.PI / 2, T), -0.9, 0.9, 0, 0.5, -0.25, 0.25, 'bench')
     put('lamp', -112.6, -143.6, 0, 1.0, T); pools.push([-112.6, -143.6, 6, T]); halos.push([-112.6, T + 4.9, -143.6]); put('planter', -119, -135.2, 0, 1.0, T)
@@ -503,7 +506,10 @@ export function buildStreet() {
       const x0 = -50, x1 = -40, z0 = -153.5, zr = -146.6, F2 = frame(0, 0, 0, T)
       ch.box(F2, x0, x1, -0.35, 0, z0, zr, col('#cdbfa6'), 'slab', 'fulrbd', 1.8, 1.2, 0)
       ch.box(F2, x0 - 0.1, x0, -0.35, 0.0, z0, zr, stone, 'ashlar', 'fulrb', 2.4, 1.2)
-      for (const [xa, xb, za, zb] of [[x0, x0 + 0.12, z0, zr], [x1 - 0.12, x1, z0, zr], [x0, x1, z0, z0 + 0.12]]) { ch.box(F2, xa, xb, 0, 1.05, za, zb, bronze, 'metal+', 'fulrb', 1, 1, 0); ch.solid(F2, xa - 0.05, xb + 0.05, 0, 1.1, za, zb, 'pierrail') }
+      for (const [xa, xb, za, zb] of [[x0, x0 + 0.12, z0, zr], [x1 - 0.12, x1, z0, zr], [x0, x1, z0, z0 + 0.12]]) {            // open black ironwork (was a solid bronze box that read as a dark wall)
+        ch.box(F2, xa, xb, 0.98, 1.05, za, zb, bronze, 'metal+', 'fulrb', 1, 1, 0); ch.solid(F2, xa - 0.05, xb + 0.05, 0, 1.1, za, zb, 'pierrail')
+        const alongX = (xb - xa) > (zb - za), len = alongX ? xb - xa : zb - za; for (let t = 0.1; t < len; t += 0.3) ch.prism(F2, alongX ? xa + t : (xa + xb) / 2, alongX ? (za + zb) / 2 : za + t, 0.018, 0.018, 0, 0.99, col('#26242b'), 'metal+', 4, false)
+        const nPosts = Math.max(2, Math.round(len / 3) + 1); for (let q = 0; q < nPosts; q++) { const t = (q / (nPosts - 1)) * len; ch.box(F2, alongX ? xa + t - 0.08 : xa - 0.04, alongX ? xa + t + 0.08 : xb + 0.04, 0, 1.1, alongX ? za - 0.04 : za + t - 0.08, alongX ? zb + 0.04 : za + t + 0.08, stone, 'trim', 'fulrb') } }
       for (const x of [x0 + 0.6, x1 - 0.6]) put('bollard', x, z0 + 0.7, 0, 1.0, T)
       ch.solid(F2, x0, x1, -0.5, 0, z0, zr, 'pierdeck')
       pois.ferry = { x: (x0 + x1) / 2, z: -150 }
