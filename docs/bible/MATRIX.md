@@ -30,3 +30,6 @@ Night (promenade, fountain, lane) and heavy rain (lane, fountain) rendered headl
 
 ## Time-of-day matrix (evidence/time_of_day_matrix.jpg, 2026-11-12) — lane, promenade, courtyard, café, bookshop, ground lobby × afternoon / golden / blue / night
 All 24 shots rendered with zero page errors (headless, not M2). Observations: exteriors respond correctly (lamps/halos/windows turn on, planting dims at night). Findings (open): café + bookshop interiors look nearly identical in all four presets (interior lighting is not time-driven — the café ceiling/walls read bright at night); lane "night" is close to blue hour (needs a darker night grade); lobby afternoon is very white. Owner to judge against Bible per-time targets.
+
+## 2026-11-13 regression (after s04 corrections, lamp reflections, roof kit, haze)
+Balcony camera x weather/time: sunny morning, cloudy afternoon, light rain golden, heavy rain golden, moderate rain night; street lane heavy rain blue hour. No page errors. Reflections weaken with rain/cloud as designed, haze thickens, wet paving darkens. Evidence: evidence/regress_s04_weather_time_matrix_2026-11-13.jpg, regress_lane_heavyrain_bluehour_lampreflect.png. Known: dark-blue base patches on the far bank in rain/night (existing bank glass).

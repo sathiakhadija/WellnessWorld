@@ -300,6 +300,8 @@ export function buildStreet() {
     // Bible s08: the sett room under the tree is framed by four taller lanterns at its corners, and the tree is up-lit warm from below (target p.31)
     for (const [dx, dz] of [[-8.9, -8.9], [8.9, -8.9], [-8.9, 8.9], [8.9, 8.9]]) { baked(g, W0, 'bollard_lantern', cx + dx, cz + dz, 0, LAN, 0, 1.15); reflects.push([cx + dx, GY + 0.85, cz + dz]); pools.push([cx + dx, cz + dz, 4.2, GY]) }
     lightsAt.push({ x: cx, y: GY + 1.1, z: cz, color: '#ffc98a', intensity: 9, distance: 12 })
+    // Bible s08 (p.31): tall black lamp standards along both house frontages, warm and low-glare
+    for (const sx of [CX0 + 2.9, CX1 - 2.9]) for (const lz of [CZ0 + 10, CZ0 + 22]) lamp(sx, lz, 0)
     pools.push([cx, cz, 9]); halos.push([cx + 2.4, GY + 2.6, cz - 1])
     pois.courtyard = { x: BX, z: 30 }
 
