@@ -32,7 +32,7 @@ function kit(name) {
 
 function useMats() {
   return useMemo(() => {
-    const brass = ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true), roughness: 0.34, metalness: 1, envMapIntensity: 2.2 }, 'lobbyBrass')
+    const brass = ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true).lerp(new THREE.Color('#cdbb98'), 0.4), roughness: 0.4, metalness: 1, envMapIntensity: 1.3 }, 'lobbyBrass')
     const warm = new THREE.MeshBasicMaterial({ color: wwHex('WW_LAMP_WARM'), toneMapped: false })
     const marbleL = LT.marbleLight(), marbleD = LT.marbleDark(), gold = LT.brushedGold(); gold.wrapS = gold.wrapT = THREE.RepeatWrapping
     return {
@@ -42,7 +42,7 @@ function useMats() {
       marble: ww('WW_MARBLE_DARK', { map: marbleD, color: new THREE.Color('#4a4340'), roughness: 0.26, envMapIntensity: 1.2 }, 'lobbyDark'),
       top: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.3 }, 'lobbyTop'),
       flute: ww('WW_LIMESTONE_CREAM', { roughness: 0.62 }, 'lobbyFlute'),
-      gold: ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true), map: gold, roughness: 0.3, metalness: 1, envMapIntensity: 2.6 }, 'lobbyGold'),
+      gold: ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true).lerp(new THREE.Color('#d6c7a6'), 0.45), map: gold, roughness: 0.34, metalness: 1, envMapIntensity: 1.5 }, 'lobbyGold'),
       brass, dark: ww('WW_IRONWORK_CHARCOAL', { roughness: 0.45, metalness: 0.4 }, 'lobbyDark2'),
       tube: warm, wax: ww('WW_LIMESTONE_CREAM', { roughness: 0.6 }, 'lobbyWax'),
       rug: ww('WW_RUG_CREAM', { map: LT.rugTex(), roughness: 1 }, 'lobbyRug'),
