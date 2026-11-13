@@ -185,11 +185,7 @@ export function shopBuilding(ch, F, o) {
   const ys = [ground]; for (let i = 0; i < nf - 1; i++) ys.push(ys[i] + fh[i])
   if (nf >= 2 && R() < 0.55) {   // Bible s12: wisteria curtain trailing from the first-floor line over the shopfront
     const cx = (R() - 0.5) * w * 0.5, span = Math.min(w * 0.6, 4.2), top = ys[0] + 1.95
-    for (let k = 0; k < 44; k++) {
-      const x = cx - span / 2 + R() * span, l = 0.5 + R() * 0.95, r0 = 0.045 + R() * 0.05
-      ch.prism(F, x, 0.34 + R() * 0.12, r0, 0.015, top - l, top, col(['#a58fc4', '#b9a6d6', '#8e76ae', '#c8b8e0'][(R() * 4) | 0]), 'leaf', 5)
-      if (R() < 0.6) ch.prism(F, x + (R() - 0.5) * 0.1, 0.4, 0.045, 0.02, top - l * 0.4, top + 0.05, col(['#5b7243', '#6b7f4a', '#4e6139'][(R() * 3) | 0]), 'leaf', 5)
-    }
+    for (let k = 0; k < Math.round(span / 0.45); k++) { const x = cx - span / 2 + (k + 0.5) * span / Math.round(span / 0.45) + (R() - 0.5) * 0.2; baked(ch, F, R() < 0.5 ? 'wisteria0' : 'wisteria1', x, 0.38 + R() * 0.1, R() * 6, { bloom: ['#7a4fb0', '#6a3f9f'][(R() * 2) | 0], bloom2: '#a77fd6', stem: '#5a4636', leaf: '#4e6a38' }, top, 1.1 + R() * 0.5) }
     ch.box(F, cx - span / 2, cx + span / 2, top, top + 0.06, 0.28, 0.46, col('#5b7243'), 'leaf', 'fulr', 1, 1, 0)
   }
   const top = ys[nf - 1]

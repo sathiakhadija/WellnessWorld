@@ -48,3 +48,6 @@ Blender `make_hedge.py` (bumpy superellipse hedge segment + leaf fringe, tiled/n
 
 ## RESHAPE 5 — Café ceiling + remaining blob flowers — PARTIAL
 Café ceiling (was flat peach plane): stained-oak cross beams + spine beam, plaster cove, recessed lit panels (reshape_cafe_ceiling_beams.png). All remaining prism-blob flowers (fountain ring, terrace planters, florist buckets, window boxes, lawn beds) replaced with the organic Blender flowers. Library shelves/café verified populated in same-viewpoint renders. OPEN: topiary balls, topiary-on-stick, wisteria strands, café chairs/tables still simple, glazing operability/rain exclusion untested.
+
+## RESHAPE 6 — Wisteria, posies, topiary + foliage material fix — PARTIAL
+Blender `make_decor_plants.py` (hanging wisteria racemes, vase posy of daisies, leaf-clad topiary in tub) replaces prism blobs in the shopfront wisteria curtains, café/library posies and shop-entrance topiary. **Bug found and fixed:** the `leaf` material was single-sided, so most petals/florets/grass blades were culled from one side; it is now DoubleSide (reshape_flowers_doublesided_fix.png, reshape_wisteria_organic.png). OPEN: wisteria reads slightly stringy at distance, tri/fill-rate impact of double-sided foliage unmeasured on M2.

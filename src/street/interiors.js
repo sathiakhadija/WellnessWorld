@@ -10,8 +10,9 @@ import BRANCHES from '../baked/branches.json'   // produced by assets/blender/ma
 import SHOP from '../baked/shop_props.json'   // assets/blender/make_shop_props.py (Blender)
 import FLOWERS from '../baked/flowers.json'   // assets/blender/make_flowers.py (Blender): curved-petal flowers, veined leaves, tapered stems
 import HEDGE from '../baked/hedge.json'   // assets/blender/make_hedge.py
+import DECOR from '../baked/decor_plants.json'   // assets/blender/make_decor_plants.py
 import PLANTS from '../baked/plants.json'   // produced by assets/blender/make_plants.py (Blender)
-const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES, ...SHOP, ...FLOWERS, ...HEDGE }
+const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES, ...SHOP, ...FLOWERS, ...HEDGE, ...DECOR }
 const PLANT_RE = /^(hydrangea|lavender|shrub)/   // organic kit: smooth floret balls
 const col = (h) => new THREE.Color(h)
 
@@ -74,12 +75,11 @@ const table = (ch, F, x, z, r, top, c1, c2) => baked(ch, F, 'bistro_table', x, z
 
 // hydrangea posy in a ceramic vase (Bible s13: lilac / mauve / cream blooms) — y = surface height
 function posy(ch, F, x, z, y, s = 1, tones = ['#9b7bb8', '#b894c8', '#e9dff0', '#c9a3c4', '#8a6aa6']) {
-  ch.prism(F, x, z, 0.06 * s, 0.045 * s, y, y + 0.16 * s, col('#efe6da'), 'slab', 10)
-  for (let k = 0; k < 6; k++) { const a = k * 1.05, r = k ? 0.075 * s : 0; ch.prism(F, x + Math.cos(a) * r, z + Math.sin(a) * r, 0.07 * s, 0.05 * s, y + 0.15 * s, y + (0.24 + (k % 2) * 0.03) * s, col(tones[k % tones.length]), 'leaf', 7) }
+  baked(ch, F, 'posy0', x, z, x * 7.3 + z, { marble: '#efe6da', bloom2: tones[((x * 3 + z * 5) | 0) % tones.length & 3 || 0], bloom: '#f3e6b0', stem: '#6b8a50', leaf: '#5f7f48' }, y, s * 1.05)
 }
 // hanging wisteria strands from the ceiling
 function wisteria(ch, F, x, z, len = 0.9, s = 1) {
-  for (let k = 0; k < 11; k++) { const dx = (k - 5) * 0.075 * s, dz = ((k * 7) % 5 - 2) * 0.06 * s, l = len * (0.55 + ((k * 5) % 7) * 0.08); ch.prism(F, x + dx, z + dz, 0.05 * s, 0.014 * s, CE - l, CE - 0.04, col(['#a78bcb', '#8e6fb4', '#b79bd6', '#6f9a55'][k % 4]), 'leaf', 6) }
+  baked(ch, F, len > 1.0 ? 'wisteria1' : 'wisteria0', x, z, x * 5.1, { bloom: '#a78bcb', bloom2: '#c8b8e0', stem: '#6b5a48', leaf: '#6f9a55' }, CE - 0.02, s * Math.max(0.7, len / 0.9))
 }
 export function cafeInterior(ch, F, c, L) {
   const { w, d } = c, x0 = -w / 2 + 0.12, x1 = w / 2 - 0.12, z0 = -d + 0.3
