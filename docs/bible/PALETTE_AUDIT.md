@@ -1,6 +1,6 @@
 # Palette audit
 
-Generated 2026-11-13T16:25:16.791Z — registry 39 materials.
+Generated 2026-11-13T22:00:32.580Z — registry 39 materials.
 
 ## Registry checks
 - ⚠️ WW_LIMESTONE_CREAM ≈ WW_MARBLE_LIGHT (ΔE2000 1.7) — consider merging
@@ -10,9 +10,9 @@ Generated 2026-11-13T16:25:16.791Z — registry 39 materials.
 ## Unregistered colours in source (nearest registered colour, ΔE2000)
 | file | distinct hex | unregistered uses | within ΔE<3 of registry |
 |---|---|---|---|
-| src/street/plan.js | 204 | 216 | 163 |
-| src/street/buildings.js | 87 | 71 | 28 |
-| src/street/interiors.js | 79 | 64 | 92 |
+| src/street/plan.js | 229 | 242 | 174 |
+| src/street/buildings.js | 96 | 83 | 31 |
+| src/street/interiors.js | 81 | 67 | 93 |
 | src/Waterfront.jsx | 34 | 31 | 3 |
 | src/street/props.js | 31 | 26 | 8 |
 | src/street/facade.js | 34 | 23 | 11 |
@@ -28,7 +28,7 @@ Generated 2026-11-13T16:25:16.791Z — registry 39 materials.
 | src/Lobby.jsx | 8 | 4 | 4 |
 | src/characters/CharacterPicker.jsx | 2 | 1 | 1 |
 
-Total unregistered colour uses: 540 (migrate area by area; do not bulk-recolour approved environments).
+Total unregistered colour uses: 581 (migrate area by area; do not bulk-recolour approved environments).
 
 ## Duplicate MeshStandardMaterial definitions
 - none

@@ -7,7 +7,7 @@ exec(open(os.path.join(here, 'make_flowers.py')).read().split('# ---------- flow
 
 def hedge_seg(name, seed):
     reset(); PARTS.clear(); rnd = random.Random(seed)
-    bm = bmesh.new(); ns, n = 9, 22; rings = []
+    bm = bmesh.new(); ns, n = 5, 14; rings = []
     for i in range(ns):
         x = -1 + 2 * i / (ns - 1); r = []
         endshrink = 1.0 if 0 < i < ns - 1 else 0.96
@@ -29,7 +29,7 @@ def hedge_seg(name, seed):
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     keep(new_obj('body', bm), 'leaf', '#ffffff')
     fb = bmesh.new()
-    for j in range(34):
+    for j in range(14):
         x = rnd.uniform(-0.95, 0.95); a = rnd.uniform(0.15, math.pi - 0.15)           # mostly upper half
         pos = Vector((x, 0.5 * math.cos(a) * 0.95, 0.5 + 0.5 * math.sin(a) * 0.95))
         nd = Vector((rnd.uniform(-0.3, 0.3), math.cos(a), math.sin(a))).normalized()

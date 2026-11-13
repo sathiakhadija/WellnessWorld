@@ -421,7 +421,7 @@ export function buildStreet() {
       }
       // wildflower meadows in the two southern rooms + herbaceous drifts along the new walks
       const K2 = ['d', 'l', 'c', 'r', 'd', 't', 'p', 'c', 'h', 'l']; let kj = 0
-      for (const [x0, x1, z0, z1] of [[-58, -32, -34, -10], [6, 30, -34, -10], [-58, -34, -86, -56]]) for (let i = 0; i < 34; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K2[kj++ % 10], 0.85 + R() * 0.5)
+      for (const [x0, x1, z0, z1] of [[-58, -32, -34, -10], [6, 30, -34, -10], [-58, -34, -86, -56]]) for (let i = 0; i < 22; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K2[kj++ % 10], 0.85 + R() * 0.5)
       // groves with proper canopy at the corners of each room (layered: tall plane + ornamental + shrub underplanting)
       for (const [gx, gz] of [[-56, -80], [-56, -14], [30, -14], [32, -80], [-24, -58], [-4, -20], [6, -56]]) { for (let i = 0; i < 5; i++) { const a = R() * 6.28, d = R() * 4.5; tree(i < 2 ? 'plane' : 'ornamental', gx + Math.cos(a) * d, gz + Math.sin(a) * d, 1.0 + R() * 0.5) } for (let i = 0; i < 5; i++) put('shrub', gx + (R() - 0.5) * 9, gz + (R() - 0.5) * 9, R() * 6, 0.9 + R() * 0.5) }
       // sheltered benches at the path bends
@@ -440,7 +440,7 @@ export function buildStreet() {
         surf(g, 'grass', x0, x1, z0, z1, '#7a8f52', 4, 4, 2)
         for (const [a, b, c2, d2] of [[x0, x1, z0, z0 + 0.45], [x0, x1, z1 - 0.45, z1], [x0, x0 + 0.45, z0, z1], [x1 - 0.45, x1, z0, z1]]) hedge(g, a, b, c2, d2, 0.5, '#4e6139')
         const kinds = [['r', 'r', 'd', 'l'], ['l', 'h', 'r', 'c'], ['r', 'p', 'd', 'r'], ['t', 'r', 'c', 'h']][q++ % 4]
-        for (let i = 0; i < 12; i++) plantAt(g, x0 + 0.9 + R() * (bw - 1.8), z0 + 0.9 + R() * (bd - 1.8), kinds[i % 4], 1.2)
+        for (let i = 0; i < 9; i++) plantAt(g, x0 + 0.9 + R() * (bw - 1.8), z0 + 0.9 + R() * (bd - 1.8), kinds[i % 4], 1.2)
       }
       for (const [dx, dz] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) bench(cx + dx * (W2 / 2 + 2.6) * (dx ? 1 : 0) + (dz ? 0 : 0), cz + dz * (D2 / 2 + 2.4), dx ? (dx > 0 ? -Math.PI / 2 : Math.PI / 2) : (dz > 0 ? Math.PI : 0))
       for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) tree('clipped', cx + dx * (W2 / 2 + 3.4), cz + dz * (D2 / 2 + 3.4), 0.9, Math.PI / 2)
@@ -448,7 +448,7 @@ export function buildStreet() {
     parterre(-36, -114, 9, 6.5); parterre(24, -114, 5.5, 5)
     // ramp-foot garden room (west of the piazza, below the retaining wall): meadow drifts, flowering shrubs and a tree ring so no raw lawn is visible from the walks
     { const K3 = ['d', 'c', 'r', 'l', 'h', 'p', 't', 'd']; let k3 = 0
-      for (const [x0, x1, z0, z1, n] of [[-92, -62, -128, -101, 60], [14, 36, -128, -101, 20]]) { for (let i = 0; i < n; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K3[k3++ % 8], 1.1 + R() * 0.3); for (let i = 0; i < 5; i++) tree(R() < 0.5 ? 'ornamental' : 'plane', x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), 0.95 + R() * 0.3); for (let i = 0; i < 8; i++) put('shrub', x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), R() * 6, 0.9 + R() * 0.5) }
+      for (const [x0, x1, z0, z1, n] of [[-92, -62, -128, -101, 34], [14, 36, -128, -101, 14]]) { for (let i = 0; i < n; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K3[k3++ % 8], 1.1 + R() * 0.3); for (let i = 0; i < 5; i++) tree(R() < 0.5 ? 'ornamental' : 'plane', x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), 0.95 + R() * 0.3); for (let i = 0; i < 8; i++) put('shrub', x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), R() * 6, 0.9 + R() * 0.5) }
       surf(g, 'gravel', -84, -82, -128, -101, G.gravel, 2, 2, 1); bench(-83, -112, Math.PI / 2); bench(-83, -122, Math.PI / 2) }
     // west + east boundary of the neighbourhood (a stone plinth with a tall clipped hedge) so the world has a clear edge
     wall(g, WEST - 0.6, WEST, -132, SOUTH, 1.2); hedge(g, WEST + 0.0, WEST + 1.4, -132, SOUTH, 2.2, '#46583a'); wall(g, EAST, EAST + 0.6, -132, SOUTH, 1.2); hedge(g, EAST - 1.4, EAST, -132, SOUTH, 2.2, '#46583a')

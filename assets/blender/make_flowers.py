@@ -37,7 +37,7 @@ def blade(bm, base, d, L, W, bend=0.0, cup=0.0, fold=0.0, rows=5, cols=3, prof=0
                 try: bm.faces.new(q)
                 except ValueError: pass
 
-def tube(bm, pts, r0, r1, seg=5):
+def tube(bm, pts, r0, r1, seg=4):
     """tapered stem swept through points (list of Vector)."""
     rings = []
     for i, p in enumerate(pts):
@@ -127,8 +127,8 @@ def head_floret_ball(B, c, r, seed=1, nflor=34, fs=0.05):                       
     for i in range(nflor):
         z = rnd.random() * 0.95; a = rnd.random() * math.tau; rr = math.sqrt(1 - z * z)
         nrm = Vector((math.cos(a) * rr, math.sin(a) * rr, z)); pos = Vector(c) + nrm * r * Vector((1, 1, 0.8))
-        for k in range(4):
-            ph = k / 4 * math.tau + rnd.random() * 0.4
+        for k in range(3):
+            ph = k / 3 * math.tau + rnd.random() * 0.4
             tang = nrm.cross(Vector((0, 0, 1))); tang = tang.normalized() if tang.length > 1e-3 else Vector((1, 0, 0))
             tang2 = nrm.cross(tang)
             dirv = (tang * math.cos(ph) + tang2 * math.sin(ph) + nrm * 0.35).normalized()
@@ -168,9 +168,9 @@ def hydrangea_new(name, seed, h=0.62, r=0.42, heads=4):
     for i in range(heads):
         a = i / heads * math.tau + rnd.random() * 0.8; rr = r * (0.2 + 0.45 * rnd.random()); z = h * (0.62 + 0.3 * rnd.random())
         c = Vector((math.cos(a) * rr, math.sin(a) * rr, z)); tube(B['stem'], [Vector((c.x * 0.2, c.y * 0.2, 0.05)), Vector((c.x * 0.6, c.y * 0.6, z * 0.5)), Vector((c.x, c.y, z - 0.05))], 0.01, 0.008)
-        head_floret_ball(B, c, 0.11 + rnd.random() * 0.04, seed + i, 16, 0.07)
-    for j in range(9):                                                             # big opposite, serrated-look leaves around the stems
-        a = j / 9 * math.tau + rnd.random() * 0.4; zb = 0.08 + rnd.random() * h * 0.45
+        head_floret_ball(B, c, 0.11 + rnd.random() * 0.04, seed + i, 10, 0.08)
+    for j in range(6):                                                             # big opposite, serrated-look leaves around the stems
+        a = j / 6 * math.tau + rnd.random() * 0.4; zb = 0.08 + rnd.random() * h * 0.45
         leaf(B['leaf'], Vector((math.cos(a) * 0.04, math.sin(a) * 0.04, zb)), a, 0.25 + rnd.random() * 0.3, r * (0.7 + rnd.random() * 0.3), r * 0.55, bend=0.6, fold=0.6)
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
     return finish(name)
