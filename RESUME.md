@@ -18,3 +18,9 @@ Rule: Section 04 stays "TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION
 - Static triangles 313k (PERF_BENCHMARK.md). M2 benchmark is owner's (`?bench=1`).
 - Next: s07 floor lanterns (blossom-canopy palette conflict needs owner decision), s10 topiary, s13 warmer limewash/back-lit shelving, close-up flower/book detail, night dimming for plants, Blender masters for remaining envs, owner audit before any push.
 - Tooling note: when re-running shots delete the log file first (stale "errors" line ends the wait loop early).
+
+## CHECKPOINT 2026-11-13 (autonomous long run)
+- Everything is on origin/main (owner authorised pushing; latest 0b5af74). Owner is auditing on localhost himself (clone, `npm install`, `npm run dev`); do not ask him to pull/restart again.
+- This run: lobby floor-collider fix (D-008), smoother rain (D-009), great-lawn formal garden (D-010), Blender planting kit + topiary in s08–s12/s15, s06 pools/niche, s07 floor lanterns, s13 counter/back bar, s14 mouldings, s12 amber windows, halos/AO tweaks, s09 Blender master + 4-way sheet, time-of-day matrix (MATRIX.md), perf notes (445k static tris).
+- Walking tests (arrow keys through real physics, not teleports): penthouse door→lift, lobby→courtyard→square→lane→promenade, ramp climb. Shop doors are closed until Enter is pressed (not a bug).
+- Open: s04 owner approval; s07 blossom canopy palette decision; close-up plant/furniture fidelity; true reflections; Blender masters for s01–s08, s10–s14; owner M2 benchmark.
