@@ -37,9 +37,13 @@ export function buildStreet() {
   const GREENS = ['#566e40', '#647a47', '#4f6a3d', '#6b8050']
   const plantAt = (ch, x, z, kind, k = 1, F = W0) => {
     const gcol = GREENS[(R() * GREENS.length) | 0], rot = R() * Math.PI * 2, sc = (0.85 + R() * 0.5) * k
-    if (kind === 'h') baked(ch, F, `hydrangea${(R() * 3) | 0}`, x, z, rot, { leaf: gcol, bloom: '#ebe5d6' }, 0, sc)
-    else if (kind === 'p') baked(ch, F, 'hydrangea_lilac', x, z, rot, { leaf: gcol, bloom2: '#9a88b4' }, 0, sc)
-    else if (kind === 'l') baked(ch, F, `lavender${(R() * 2) | 0}`, x, z, rot, { leaf: '#7a8a68', stem: '#7a8a68', bloom2: '#8b7b9c' }, 0, sc)
+    if (kind === 'h') baked(ch, F, `hydrangea_n${(R() * 3) | 0}`, x, z, rot, { leaf: gcol, bloom: '#ebe5d6', bloom2: '#f4efe4', stem: '#6b7a4a' }, 0, sc)
+    else if (kind === 'p') baked(ch, F, `hydrangea_n${(R() * 3) | 0}`, x, z, rot, { leaf: gcol, bloom: '#9a88b4', bloom2: '#b7a6cc', stem: '#6b7a4a' }, 0, sc)
+    else if (kind === 'l') baked(ch, F, `lavender_n${(R() * 2) | 0}`, x, z, rot, { leaf: '#7a8a68', stem: '#7a8a68', bloom2: '#8b7b9c' }, 0, sc)
+    else if (kind === 'r') baked(ch, F, `rose${(R() * 2) | 0}`, x, z, rot, { leaf: '#3f5a38', stem: '#4c6a3c', bloom: ['#d9708a', '#f0d9c4', '#c7485f', '#f2b6a8'][(R() * 4) | 0], bloom2: '#f6e6d8' }, 0, sc)
+    else if (kind === 'd') baked(ch, F, `daisy${(R() * 2) | 0}`, x, z, rot, { leaf: '#5a7a44', stem: '#6a8a50', bloom2: '#f7f3ea', bloom: '#e3b83c' }, 0, sc)
+    else if (kind === 't') baked(ch, F, 'tulip0', x, z, rot, { leaf: '#5f8248', stem: '#6a8a50', bloom: ['#e66a5a', '#f2c94c', '#e8a0b4', '#f4efe4'][(R() * 4) | 0], bloom2: '#f6e6d8' }, 0, sc)
+    else if (kind === 'c') baked(ch, F, 'cosmos0', x, z, rot, { leaf: '#6a8a50', stem: '#6a8a50', bloom: ['#e88fb0', '#f4e4ec', '#c75a8a'][(R() * 3) | 0], bloom2: '#e3b83c' }, 0, sc)
     else baked(ch, F, `shrub${(R() * 2) | 0}`, x, z, rot, { leaf: gcol }, 0, sc)
   }
 
@@ -412,12 +416,13 @@ export function buildStreet() {
         for (const [dx, dz] of [[-5.4, -5.4], [5.4, -5.4], [-5.4, 5.4], [5.4, 5.4]]) lamp(PX + dx, PZb + dz, 0)
       }
       // wildflower meadows in the two southern rooms + herbaceous drifts along the new walks
-      const K2 = ['h', 'l', 'p', 'l', 'h', 's', 'p']; let kj = 0
-      for (const [x0, x1, z0, z1] of [[-58, -32, -34, -10], [6, 30, -34, -10], [-58, -34, -86, -56]]) for (let i = 0; i < 70; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K2[kj++ % 7], 0.85 + R() * 0.5)
+      const K2 = ['d', 'l', 'c', 'r', 'd', 't', 'p', 'c', 'h', 'l']; let kj = 0
+      for (const [x0, x1, z0, z1] of [[-58, -32, -34, -10], [6, 30, -34, -10], [-58, -34, -86, -56]]) for (let i = 0; i < 34; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K2[kj++ % 10], 0.85 + R() * 0.5)
       // groves with proper canopy at the corners of each room (layered: tall plane + ornamental + shrub underplanting)
       for (const [gx, gz] of [[-56, -80], [-56, -14], [30, -14], [32, -80], [-24, -58], [-4, -20], [6, -56]]) { for (let i = 0; i < 5; i++) { const a = R() * 6.28, d = R() * 4.5; tree(i < 2 ? 'plane' : 'ornamental', gx + Math.cos(a) * d, gz + Math.sin(a) * d, 1.0 + R() * 0.5) } for (let i = 0; i < 5; i++) put('shrub', gx + (R() - 0.5) * 9, gz + (R() - 0.5) * 9, R() * 6, 0.9 + R() * 0.5) }
       // sheltered benches at the path bends
       for (const [bx2, bz2, ry] of [[-52, -58, 0.8], [-36, -76, 0.4], [-50, -24, -0.8], [-30, -12, -0.4], [24, -58, -0.8], [26, -24, 0.8], [8, -16, 0.4]]) bench(bx2, bz2, ry)
+      for (const [bx2, bz2] of [[-52, -58], [-36, -76], [-50, -24], [-30, -12], [24, -58], [26, -24], [8, -16]]) for (let i = 0; i < 5; i++) { const a = R() * 6.28, d = 1.6 + R() * 2.2; plantAt(g, bx2 + Math.cos(a) * d, bz2 + Math.sin(a) * d, ['r', 't', 'd', 'c', 'h'][i], 1.2) }   // bedding round each bench: roses, tulips, daisies
     }
     // west + east boundary of the neighbourhood (a stone plinth with a tall clipped hedge) so the world has a clear edge
     wall(g, WEST - 0.6, WEST, -132, SOUTH, 1.2); hedge(g, WEST + 0.0, WEST + 1.4, -132, SOUTH, 2.2, '#46583a'); wall(g, EAST, EAST + 0.6, -132, SOUTH, 1.2); hedge(g, EAST - 1.4, EAST, -132, SOUTH, 2.2, '#46583a')

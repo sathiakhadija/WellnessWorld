@@ -8,8 +8,9 @@ import LANTERNS from '../baked/lanterns.json'
 import CAFEPROPS from '../baked/cafe_props.json'   // assets/blender/make_cafe_props.py (Blender)   // produced by assets/blender/make_lanterns.py (Blender)
 import BRANCHES from '../baked/branches.json'   // produced by assets/blender/make_branches.py (Blender)
 import SHOP from '../baked/shop_props.json'   // assets/blender/make_shop_props.py (Blender)
+import FLOWERS from '../baked/flowers.json'   // assets/blender/make_flowers.py (Blender): curved-petal flowers, veined leaves, tapered stems
 import PLANTS from '../baked/plants.json'   // produced by assets/blender/make_plants.py (Blender)
-const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES, ...SHOP }
+const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES, ...SHOP, ...FLOWERS }
 const PLANT_RE = /^(hydrangea|lavender|shrub)/   // organic kit: smooth floret balls
 const col = (h) => new THREE.Color(h)
 
