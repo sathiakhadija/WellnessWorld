@@ -13,6 +13,7 @@ import { LIVE } from '../atmosphere.js'
 import { discoStore } from '../discoveries.js'
 import { buildStreet, BX, hash } from './plan.js'
 import { GY } from './geo.js'
+import { FountainFx } from './FountainFx.jsx'
 import { WX } from '../weather/weather.js'
 import * as T from './textures.js'
 import * as P from './props.js'
@@ -240,10 +241,7 @@ export function StreetVisuals() {
           {w.kind === 'pool' ? <planeGeometry args={[w.w, w.d]} /> : <circleGeometry args={[w.r, 40]} />}
         </mesh>
       ))}
-      {built.jets.map((j, i) => [0, 1, 2, 3, 4].map((k) => {
-        const a = (k / 5) * Math.PI * 2, r = k === 0 ? 0 : 0.5
-        return <mesh key={'j' + i + k} ref={(m) => { if (m) { m.userData.y = j.y; m.userData.k = k; jetRefs.current[k] = m } }} position={[j.x + Math.cos(a) * r, j.y + 0.75, j.z + Math.sin(a) * r]}><cylinderGeometry args={[0.025, 0.05, 1.5, 6]} /><meshStandardMaterial color="#e8eef6" transparent opacity={0.55} roughness={0.2} /></mesh>
-      }))}
+      <FountainFx jets={built.jets} />
       {built.lightsAt.map((l, i) => <pointLight key={'l' + i} ref={(p) => { if (p) { p.userData.i = l.intensity; p.userData.always = !!l.always; lightRefs.current[i] = p } }} position={[l.x, l.y, l.z]} color={l.color} intensity={0} distance={l.distance} decay={1.6} />)}
     </>
   )
