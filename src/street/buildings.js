@@ -260,7 +260,7 @@ export function shopBuilding(ch, F, o) {
       const sy = yy0 + sill + 0.02, bl = [['#e8c9d2', '#f3f0ea', '#b9a5c9'], ['#f3f0ea', '#d9a8ae', '#cfa9c6']][R() < 0.5 ? 0 : 1]
       ch.box(F, cx - 0.52, cx + 0.52, sy, sy + 0.24, 0.1, 0.34, col('#4a3b30'), 'wood', 'fulrb', 1, 1, 0)
       ch.box(F, cx - 0.5, cx + 0.5, sy + 0.24, sy + 0.4, 0.12, 0.32, col('#5d7a46'), 'leaf', 'fulr', 1, 1, 0)
-      for (let k = 0; k < 6; k++) ch.prism(F, cx - 0.42 + k * 0.168, 0.23 + (k % 2) * 0.03, 0.09, 0.08, sy + 0.38, sy + 0.54 + (k % 3) * 0.04, col(bl[k % 3]), 'leaf', 6)
+      for (let k = 0; k < 3; k++) baked(ch, F, k % 2 ? 'daisy1' : 'cosmos0', cx - 0.34 + k * 0.34, 0.23, k * 2.1, { leaf: '#5a7a44', stem: '#6a8a50', bloom: bl[k % 3], bloom2: k % 2 ? '#f7f3ea' : '#e3b83c' }, sy + 0.38, 0.55)   // organic window-box flowers
     }
     ch.box(F, -w / 2 - 0.02, w / 2 + 0.02, yy0 - 0.06, yy0 + 0.06, -0.02, 0.06, stone, 'trim', 'fu')
   }

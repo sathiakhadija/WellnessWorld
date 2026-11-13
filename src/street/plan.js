@@ -276,7 +276,7 @@ export function buildStreet() {
       g.prism(FT, 0, 0, 2.63, 2.63, 0.3, 0.33, col('#ffd29a'), 'glow', 36)                                                       // softly glowing recessed light strip
       g.prism(FT, 0, 0, 2.62, 2.62, 0.42, 0.46, col('#efe7d8'), 'trim', 36)                                                      // coping
       g.prism(FT, 0, 0, 2.3, 2.3, 0.42, 0.5, col('#5a4a3a'), 'gravel', 30)                                                       // soil bed
-      for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2, r = 1.55 + (i % 3) * 0.25; g.prism(frame(cx + Math.cos(a) * r, cz + Math.sin(a) * r, 0, GY), 0, 0, 0.34, 0.16, 0.48, 0.68, col(['#edE6d7', '#82749a', '#718451'][i % 3]), 'leaf', 8) }   // off-white, lavender and sage planting
+      for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2, r = 1.55 + (i % 3) * 0.25; plantAt(g, cx + Math.cos(a) * r, cz + Math.sin(a) * r, ['h', 'l', 'd', 'p', 'c'][i % 5], 0.9) }   // off-white, lavender and sage planting
       g.solid(FT, -2.3, 2.3, 0, 0.46, -2.3, 2.3, 'planter')
     }
     const arc = (a0, a1, r = 3.6) => {
@@ -301,7 +301,7 @@ export function buildStreet() {
     const R2 = rng(77)
     for (const [bx0, bx1, bz0, bz1] of [[CX0 + 3, cx - 9.2, CZ0 + 8, cz - 3], [CX0 + 3, cx - 9.2, cz + 3, CZ1 - 3], [cx + 9.2, CX1 - 3, CZ0 + 8, cz - 8], [cx + 9.2, CX1 - 3, cz + 6, CZ1 - 3]]) {
       for (let i = 0; i < 14; i++) { const x = bx0 + R2() * (bx1 - bx0), z = bz0 + R2() * (bz1 - bz0); if (R2() < 0.55) put('shrub', x, z, R2() * 6, 0.7 + R2() * 0.5); else put('grass', x, z, R2() * 6, 0.9 + R2() * 0.5) }
-      for (let i = 0; i < 4; i++) { const x = bx0 + R2() * (bx1 - bx0), z = bz0 + R2() * (bz1 - bz0); g.prism(frame(x, z, 0, GY), 0, 0, 0.3, 0.22, 0.0, 0.34, col(['#cfa9ad', '#e4d9cb', '#b7a5c4'][i % 3]), 'leaf', 8) }
+      for (let i = 0; i < 6; i++) { const x = bx0 + R2() * (bx1 - bx0), z = bz0 + R2() * (bz1 - bz0); plantAt(g, x, z, ['h', 'l', 'r', 'd', 'c', 'p'][i], 1.1) }   // organic flowers (were pink prism blobs)
     }
     for (const [x, z] of [[cx - 4.6, CZ0 + 2.0], [cx + 4.6, CZ0 + 2.0]]) { put('planter', x, z, 0, 1.0) }
     put('ornamental', CX0 + 4.5, CZ0 + 14, 0, 0.8); put('ornamental', CX1 - 4.5, CZ0 + 17, 1, 0.85); put('ornamental', CX0 + 4.5, CZ1 - 6, 2, 0.8); put('ornamental', CX1 - 4.5, CZ1 - 8, 3, 0.8)
@@ -526,7 +526,7 @@ export function buildStreet() {
       const x = -34 + i * 8.2; if (Math.abs(x - BX) < 11.5) continue
       ch.box(FT, x - 1.3, x + 1.3, 0, 0.62, -134.9, -133.7, col('#d8cbb9'), 'ashlar', 'fulrb', 2.4, 1.2, 0.01); ch.box(FT, x - 1.34, x + 1.34, 0.62, 0.68, -135.0, -133.6, col('#e8dfcf'), 'trim', 'fulrbd', 1, 1, 0)
       ch.box(FT, x - 1.28, x + 1.28, 0.05, 0.1, -133.7, -133.66, col('#ffd29a'), 'glow', 'f', 1, 1, 0)
-      for (let k = 0; k < 6; k++) ch.prism(frame(x - 1.0 + k * 0.4, -134.3, 0, T), 0, 0, 0.26, 0.2, 0.68, 0.95 + (k % 2) * 0.12, col(['#4e6139', '#718451', '#82749a', '#718451', '#edE6d7', '#4e6139'][k]), 'leaf', 8)
+      for (let k = 0; k < 6; k++) plantAt(ch, x - 1.0 + k * 0.4, -134.3, ['s', 'l', 'p', 'h', 'd', 'l'][k], 0.85, frame(0, 0, 0, T))
       ch.solid(FT, x - 1.34, x + 1.34, 0, 0.9, -135.0, -133.6, 'planter')
       for (const [px, pz, pr, hw] of [[x, -133.6, 0, 1.45], [x, -135.0, Math.PI, 1.45], [x + 1.34, -134.3, -Math.PI / 2, 0.75], [x - 1.34, -134.3, Math.PI / 2, 0.75]]) aoStrip(ch, frame(px, pz, pr, T), -hw, hw, 0.95)   // baked-style contact AO around each planter
     }
@@ -769,7 +769,7 @@ export function buildStreet() {
     const R3 = rng(81)
     for (const [bx0, bx1, bz0, bz1] of [[-19, -10, 74, 86], [18, 31, 62.5, 70], [20, 31, 91, 104], [-7, 6, 100, 105], [-8, 2, 63, 66.5]]) {
       for (let i = 0; i < 16; i++) { const x = bx0 + R3() * (bx1 - bx0), z = bz0 + R3() * (bz1 - bz0); if (R3() < 0.5) put('shrub', x, z, R3() * 6, 0.7 + R3() * 0.5); else put('grass', x, z, R3() * 6, 0.9 + R3() * 0.5) }
-      for (let i = 0; i < 5; i++) { const x = bx0 + R3() * (bx1 - bx0), z = bz0 + R3() * (bz1 - bz0); g.prism(frame(x, z, 0, GY), 0, 0, 0.32, 0.22, 0, 0.32, col(['#cfa9ad', '#e4d9cb', '#b7a5c4', '#d9c08a'][i % 4]), 'leaf', 8) }
+      for (let i = 0; i < 5; i++) { const x = bx0 + R3() * (bx1 - bx0), z = bz0 + R3() * (bz1 - bz0); plantAt(g, x, z, ['r', 'h', 'c', 'd', 'p'][i % 5], 1.1) }
     }
     for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.3, r = 7.4; bench(SCX + Math.cos(a) * r, SCZ + Math.sin(a) * r, -a + Math.PI / 2 + Math.PI) }
     // seating corners: NW nook (two benches + a table under a plane), SE pergola bench
@@ -865,7 +865,7 @@ export function buildStreet() {
         { const sx = shopRes.dx > 0 ? -1 : 1, bx = sx * (w / 2 - 0.55), FA = frame(xc, zf, row > 0 ? 0 : Math.PI, GY); ch.box(FA, bx - 0.28, bx + 0.28, 0.0, 0.85, 1.45, 1.52, col('#26292a'), 'trim', 'fb', 1, 1, 0); ch.box(FA, bx - 0.28, bx + 0.28, 0.0, 0.85, 1.7, 1.77, col('#26292a'), 'trim', 'fb', 1, 1, 0); ch.box(FA, bx - 0.3, bx + 0.3, 0.84, 0.88, 1.43, 1.79, col('#8a6a4a'), 'wood', 'u', 1, 1, 0); ch.box(FA, bx - 0.22, bx + 0.22, 0.2, 0.7, 1.77, 1.775, col('#efe6d6'), 'glow', 'f', 1, 1, 0); ch.solid(FA, bx - 0.3, bx + 0.3, 0, 0.9, 1.4, 1.8, 'sign') }
         if (sp.id === 'cafe') { for (let i = 0; i < 4; i++) { const tx = xc + (i - 1.5) * 1.9, tz = zf + dir * 2.4; put('table', tx, tz, 0); put('chair', tx - 0.55, tz, Math.PI / 2); put('chair', tx + 0.55, tz, -Math.PI / 2) } put('planter', xc - w / 2 + 0.5, zf + dir * 1.3, 0, 1.0); put('planter', xc + w / 2 - 0.5, zf + dir * 1.3, 0, 1.0) }
         if (sp.id === 'cafe') { const FW = frame(xc, zf, Math.PI, GY), RW = rng(91); for (let i = 0; i < 90; i++) { const x = -w / 2 + 0.2 + RW() * (w - 0.4), y = 4.3 + RW() * 1.7, len = 0.5 + RW() * 0.8; ch.prism(FW, x, 0.42 + RW() * 0.12, 0.075, 0.015, y - len, y, col(['#9a82b5', '#b39bc8', '#82749a', '#c9b3d6'][i % 4]), 'leaf', 6, false); if (i % 3 === 0) ch.prism(FW, x + 0.1, 0.4, 0.3, 0.2, y, y + 0.22, col('#5f7a47'), 'leaf', 7) } }   // wisteria draped over the café frontage (Bible s13)
-        if (sp.id === 'florist') { for (let i = 0; i < 3; i++) { const fx = xc + (i - 1) * 1.1, fz = zf + dir * 0.9; ch.prism(frame(fx, fz, 0, GY), 0, 0, 0.2, 0.17, 0, 0.42, col('#6b6a70'), 'metal', 8); for (let j = 0; j < 5; j++) ch.prism(frame(fx + (j - 2) * 0.06, fz + ((j % 2) - 0.5) * 0.08, 0, GY), 0, 0, 0.07, 0.05, 0.42, 0.64 + (j % 3) * 0.05, col(['#cfa9ad', '#e4d9cb', '#b7a5c4', '#d9c08a', '#a9b39a'][j]), 'leaf', 6) } }
+        if (sp.id === 'florist') { for (let i = 0; i < 3; i++) { const fx = xc + (i - 1) * 1.1, fz = zf + dir * 0.9; ch.prism(frame(fx, fz, 0, GY), 0, 0, 0.2, 0.17, 0, 0.42, col('#6b6a70'), 'metal', 8); baked(ch, frame(0, 0, 0, GY + 0.4), 'cosmos0', fx, fz, i * 2, { leaf: '#5a7a44', stem: '#6a8a50', bloom: ['#e88fb0', '#f4e4ec', '#d9c08a'][i], bloom2: '#e3b83c' }, 0, 0.7); baked(ch, frame(0, 0, 0, GY + 0.4), 'daisy1', fx + 0.08, fz, 1 + i, { leaf: '#5a7a44', stem: '#6a8a50', bloom2: '#f7f3ea', bloom: '#e3b83c' }, 0, 0.8) } }
         if (sp.id === 'books') { ch.box(frame(xc, zf + dir * 0.9, row > 0 ? 0 : Math.PI, GY), -0.6, 0.6, 0, 1.1, -0.25, 0.25, col('#4a3a2c'), 'wood', 'fulrb'); ch.solid(frame(xc, zf + dir * 0.9, 0, GY), -0.6, 0.6, 0, 1.1, -0.25, 0.25, 'cart') }
         if (sp.id === 'bakery') { ch.box(frame(xc, zf + dir * 0.9, 0, GY), -0.5, 0.5, 0, 0.95, -0.28, 0.28, col('#6a4d3a'), 'wood', 'fulrb'); ch.box(frame(xc, zf + dir * 0.9, 0, GY), -0.52, 0.52, 0.95, 1.0, -0.3, 0.3, col('#d9c9a0'), 'trim', 'fulrb') }
         if (sp.id) pois[sp.id] = { x: xc, z: zf + dir * 0.6 }
@@ -919,7 +919,7 @@ export function buildStreet() {
     bench(68.3, 108.2, 0); put('lamp', 64.6, 106.5, 0, 1.0); pools.push([64.6, 106.5, 7.5]); halos.push([64.6, GY + 4.9, 106.5])
     tree('plane', 77, 85, 1.15); tree('ornamental', 62, 112, 1.0); tree('ornamental', 76, 112, 0.95); tree('ornamental', 49, 114, 0.95); tree('plane', 52, 80, 0.5)
     const R4 = rng(91); for (let i = 0; i < 26; i++) { const x = 49 + R4() * 31, z = 78 + R4() * 44; if (Math.hypot(x - px, z - pz) < 5.5 || (x > 62 && x < 72 && z > 103 && z < 110)) continue; if (R4() < 0.5) put('shrub', x, z, R4() * 6, 0.7 + R4() * 0.6); else put('grass', x, z, R4() * 6, 0.9 + R4() * 0.5) }
-    for (let i = 0; i < 6; i++) g.prism(frame(60 + R4() * 20, 80 + R4() * 38, 0, GY), 0, 0, 0.3, 0.2, 0, 0.3, col(['#cfa9ad', '#e4d9cb', '#b7a5c4'][i % 3]), 'leaf', 8)
+    for (let i = 0; i < 6; i++) plantAt(g, 60 + R4() * 20, 80 + R4() * 38, ['c', 'h', 'r', 'd', 'p', 't'][i], 1.1)
     wall(g, ES1, 57.2, 73.25 - 0.0, 73.4, 3.0, { col: PAL.stock, key: 'brick', nocap: true })                                                // alley wall, house side is the house itself
     pois.secret = { x: 66, z: 96 }; pois.alley = { x: 50, z: 74.2 }
     // masses that close the remaining voids (building backs) so the envelope is fully enclosed
