@@ -17,13 +17,13 @@ const RAY_GROUPS = interactionGroups([GROUPS.cameraRay], [GROUPS.world])
 // shared with the Player component (camera-relative walking)
 export const rigShared = { followYaw: 0 }
 
-const FOV = { follow: 50, free: 62, sims: 38 }
+const FOV = { follow: 54, free: 62, sims: 38 }
 const MARGIN = 0.3
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 const damp = (c, t, k, dt) => c + (t - c) * (1 - Math.exp(-k * dt))
 const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10)
 
-const FOLLOW0 = { yaw: 0, pitch: 0.30, dist: 3.0 }
+const FOLLOW0 = { yaw: 0, pitch: 0.36, dist: 4.4 }       // Audit cross-system: avatar was large and its ears clipped the lower viewport; pulled back, a touch higher
 const SIMS0 = { yaw: 0.55, pitch: 0.95, dist: 12 }
 const FREE0 = { pos: [-1.3, 1.65, -0.6], yaw: 0, pitch: -0.05 }
 const SIMS_BOUNDS = { x: [-10.2, 5.8], z: [-14, 0.3] }
@@ -152,7 +152,7 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
     if (mode === 'follow' || mode === 'sims') {
       const o = mode === 'follow' ? st.f : st.s
       const lim = mode === 'follow'
-        ? { pmin: -0.12, pmax: 1.25, dmin: 1.1, dmax: 7 }
+        ? { pmin: -0.12, pmax: 1.25, dmin: 1.4, dmax: 9 }
         : { pmin: 0.35, pmax: 1.45, dmin: 4, dmax: onStreet() ? 80 : 26 }
       const rot = (input.down('KeyQ') ? 1 : 0) - (input.down('KeyE') ? 1 : 0)
       o.yaw += -inp.ox * 0.0055 + rot * dt * 1.6
@@ -162,7 +162,7 @@ export default function CameraRig({ playerRef, playerMeshRef }) {
 
       if (mode === 'follow') {
         rigShared.followYaw = o.sy
-        if (p) _pivot.set(p.x, p.y + 1.3, p.z)
+        if (p) _pivot.set(p.x, p.y + 1.55, p.z)       // aim above the avatar so it sits in the lower third without hiding the scenery
       } else {
         // WASD / arrows / right-drag pan the pivot; the player is NOT moved
         const fx = -Math.sin(o.sy), fz = -Math.cos(o.sy), rx = Math.cos(o.sy), rz = -Math.sin(o.sy)
