@@ -734,6 +734,13 @@ export function buildStreet() {
     // Bible s12: Blender planting kit at the foot of both lane facades (lavender, hydrangea, shrub), thin so the 1.5 m pavements stay walkable
     { const K = ['l', 'h', 's', 'l', 'p', 'l']; let ki = 0
       for (let x = LX0 + 1.5; x < LX1 - 2; x += 2.9) { plantAt(g, x + (R() - 0.5) * 0.5, 86.45 + R() * 0.15, K[ki++ % 6], 0.85); plantAt(g, x + 0.9 + (R() - 0.5) * 0.5, 94.55 - R() * 0.15, K[ki++ % 6], 0.85) } }
+    // Bible s12: overhead warm string-light catenaries spanning the lane every 7 m (thin brass wire + glowing bulbs), well above head height
+    for (let x = LX0 + 8; x < LX1 - 6; x += 7) {
+      const N = 16
+      for (let i = 0; i <= N; i++) { const t = i / N, z = 86.3 + 8.4 * t, y = 5.6 - Math.sin(t * Math.PI) * 0.7
+        g.box(W0, x - 0.012, x + 0.012, y - 0.03, y, z, z + 0.52, col('#3a3128'), 'metal', 'fulr', 1, 1, 0)
+        if (i % 2 === 0) g.box(W0, x - 0.06, x + 0.06, y - 0.16, y - 0.04, z - 0.06, z + 0.06, col('#ffd9a0'), 'glow', 'fulrbd', 1, 1, 0) }
+    }
     const W_ = (a, p) => ({ sign: a, ...p })
     const NORTH = [
       { id: 'books', w: 7.4, sign: 1, awning: '#8d9a85', wall: 'plaster', main: '#d9d1bf', stall: '#3a3331', door: '#2f3d36' },
