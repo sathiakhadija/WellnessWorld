@@ -22,7 +22,7 @@ export const PRESETS = {
     sky: { zen: c(0.40, 0.36, 0.64), upper: c(0.62, 0.55, 0.80), mid: c(0.80, 0.70, 0.84), pink: c(0.99, 0.62, 0.62), hor: c(0.99, 0.70, 0.56), below: c(0.45, 0.38, 0.52), glow: c(0.85, 0.46, 0.28), cHi: c(1.0, 0.72, 0.70), cLo: c(0.68, 0.56, 0.80) },
   },
   blue: {
-    label: 'Blue Hour', icon: '🌆', sunAz: 40, sunEl: 5, sunCol: '#8aa0ff', sun: 0.6, hemiSky: '#8fa3e6', hemiGround: '#5a4a6a', hemi: 0.6, fill: 0.7, fillCol: '#8095d8',
+    label: 'Blue Hour', icon: '🌆', sunAz: 40, sunEl: 5, sunCol: '#8aa0ff', sun: 0.6, hemiSky: '#8fa3e6', hemiGround: '#37466a', hemi: 0.6, fill: 0.7, fillCol: '#8095d8',
     fog: '#5b567a', exp: 1.08, lit: 0.85, glow: 0.55, tint: [0.46, 0.50, 0.72], lamp: 1.0, win: 1.15,
     sky: { zen: c(0.10, 0.14, 0.34), upper: c(0.22, 0.26, 0.50), mid: c(0.45, 0.42, 0.66), pink: c(0.66, 0.52, 0.68), hor: c(0.74, 0.58, 0.64), below: c(0.20, 0.20, 0.32), glow: c(0.35, 0.20, 0.20), cHi: c(0.80, 0.65, 0.78), cLo: c(0.30, 0.32, 0.50) },
   },

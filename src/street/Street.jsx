@@ -40,6 +40,7 @@ function makeMaterials() {
   for (const k of ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']) applyWet(M[k])       // rain: darker, glossier, puddles
   return M
 }
+const GROUND_LIT = ['slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2']
 const NOSHADOW = new Set(['ao', 'glow', 'shopin', 'sign', 'paint', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2'])
 const GROUND = new Set(['ao', 'grass', 'slab', 'sett', 'road', 'gravel', 'slab2', 'sett2', 'road2', 'gravel2', 'paint'])
 
@@ -179,6 +180,8 @@ export function StreetVisuals() {
     jetRefs.current.forEach((m) => { if (!m) return; const s = 0.82 + 0.18 * Math.sin(t * 2.1 + m.userData.k * 1.7); m.scale.y = s; m.position.y = m.userData.y + (s * 1.5) / 2 })
     const onStreet = world.level === 'street'
     { const w = Math.min(1, LIVE.win), k = 0.55 + 0.62 * w; M.shopin.color.setRGB(k, k * (1 - 0.07 * w), k * (1 - 0.22 * w)) }   // Bible s12: shop interiors turn amber-gold at dusk (p.52), not flat cream
+    // Bible s08/s12 blue hour: the target paving is dark, cool and slightly glossy (wet-look setts catching lamp glow), not pale pink limestone
+    { const bl = Math.max(0, Math.min(1, (LIVE.tint.b - LIVE.tint.r) / 0.26)); for (const k of GROUND_LIT) { const m = M[k]; if (!m) continue; m.color.setRGB(1 - 0.34 * bl, 1 - 0.28 * bl, 1 - 0.06 * bl); m.roughness = (m.userData.r0 ??= m.roughness) * (1 - 0.42 * bl) } }
     //                                        // interiors read dim by day, glow at dusk
     for (const l of lightRefs.current) if (l) l.intensity = onStreet ? l.userData.i * (l.userData.always ? Math.max(LIVE.lamp, 0.6) : LIVE.lamp) : 0
     M.leaf.color.setScalar(1 - 0.3 * Math.min(1, LIVE.lamp))                                         // modelled planting (hydrangea/lavender/shrub) dims at night too

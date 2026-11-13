@@ -256,7 +256,7 @@ export function buildStreet() {
       const K = ['h', 'l', 'h', 'p', 'l', 's', 'h', 'l']
       let ki = 0
       for (const sx of [-1, 1]) for (let z = cz + 9.5; z < CZ1 - 1.5; z += 0.95) plantAt(g, cx + sx * (2.4 + R() * 0.8), z + (R() - 0.5) * 0.3, K[ki++ % K.length], 1.2)
-      for (const sx of [-1, 1]) for (let z = CZ0 + 7.5; z < cz - 9; z += 1.0) plantAt(g, cx + sx * (3.0 + R() * 1.4), z + (R() - 0.5) * 0.3, K[ki++ % K.length], 1.2)
+      for (const sx of [-1, 1]) for (let z = CZ0 + 6.8; z < cz - 8.6; z += 0.8) plantAt(g, cx + sx * (3.0 + R() * 1.6), z + (R() - 0.5) * 0.3, K[ki++ % K.length], 1.3)
     }
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
     put('plane', cx, cz, 0.3, 1.25)
@@ -295,7 +295,11 @@ export function buildStreet() {
     for (const [x, z] of [[cx - 4.6, CZ0 + 2.0], [cx + 4.6, CZ0 + 2.0]]) { put('planter', x, z, 0, 1.0) }
     put('ornamental', CX0 + 4.5, CZ0 + 14, 0, 0.8); put('ornamental', CX1 - 4.5, CZ0 + 17, 1, 0.85); put('ornamental', CX0 + 4.5, CZ1 - 6, 2, 0.8); put('ornamental', CX1 - 4.5, CZ1 - 8, 3, 0.8)
     // discreet lighting: low path lights along the spine, two lamps at the gate, soft pools
-    for (let z = CZ0 + 8; z <= CZ1 - 2; z += 5.2) for (const s of [-1, 1]) { put('pathLight', cx + s * 2.3, z, 0); pools.push([cx + s * 2.3, z, 3.2]) }
+    const LAN = { metal: '#1f1d22', brass: PAL.brass, glow: '#ffdca2' }
+    for (let z = CZ0 + 8; z <= CZ1 - 2; z += 5.2) for (const s of [-1, 1]) { baked(g, W0, 'bollard_lantern', cx + s * 2.3, z, 0, LAN, 0, 1); pools.push([cx + s * 2.3, z, 3.6, GY]) }
+    // Bible s08: the sett room under the tree is framed by four taller lanterns at its corners, and the tree is up-lit warm from below (target p.31)
+    for (const [dx, dz] of [[-8.9, -8.9], [8.9, -8.9], [-8.9, 8.9], [8.9, 8.9]]) { baked(g, W0, 'bollard_lantern', cx + dx, cz + dz, 0, LAN, 0, 1.15); pools.push([cx + dx, cz + dz, 4.2, GY]) }
+    lightsAt.push({ x: cx, y: GY + 1.1, z: cz, color: '#ffc98a', intensity: 9, distance: 12 })
     pools.push([cx, cz, 9]); halos.push([cx + 2.4, GY + 2.6, cz - 1])
     pois.courtyard = { x: BX, z: 30 }
 
