@@ -4,9 +4,11 @@ import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Boats } from './Boats.jsx'
+import { ATMO_U, patchHaze, hazeVertex, hazeFragment } from './exteriorAtmo.js'
 import { Waterfront } from './Waterfront.jsx'
 import { StreetVisuals } from './street/Street.jsx'
 import { world, OFF } from './world.js'
+import { WX } from './weather/weather.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { buildLayout, SCALE, EYE_ABOVE_WATER, SUN_AZ_DEG, SUN_EL_DEG, TWIST } from './skylineData.js'
 
@@ -78,7 +80,7 @@ export function SkyDome() {
 // ---------------------------------------------------------------- facades
 // Curtain-wall facade tile: 32 window columns x 64 half-floors. Whole floors light up in horizontal runs (office banding) over smooth
 // sunset-reflecting glass, like the reference; random per-window speckle reads as noise at distance, so it is kept very low.
-function facadeCanvas({ cols = 32, rows = 64, lit = 0.6, base, glassTop, glassBottom, warm, seed = 1 }) {
+function facadeCanvas({ cols = 32, rows = 64, lit = 0.6, base, glassTop, glassBottom, warm, seed = 1, fin, band }) {
   const cw = 6, ch = 6
   const cv = document.createElement('canvas'); cv.width = cols * cw; cv.height = rows * ch
   const g = cv.getContext('2d')
@@ -108,6 +110,9 @@ function facadeCanvas({ cols = 32, rows = 64, lit = 0.6, base, glassTop, glassBo
       }
     }
   }
+  // architectural articulation: pale vertical fins (every 4th mullion) and/or horizontal spandrel bands (every 8 half-floors), drawn over the glass
+  if (fin) { g.fillStyle = fin; for (let c = 0; c < cols; c += 4) g.fillRect(c * cw - 1, 0, 2, cv.height) }
+  if (band) { g.fillStyle = band; for (let r = 0; r < rows; r += 8) g.fillRect(0, r * ch + ch * 2 - 2, cv.width, 3) }
   return cv
 }
 
@@ -117,21 +122,27 @@ const VARIANTS = {
   stone:  { lit: 0.60, base: '#7a6e7c', glassTop: [150, 134, 146], glassBottom: [106, 96, 112], warm: [255, 220, 150], seed: 5 },
   steel:  { lit: 0.22, base: '#8a8794', glassTop: [186, 176, 184], glassBottom: [120, 116, 136], warm: [255, 226, 170], seed: 11 },   // One Canada Square: pale stainless cladding, few lit floors
   blue:   { lit: 0.50, base: '#3f4d70', glassTop: [112, 128, 170], glassBottom: [52, 64, 108], warm: [255, 236, 190], seed: 13 },     // blue-glass towers, warm lit bands
+  fin:    { lit: 0.40, base: '#4a4c68', glassTop: [112, 118, 150], glassBottom: [58, 64, 98], warm: [255, 228, 164], seed: 21, fin: 'rgba(196,190,200,0.85)' },       // pale stone fins over blue glass
+  band:   { lit: 0.38, base: '#46465f', glassTop: [118, 112, 142], glassBottom: [60, 60, 92], warm: [255, 222, 156], seed: 23, band: 'rgba(170,160,170,0.9)' },       // horizontal spandrel bands
+  warm:   { lit: 0.52, base: '#6e6270', glassTop: [168, 142, 140], glassBottom: [112, 94, 108], warm: [255, 214, 146], seed: 29, band: 'rgba(206,186,170,0.8)' },      // champagne / sandstone cladding
   dusk:   { lit: 0.30, base: '#3b3a52', glassTop: [118, 100, 128], glassBottom: [58, 54, 84], warm: [255, 210, 140], seed: 17 },      // mauve-reflecting glass
 }
-const HERO_STYLE = { 'One Canada Sq': 'steel', '25 Canada Sq (Citi) main': 'blue', '25 Canada Sq shoulder': 'blue', '8 Canada Sq (HSBC)': 'dusk', 'Barclays slab': 'steel', 'west low tower': 'dusk', 'west block A': 'blue', 'west block B': 'glassD', 'narrow tower': 'dusk', 'east tower': 'glass' }
+const HERO_STYLE = { 'One Canada Sq': 'steel', '25 Canada Sq (Citi) main': 'blue', '25 Canada Sq shoulder': 'blue', '8 Canada Sq (HSBC)': 'dusk', 'Barclays slab': 'band', 'west low tower': 'dusk', 'west block A': 'blue', 'west block B': 'fin', 'narrow tower': 'dusk', 'east tower': 'warm' }
 export const GLOW = { value: 0.0 }          // emissive boost on lit windows (night / blue hour)
 export const LIT = { value: 0.45 }          // fraction of lit windows that are switched on (ramps up slowly: the city "comes alive" over ~4 minutes)
-export function patchLitWindows(mat, cells) {
+export function patchLitWindows(mat, cells, mirrored = false) {
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.uLit = LIT; sh.uniforms.uGlow = GLOW
     sh.uniforms.uCells = { value: new THREE.Vector2(...cells) }
+    hazeVertex(sh); hazeFragment(sh, mirrored)
     sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform float uLit, uGlow; uniform vec2 uCells; float gLit = 0.0;\nvoid main() {')
       .replace('#include <map_fragment>', `
         #ifdef USE_MAP
-          vec4 sd = texture2D(map, vMapUv);
+          vec2 muv = vMapUv;
+          ${mirrored ? 'muv.x += uRip * sin(vHzY * uInvExt * 0.55 + uRipT * 1.7) * (0.4 + 0.6 * sin(vHzY * uInvExt * 0.13 - uRipT * 0.9));' : ''}
+          vec4 sd = texture2D(map, muv);
           float litM = smoothstep(0.35, 0.5, sd.r - sd.b) * smoothstep(0.7, 0.85, sd.r);
-          vec2 cell = floor(vMapUv * uCells);
+          vec2 cell = floor(muv * uCells);
           float hh = fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453);
           float on = 1.0 - smoothstep(uLit - 0.04, uLit + 0.04, hh);
           sd.rgb = mix(sd.rgb, vec3(0.16, 0.16, 0.24) * (0.7 + 0.3 * hh), litM * (1.0 - on));
@@ -157,40 +168,57 @@ const FACE_DEFS = [   // side faces: [normal angle about Y, local offset axis]
 ]
 const SUN_H = new THREE.Vector2(Math.sin((SUN_AZ_DEG * Math.PI) / 180), -Math.cos((SUN_AZ_DEG * Math.PI) / 180))
 
+// Plan ring (local x,z) per massing shape. Edge i runs p[i] -> p[i+1]; outward normal is (dz, -dx).
+function ringFor(b) {
+  const hw = b.w / 2, hd = b.d / 2
+  if (b.shape === 'chamfer') { const c = Math.min(hw, hd) * 0.42; return [[-hw + c, -hd], [hw - c, -hd], [hw, -hd + c], [hw, hd - c], [hw - c, hd], [-hw + c, hd], [-hw, hd - c], [-hw, -hd + c]] }
+  if (b.shape === 'round') { const n = 14, r = []; for (let i = 0; i < n; i++) { const t = (i / n) * Math.PI * 2; r.push([-Math.sin(t) * hw, -Math.cos(t) * hd]) } return r }
+  return [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]]
+}
+// Profile: [height fraction, plan scale] pairs (a taper narrows the upper third); 'slant' lowers the back edge of the roof by 12 %.
+const profileFor = (b) => (b.shape === 'taper' ? [[0, 1], [0.62, 1], [1, b.topScale || 0.74]] : [[0, 1], [1, 1]])
+const topY = (b, z) => (b.shape === 'slant' ? b.h * (1 - 0.12 * (1 - (z / b.d + 0.5))) : b.h)
+
 // Merge every facade into one mesh per texture variant: window repeat is baked into UVs, face shading into vertex colours.
 export function buildFacadeGeometries(layout, filter = () => true) {
-  const lists = { glass: [], glassD: [], stone: [], steel: [], blue: [], dusk: [], roof: [] }
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler()
+  const lists = { glass: [], glassD: [], stone: [], steel: [], blue: [], dusk: [], fin: [], band: [], warm: [], roof: [] }
+  const e = new THREE.Euler(), v = new THREE.Vector3(), pa = new THREE.Vector3(), pb = new THREE.Vector3(), pc = new THREE.Vector3()
   for (const b of layout) {
     if (!filter(b)) continue
     const key = b.tex || HERO_STYLE[b.parent || b.name] || (b.style === 'stone' ? 'stone' : (b.shade ?? 0.5) > 0.55 ? 'glassD' : 'glass')
-    const floors = b.h / 3.9
     const bq = new THREE.Quaternion().setFromEuler(e.set(0, -b.rot + TWIST, 0))
     const base = new THREE.Matrix4().compose(new THREE.Vector3(b.x, -EYE_ABOVE_WATER + (b.y0 || 0), b.z), bq, new THREE.Vector3(1, 1, 1))
-    for (const f of FACE_DEFS) {
-      const fw = f.useW ? b.w : b.d
-      const g = new THREE.PlaneGeometry(fw, b.h)
-      const uv = g.attributes.uv
-      for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) * (fw / 1.7)) / 32, (uv.getY(i) * (b.h / 1.95)) / 64)
-      const off = f.useW ? b.d / 2 : b.w / 2
-      q.setFromEuler(e.set(0, f.ry, 0))
-      m4.compose(new THREE.Vector3(f.sx * off, b.h / 2, f.sz * off), q, new THREE.Vector3(1, 1, 1))
-      g.applyMatrix4(m4).applyMatrix4(base)
-      // shading: faces turned toward the sun are warmer/brighter, others stay in blue shade (towers are mostly backlit in the reference)
-      const nWorld = new THREE.Vector3(f.sx, 0, f.sz).applyQuaternion(bq)
-      const lit = 0.5 + 0.5 * new THREE.Vector2(nWorld.x, nWorld.z).dot(SUN_H)
-      const tint = 0.80 + 0.20 * lit
-      const col = new Float32Array(g.attributes.position.count * 3)
-      const pos = g.attributes.position
-      for (let i = 0; i < pos.count; i++) {   // vertex y is already in tower-local space + base offset
-        const t = THREE.MathUtils.clamp((pos.getY(i) + EYE_ABOVE_WATER - (b.y0 || 0)) / b.h, 0, 1)
-        const k = tint * (0.62 + 0.34 * t)
-        col[i * 3] = k * 1.03; col[i * 3 + 1] = k; col[i * 3 + 2] = k * 0.97
+    const ring = ringFor(b), prof = profileFor(b), n = ring.length
+    const ptAt = (i, lv) => { const [fy, sc] = prof[lv]; const [x, z] = ring[i % n]; const yy = fy >= 1 ? topY(b, z) : b.h * fy; return [x * sc, yy, z * sc] }
+    const pos = [], uvs = [], col = [], idx = []
+    for (let i = 0; i < n; i++) {
+      const [x0, z0] = ring[i], [x1, z1] = ring[(i + 1) % n]
+      const dx = x1 - x0, dz = z1 - z0, len = Math.hypot(dx, dz), nx = dz / len, nz = -dx / len
+      const nWorld = new THREE.Vector3(nx, 0, nz).applyQuaternion(bq)
+      const lit = 0.5 + 0.5 * (nWorld.x * SUN_H.x + nWorld.z * SUN_H.y), tint = 0.80 + 0.20 * lit
+      for (let lv = 0; lv < prof.length - 1; lv++) {
+        const A = ptAt(i, lv), B = ptAt(i + 1, lv), Cc = ptAt(i + 1, lv + 1), D = ptAt(i, lv + 1)
+        const vbase = pos.length / 3
+        for (const [P, uu, vv] of [[A, 0, A[1]], [B, 1, B[1]], [Cc, 1, Cc[1]], [D, 0, D[1]]]) {
+          pos.push(P[0], P[1], P[2]); uvs.push((uu * len) / 1.7 / 32, (vv / 1.95) / 64)
+          const t = Math.min(1, Math.max(0, P[1] / b.h)), k = tint * (0.62 + 0.34 * t); col.push(k * 1.03, k, k * 0.97)
+        }
+        // winding: make the triangle normal point outward
+        pa.set(...A); pb.set(...B); pc.set(...Cc)
+        const tn = pb.clone().sub(pa).cross(pc.clone().sub(pa))
+        if (tn.x * nx + tn.z * nz >= 0) idx.push(vbase, vbase + 1, vbase + 2, vbase, vbase + 2, vbase + 3)
+        else idx.push(vbase, vbase + 2, vbase + 1, vbase, vbase + 3, vbase + 2)
       }
-      g.setAttribute('color', new THREE.BufferAttribute(col, 3))
-      lists[key].push(g)
     }
-    const roof = new THREE.PlaneGeometry(b.w, b.d); roof.rotateX(-Math.PI / 2); roof.translate(0, b.h, 0).applyMatrix4(base)
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx)
+    g.applyMatrix4(base); lists[key].push(g)
+    // roof: fan over the top ring (sloped for 'slant')
+    const top = prof.length - 1, rp = [], ri = []
+    for (let i = 0; i < n; i++) { const P = ptAt(i, top); rp.push(P[0], P[1], P[2]) }
+    for (let i = 1; i < n - 1; i++) ri.push(0, i + 1, i)
+    const roof = new THREE.BufferGeometry(); roof.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); roof.setIndex(ri); roof.computeVertexNormals(); roof.applyMatrix4(base)
+    roof.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(n * 2), 2)); roof.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(n * 3).fill(1), 3))
     lists.roof.push(roof)
   }
   const out = {}
@@ -207,13 +235,13 @@ export function FacadeMeshes({ geoms, mirrored = false }) {
     const o = {}
     for (const k of Object.keys(geoms)) {
       o[k] = k === 'roof'
-        ? new THREE.MeshBasicMaterial({ color: C(0.30, 0.28, 0.34), toneMapped: false })
-        : patchLitWindows(new THREE.MeshBasicMaterial({ map: variantTexture(k), vertexColors: true, toneMapped: false }), [32, 64])
-      if (mirrored) { o[k].transparent = true; o[k].opacity = 0.5; o[k].side = THREE.DoubleSide; o[k].depthWrite = false }
+        ? patchHaze(new THREE.MeshBasicMaterial({ color: C(0.30, 0.28, 0.34), toneMapped: false }), mirrored)
+        : patchLitWindows(new THREE.MeshBasicMaterial({ map: variantTexture(k), vertexColors: true, toneMapped: false }), [32, 64], mirrored)
+      if (mirrored) { o[k].transparent = true; o[k].side = THREE.DoubleSide; o[k].depthWrite = false }
     }
     return o
   }, [geoms, mirrored])
-  return <>{Object.keys(geoms).map((k) => <mesh key={k} geometry={geoms[k]} material={mats[k]} frustumCulled={false} />)}</>
+  return <>{Object.keys(geoms).map((k) => <mesh key={k} geometry={geoms[k]} material={mats[k]} frustumCulled={false} renderOrder={mirrored ? 5 : 0} />)}</>
 }
 
 function PyramidCap({ b }) {
@@ -249,7 +277,7 @@ function Quay() {
 // and lit stretches of the far bank throw soft, wave-broken streaks toward the viewer. Wave detail fades with distance so nothing shimmers into noise.
 const waterVert = /* glsl */`varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position,1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`
 const waterFrag = /* glsl */`
-varying vec3 vW; uniform vec3 uCam, uSun, cDeep, cShallow, cGlint, cZenith, cUpper, cMid, cPink, cHorizon; uniform float uAlpha, uInvScale, uTime; uniform sampler2D uCols;
+varying vec3 vW; uniform vec3 uCam, uSun, cDeep, cShallow, cGlint, cZenith, cUpper, cMid, cPink, cHorizon; uniform float uAlpha, uInvScale, uTime, uRain, uCloud, uNight; uniform sampler2D uCols;
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
@@ -267,8 +295,10 @@ void main(){
     vec4 w = i==0?W0 : i==1?W1 : i==2?W2 : i==3?W3 : W4;
     float k = 6.2832 / w.z, ph = k * dot(w.xy, p) + uTime * (0.5 + 8./w.z) * 1.0;
     float fade = smoothstep(0.004 * dist, 0.014 * dist, w.z);
-    g += w.xy * (w.w * k * cos(ph) * fade); hs += w.w * sin(ph) * fade;
+    g += w.xy * (w.w * k * cos(ph) * fade * (1. + 1.5 * uRain)); hs += w.w * sin(ph) * fade;
   }
+  // rain: fine pitter-patter chop breaks the reflections up (Bible s04: reflections respond to weather)
+  g += uRain * 0.22 * vec2(noise(p * 1.7 + uTime * 1.1) - 0.5, noise(p * 1.9 - uTime * 0.9 + 9.) - 0.5) * smoothstep(0.004 * dist, 0.02 * dist, 6.);
   vec3 n = normalize(vec3(-g.x * 0.55, 1.0, -g.y * 0.55));
   vec3 v = normalize(cam - wr);
   vec3 R = reflect(-v, n); R.y = max(R.y, 0.004);
@@ -279,14 +309,14 @@ void main(){
   vec3 col = mix(body, sky, F);
   // sun path: elongated toward the viewer because wave slopes spread the reflected sun vertically
   float S = max(dot(R, normalize(uSun)), 0.);
-  col += cGlint * (pow(S, 90.) * 3.6 + pow(S, 14.) * 0.28) * smoothstep(40., 260., dist);
+  col += cGlint * (pow(S, 90.) * 3.6 + pow(S, 14.) * 0.28) * smoothstep(40., 260., dist) * (1. - 0.85 * uCloud);
   // lit far bank: soft vertical streaks broken by the swell
   float azr = atan(rel.x, -rel.z), aDeg = degrees(azr + hs * 0.0025);
   float lc = texture2D(uCols, vec2((aDeg + 180.) / 360., 0.5)).r;
   float sh = 0.5 + 0.5 * sin(dist * 0.085 + hs * 11. - uTime * 0.7);
   float streak = smoothstep(0.30, 0.95, sh * (0.55 + 0.7 * noise(vec2(aDeg * 5., dist * 0.012))));
   float reach = smoothstep(180., 700., dist) * (1.0 - smoothstep(960., 1120., dist));
-  col += vec3(1.0, 0.58, 0.22) * lc * streak * reach * 0.55;
+  col += vec3(1.0, 0.58, 0.22) * lc * streak * reach * 0.55 * (0.4 + 0.9 * uNight) * (1. - 0.45 * uRain);
   // far haze: the river dissolves into the horizon colour
   col = mix(col, cHorizon, smoothstep(900., 2400., dist) * 0.35);
   gl_FragColor = vec4(col, uAlpha);
@@ -319,7 +349,7 @@ function River({ layout }) {
     return new THREE.ShaderMaterial({
       transparent: true, depthWrite: false, fog: false, toneMapped: false,
       uniforms: {
-        uCols: { value: null }, uCam: { value: new THREE.Vector3() }, uInvScale: { value: 1 / SCALE }, uAlpha: { value: 0.86 }, uTime: { value: 0 },
+        uCols: { value: null }, uCam: { value: new THREE.Vector3() }, uInvScale: { value: 1 / SCALE }, uAlpha: { value: 0.86 }, uTime: { value: 0 }, uRain: { value: 0 }, uCloud: { value: 0 }, uNight: { value: 0 },
         uSun: sky.uSun, cZenith: sky.cZenith, cUpper: sky.cUpper, cMid: sky.cMid, cPink: sky.cPink, cHorizon: sky.cHorizon,
         cDeep: { value: C(0.17, 0.19, 0.28) }, cShallow: { value: C(0.30, 0.31, 0.40) }, cGlint: { value: C(0.95, 0.60, 0.30) },
       },
@@ -327,7 +357,7 @@ function River({ layout }) {
     })
   }, [])
   mat.uniforms.uCols.value = cols
-  useFrame(({ clock }) => { mat.uniforms.uCam.value.copy(camera.position); mat.uniforms.uTime.value = clock.elapsedTime; mat.uniforms.uInvScale.value = 1 / (world.extScale || SCALE) })
+  useFrame(({ clock }) => { mat.uniforms.uCam.value.copy(camera.position); mat.uniforms.uTime.value = clock.elapsedTime; mat.uniforms.uInvScale.value = 1 / (world.extScale || SCALE); mat.uniforms.uRain.value = WX.rain; mat.uniforms.uCloud.value = WX.cloud; mat.uniforms.uNight.value = Math.min(1, GLOW.value / 0.55) })
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -EYE_ABOVE_WATER, -577]} material={mat} renderOrder={3}>
@@ -354,6 +384,12 @@ export function Skyline() {
     const street = world.level === 'street', s = street ? 1 : SCALE
     if (!g.current) return
     g.current.scale.setScalar(s); g.current.position.set(0, street ? 0 : 1.7, street ? 0 : -0.4); world.extScale = s
+    // Bible s04: atmospheric perspective + reflection strength follow time of day and weather
+    const U = ATMO_U, night = Math.min(1, GLOW.value / 0.55)
+    U.uHazeCol.value.copy(SKY_U.cHorizon.value); U.uHazeK.value = 0.00013 * (1 + 2.4 * WX.rain + 0.9 * WX.cloud); U.uInvExt.value = 1 / s
+    U.uRefl.value = (0.36 + 0.3 * night) * (1 - 0.6 * WX.rain) * (1 - 0.2 * WX.cloud)
+    U.uRip.value = 0.018 + 0.03 * WX.wind + 0.05 * WX.rain; U.uRipT.value = performance.now() / 1000
+    U.uWaterY.value = g.current.position.y - EYE_ABOVE_WATER * s
   })
   return (
     <group ref={g} name="exterior" position={[0, 1.7, -0.4]} scale={[SCALE, SCALE, SCALE]}>
@@ -367,7 +403,7 @@ export function Skyline() {
       <Waterfront />
       {!OFF.has('street') && <StreetVisuals />}
       {/* mirrored copy under the water plane = reflections of the lit towers */}
-      <group scale={[1, -1, 1]} position={[0, -2 * EYE_ABOVE_WATER, 0]}><FacadeMeshes geoms={mirrorGeoms} mirrored /></group>
+      <group scale={[1, -1, 1]} position={[0, -2 * EYE_ABOVE_WATER, 0]}><FacadeMeshes geoms={mirrorGeoms} mirrored /><Waterfront mirrored /></group>
       <River layout={layout} />
     </group>
   )

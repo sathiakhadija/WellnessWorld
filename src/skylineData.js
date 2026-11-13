@@ -36,6 +36,12 @@ const HERO = [
   ['east tower',         1716, 1761,  451, 1240, 'glass'],
 ]
 export const PYRAMID_APEX_PX = 331
+// Bible s04 (owner correction 1): architecturally varied massing. Plan/profile per hero tower so the skyline is not a row of rectangular slabs.
+const HERO_SHAPE = {
+  '25 Canada Sq (Citi) main': 'chamfer', '8 Canada Sq (HSBC)': 'taper', 'Barclays slab': 'slant', 'narrow tower': 'round',
+  'west block B': 'chamfer', 'east tower': 'taper', 'west block A': 'slant', 'Citi podium': 'chamfer',
+}
+const BG_TEX = ['glass', 'glassD', 'blue', 'dusk', 'fin', 'band', 'warm', 'steel']
 
 function seeded(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
 
@@ -45,12 +51,14 @@ function seeded(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 10
 function addCrowns(out) {
   const R = seeded(404), extra = []
   const part = (b, tag, sw, sd, h, y0, o = {}) => {
-    const th = -b.rot + TWIST, c = Math.cos(th), s = Math.sin(th), dx = o.dx || 0, dz = o.dz || 0
+    const ts = (y0 >= b.h && b.topScale) || 1; sw *= ts; sd *= ts; const th = -b.rot + TWIST, c = Math.cos(th), s = Math.sin(th), dx = o.dx || 0, dz = o.dz || 0
     extra.push({ name: b.name + ':' + tag, parent: b.name, style: b.style, shade: b.shade, hero: b.hero, band: b.band, part: true, tex: o.tex, x: b.x + dx * c + dz * s, z: b.z - dx * s + dz * c, w: sw, d: sd, h, y0, rot: b.rot })
     return y0 + h
   }
   for (const b of out) {
     if (b.part) continue
+    if (b.shape === 'taper') b.topScale = 0.74
+    if (b.shape === 'slant' || b.shape === 'round') { if (!b.hero && R() < 0.5) part(b, 'p', b.w * 0.25, b.d * 0.25, 2.5, b.h * 0.9); continue }
     if (b.hero) {
       switch (b.name) {
         case 'One Canada Sq': { b.crownH = 6; part(b, 'c1', b.w * 0.94, b.d * 0.94, 6, b.h, { tex: 'steel' }); part(b, 'mast', 1.5, 1.5, 22, b.h + 6 + b.capH - 2, { tex: 'steel' }); break }
@@ -80,7 +88,7 @@ export function buildLayout() {
     const w = silhouette / (Math.cos(TWIST) + dr * Math.sin(TWIST))   // box width so the twisted box projects to the measured silhouette
     const topAboveEye = (D * (HORIZON_PX - ytop)) / F_PX
     const height = topAboveEye + EYE_ABOVE_WATER
-    out.push({ name, style, hero: true, x: D * Math.sin(a), z: -D * Math.cos(a), w, d: w * dr, h: height, rot: a })
+    out.push({ name, style, shape: HERO_SHAPE[name] || 'box', hero: true, x: D * Math.sin(a), z: -D * Math.cos(a), w, d: w * dr, h: height, rot: a })
   }
   // pyramid cap height from apex row
   const one = out.find((b) => b.name === 'One Canada Sq')
@@ -106,7 +114,7 @@ export function buildLayout() {
     cx += cw + 36 + rb() * 80                                                    // plaza / dock basin gap
   }
   // background city: low/mid-rise band all around the river view, plus a few taller clusters off-frame (north dock / east)
-  const rnd = seeded(7)
+  const rnd = seeded(7), rs = seeded(1234)
   for (let i = 0; i < 190; i++) {
     const azDeg = -100 + rnd() * 200
     const D = 1350 + rnd() * 1500
@@ -119,7 +127,8 @@ export function buildLayout() {
     // towers floated on the water. Re-seat them on the far-bank land (same x, so the skyline's horizontal composition is unchanged).
     if (bz > -1040 && bz < -150) bz = -(1060 + rnd() * 380)
     else if (bz >= -150 && bz < -90) bz = -90 + rnd() * 60                                      // on the near bank, but not on the embankment/promenade strip
-    out.push({ name: 'bg' + i, style: rnd() > 0.7 ? 'stone' : 'glass', hero: false, x: D * Math.sin(a), z: bz, w, d: w * (0.7 + rnd() * 0.6), h, rot: a + (rnd() - 0.5) * 0.6, shade: rnd() })
+    const sr = rs(), shape = h > 60 ? (sr < 0.28 ? 'chamfer' : sr < 0.46 ? 'taper' : sr < 0.62 ? 'slant' : sr < 0.74 ? 'round' : 'box') : (sr < 0.12 ? 'chamfer' : sr < 0.2 ? 'slant' : 'box'), tex = rs() < 0.55 ? BG_TEX[(rs() * BG_TEX.length) | 0] : undefined
+    out.push({ name: 'bg' + i, style: rnd() > 0.7 ? 'stone' : 'glass', shape, tex, hero: false, x: D * Math.sin(a), z: bz, w, d: w * (0.7 + rnd() * 0.6), h, rot: a + (rnd() - 0.5) * 0.6, shade: rnd() })
   }
   addCrowns(out)
   return out

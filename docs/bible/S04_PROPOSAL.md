@@ -24,3 +24,6 @@ Evidence (headless SwiftShader, not M2-verified):
 - M2 performance untested.
 
 Owner action: approve, or give correction notes against the sheet.
+
+
+OWNER DECISION 2026-11-13: Option 2 (conditional approval with corrections). Corrections implemented — see S04_CORRECTIONS.md. s04 remains NOT visually approved until the owner reviews the corrected renders.
