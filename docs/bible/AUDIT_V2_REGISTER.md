@@ -30,3 +30,6 @@ Entrance/lift/door open-close behaviour needs runtime video; M2 FPS; screenshot-
 ## Update — library lounge & bedroom window
 - B03.08 bedroom window: PARTIAL — window now shows city with river glimpse (evidence: audit_b03_bedroom_window_golden.png). Not M2-verified.
 - Library lounge chairs: PARTIAL — chairs angled toward each other and the lamp, gallery frames added above (evidence: audit_b02_library_lounge_chairs.png). Shelf book spines and lounge remodel still open. Not owner-approved.
+
+## Update — fashion-street window displays
+- Shopfront displays: PARTIAL — Blender kit `assets/blender/make_shop_props.py` (mannequins ×3 silhouettes, handbag, shoe riser → `src/baked/shop_props.json`); boutique windows (Maison Sauvage, Atelier Bordeaux) now carry mannequins + folded-garment shelves; goods theme now follows the sign (a boutique no longer shows books). Evidence: audit_b02_shop_window_mannequins.png. Overhead clutter reduction, per-shop distinct façades and other shop types' goods still open. Not M2-verified, not owner-approved.

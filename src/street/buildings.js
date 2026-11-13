@@ -2,6 +2,7 @@
 // geometry (recessed windows, cornices, mansards, balconies, shopfronts) plus its colliders. Specs are randomised by the caller so no two facades repeat.
 import * as THREE from 'three'
 import { rowWall } from './geo.js'
+import { baked } from './interiors.js'
 import { PAL, sash, pane, strip, railing, balconette, frontDoor, steps } from './facade.js'
 
 const col = (h) => new THREE.Color(h)
@@ -204,7 +205,7 @@ export function shopBuilding(ch, F, o) {
   // display window: stall riser + glass + transom bar + mullions
   ch.box(F, winX0, winX1, 0.12, 0.78, -0.55, -0.4, stall, 'wood', 'fu')
   const lit = o.shopLit ?? true
-  if (lit && !o.interior) shopInterior(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.35)
+  if (lit && !o.interior) shopInterior(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.35, o.sign)
   else if (!o.interior) pane(ch, F, winX0 + 0.04, winX1 - 0.04, 0.8, ground - 0.9, -0.5, lit)
   const frameC = col('#2b2623')
   strip(ch, F, 'trim+', frameC, winX0, winX1, ground - 1.0, ground - 0.9, -0.48)
@@ -300,8 +301,9 @@ export function shopBuilding(ch, F, o) {
 
 // Lit shop interior seen through the display window: warm back wall + floor + ceiling glow, shelving / counter / pendants and themed goods
 // (books, loaves, flowers, garments, ceramics) built as small emissive-lit blocks so the window reads as a real, populated room.
-function shopInterior(ch, F, x0, x1, y0, y1) {
-  const R = ch.R, D = 3.4, z0 = -0.62, zb = z0 - D, w = x1 - x0, theme = (R() * 5) | 0
+const SIGN_THEME = { 3: 3, 11: 3, 10: 3, 4: 1, 5: 1, 6: 0, 7: 4, 1: 0 }   // sign atlas index -> goods theme (fashion = 3 mannequins), so a boutique never shows books
+function shopInterior(ch, F, x0, x1, y0, y1, sign) {
+  const R = ch.R, D = 3.4, z0 = -0.62, zb = z0 - D, w = x1 - x0, rt = (R() * 5) | 0, theme = SIGN_THEME[sign] ?? rt
   const warm = (h, k = 1) => col(h).multiplyScalar(k)
   // back wall as a vertical gradient of glow strips; floor + ceiling
   const WALLS = [['#d2ab78', '#c79d68', '#b58858', '#94704a'], ['#f2e0bd', '#ead3aa', '#d9bc8f', '#b89a6e'], ['#e6e3c8', '#d9d8b8', '#c3c4a2', '#9ea083'], ['#ecd3c6', '#e2c4b4', '#cfae9d', '#a78677'], ['#e4d6bd', '#d8c7a8', '#c4b08f', '#a08c6c']]
@@ -323,13 +325,18 @@ function shopInterior(ch, F, x0, x1, y0, y1) {
     const sy = y0 + 0.55 + r * ((y1 - y0 - 1.0) / rows)
     ch.box(F, x0, x1, sy, sy + 0.035, shelfZ, shelfZ + 0.32, dark, 'wood', 'fu', 1, 1, 0)
     let x = x0 + 0.1
-    while (x < x1 - 0.2) { const bw = 0.05 + R() * 0.12, bh = 0.18 + R() * 0.26; ch.box(F, x, x + bw, sy + 0.035, sy + 0.035 + (theme === 2 ? bh * 0.7 : bh), shelfZ + 0.04, shelfZ + 0.3, warm(palettes[(R() * palettes.length) | 0], 0.9 + R() * 0.3), 'shopin', 'f', 1, 1, 0); x += bw + 0.012 + (R() < 0.15 ? 0.2 : 0) }
+    while (x < x1 - 0.2) { const bw = theme === 3 ? 0.26 + R() * 0.16 : 0.05 + R() * 0.12, bh = theme === 3 ? 0.06 + R() * 0.1 : 0.18 + R() * 0.26;   // fashion: folded garment stacks, not book spines
+    ch.box(F, x, x + bw, sy + 0.035, sy + 0.035 + (theme === 2 ? bh * 0.7 : bh), shelfZ + 0.04, shelfZ + 0.3, warm(palettes[(R() * palettes.length) | 0], 0.9 + R() * 0.3), 'shopin', 'f', 1, 1, 0); x += bw + 0.012 + (R() < 0.15 ? 0.2 : 0) }
   }
   // counter / display table nearer the glass
   if (theme === 1 || theme === 4) { ch.box(F, x0 + 0.3, x1 - 0.3, y0, y0 + 0.9, zb + 1.0, zb + 1.7, dark, 'wood', 'fulr', 1, 1, 0); ch.box(F, x0 + 0.3, x1 - 0.3, y0 + 0.9, y0 + 0.94, zb + 0.96, zb + 1.74, warm('#efe4d0'), 'trim', 'fulr', 1, 1, 0)
     for (let i = 0; i < 6; i++) { const px = x0 + 0.5 + R() * (w - 1.0); ch.box(F, px, px + 0.16, y0 + 0.94, y0 + 1.08, zb + 1.2, zb + 1.5, warm(palettes[(R() * palettes.length) | 0], 1.05), 'shopin', 'fulr', 1, 1, 0) } }
   if (theme === 2) for (let i = 0; i < Math.max(2, Math.round(w / 0.8)); i++) { const px = x0 + 0.3 + (i + 0.5) * (w - 0.6) / Math.max(2, Math.round(w / 0.8)); ch.box(F, px - 0.14, px + 0.14, y0, y0 + 0.5, zb + 1.2, zb + 1.5, col('#5e5a52'), 'metal', 'fulr', 1, 1, 0); for (let k = 0; k < 4; k++) ch.box(F, px - 0.1 + R() * 0.05, px + 0.1, y0 + 0.5, y0 + 0.5 + 0.25 + R() * 0.25, zb + 1.25 + R() * 0.1, zb + 1.45, warm(palettes[(R() * palettes.length) | 0], 1.05), 'shopin', 'fulr', 1, 1, 0) }
-  if (theme === 3) { for (let i = 0; i < 3; i++) { const px = x0 + (i + 0.5) * w / 3; ch.box(F, px - 0.12, px + 0.12, y0 + 0.4, y0 + 1.6, zb + 1.3, zb + 1.5, warm(palettes[i % palettes.length], 1.05), 'shopin', 'fulr', 1, 1, 0); ch.box(F, px - 0.015, px + 0.015, y0, y0 + 0.4, zb + 1.38, zb + 1.42, dark, 'wood', 'fulr', 1, 1, 0) } }
+  if (theme === 3) { const GARM = ['#c94f6a', '#2f4a6e', '#e9dcc4', '#7a2f3e', '#3f6a58', '#d9a441'], nm = Math.max(2, Math.min(4, Math.round(w / 1.1))), kinds = ['mannequin_dress', 'mannequin_skirt', 'mannequin_coat']
+    for (let i = 0; i < nm; i++) { const px = x0 + (i + 0.5) * w / nm; baked(ch, F, kinds[(R() * 3) | 0], px, z0 - 0.85 - R() * 0.5, Math.PI + (R() - 0.5) * 0.6, { fabric: GARM[(R() * GARM.length) | 0], marble: '#e8ddd0', metal: '#6b6b6b', brass: '#c9a45e' }, y0 + 0.02, 0.92 + R() * 0.12) }
+    baked(ch, F, 'shoe_shelf', x1 - 0.5, z0 - 0.6, Math.PI, { fabric: '#7a2f3e', metal: '#6b6b6b', brass: '#c9a45e' }, y0 + 0.02, 1.3)
+    baked(ch, F, 'handbag', x0 + 0.5, z0 - 0.6, Math.PI, { fabric: '#7a2f3e', marble: '#efe4d0', brass: '#c9a45e' }, y0 + 0.02, 1.2) }
+
 }
 const W = (F, x, y, z) => [F.x + x * F.c + z * F.s, F.y + y, F.z - x * F.s + z * F.c]
 const dirW = (F) => [F.s, 0, F.c]
