@@ -31,3 +31,6 @@ Headless SwiftShader localhost + Blender (bpy) only. NOTHING is owner-approved. 
 | Visual verification (Part 12) | V | evidence sheets s01–s15 | Blender column is a note for most envs |
 
 Owner-only decisions: s04 visual approval; s07 blossom canopy vs palette; final CHECKLIST confirmation; M2 benchmark.
+
+## s08 courtyard hero tree (2026-11-13)
+Hero plane scaled 1.25→1.5 with 7 Blender branch sprays spreading the canopy; warm under-bench glow strips. Evidence: `evidence/s08_game_hero_tree_bluehour.png` (no page errors). PARTIAL vs p.31 (canopy still sparser than the target; benches glow is subtle). Not approved; M2 not measured.

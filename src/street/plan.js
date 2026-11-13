@@ -259,7 +259,8 @@ export function buildStreet() {
       for (const sx of [-1, 1]) for (let z = CZ0 + 6.8; z < cz - 8.6; z += 0.8) plantAt(g, cx + sx * (3.0 + R() * 1.6), z + (R() - 0.5) * 0.3, K[ki++ % K.length], 1.3)
     }
     // the signature tree + pit + curved limestone bench (two arcs open to the path axis)
-    put('plane', cx, cz, 0.3, 1.25)
+    put('plane', cx, cz, 0.3, 1.5)
+    for (let i = 0; i < 7; i++) baked(g, W0, `branch_${1 + (i % 3)}`, cx + Math.cos(i * 0.9) * 0.4, cz + Math.sin(i * 0.9) * 0.4, -i * 0.9 + (i % 2) * 0.3, { leaf: i % 2 ? '#668a4a' : '#587a40', stem: '#4a3b2e' }, 5.6 + (i % 3) * 0.6, 2.1 + (i % 3) * 0.3)   // Blender branch sprays spread the hero canopy (Bible s08 p.31)
     {
       const FT = frame(cx, cz, 0, GY)
       g.prism(FT, 0, 0, 2.6, 2.6, 0, 0.42, col('#e0d6c4'), 'ashlar', 36)                                                         // low circular limestone planter
@@ -274,6 +275,7 @@ export function buildStreet() {
       for (let i = 0; i < n; i++) {
         const a = a0 + ((i + 0.5) / n) * (a1 - a0), seg = ((a1 - a0) / n) * r * 1.04, rot = Math.atan2(-Math.cos(a), -Math.sin(a)), F = frame(cx + Math.cos(a) * r, cz + Math.sin(a) * r, rot, GY)
         g.box(F, -seg / 2, seg / 2, 0, 0.46, -0.32, 0.32, col('#e0d6c0'), 'ashlar', 'fulrb', 2.4, 1.2, 0.02); g.box(F, -seg / 2 - 0.02, seg / 2 + 0.02, 0.46, 0.52, -0.36, 0.36, col('#ebe3d1'), 'trim', 'fulrbd')
+        g.box(F, -seg / 2 + 0.05, seg / 2 - 0.05, 0.06, 0.1, -0.345, -0.325, col('#ffd29a'), 'glow', 'f', 1, 1, 0)   // warm under-bench glow strip
         g.solid(F, -seg / 2, seg / 2, 0, 0.52, -0.36, 0.36, 'bench')
       }
     }
