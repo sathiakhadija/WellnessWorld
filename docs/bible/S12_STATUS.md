@@ -11,3 +11,7 @@ UPDATE: shop interiors tint amber-gold at dusk (blue-green channels pulled down 
 UPDATE (2026-11-13): audit of the code shows the sett/slab/road/gravel materials already take the rain wet shader (darker, glossier, puddles; src/weather/wet.js via Street.jsx), so wet cobbles in s12 are covered when weather is raining. Shop interiors (incl. s13/s14) share the `shopin` material, whose tint follows the window-glow factor, so they do change with time of day (colour only; brightness is a single global factor, not per-shop). Still open: an overhead leaf canopy for the lane, and visual confirmation of wet cobbles at M2 quality (headless only so far). Not approved.
 
 UPDATE (2026-11-13, later): added overhead warm string-light catenaries across the lane every 7 m (evidence/s12_game_stringlights_night.png, headless night render, no page errors). This is a light-string overhead element, not a full leaf canopy; the leaf canopy remains open. Not approved; M2 performance unchecked.
+
+## Overhead foliage (Bible p.52) — 2026-11-13
+- Blender kit `assets/blender/make_branches.py` → `src/baked/branches.json` (3 sprays), placed every ~6 m on both lane facades (`plan.js`).
+- Evidence: `evidence/s12_game_branches_bluehour.png` (no page errors). PARTIAL: canopy now frames the lane top, but limbs read bare/stick-like versus the dense leaf mass in the target; leaf density and limb thickness still to tune. Not approved; M2 performance not measured.
