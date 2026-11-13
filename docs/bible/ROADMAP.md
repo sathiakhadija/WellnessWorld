@@ -1,90 +1,41 @@
-# Wellness World — Design Bible V16 implementation roadmap
+# Roadmap to the FINAL SIGN-OFF CHECKLIST (rebuilt 2026-11-13)
+Rules: Blender for every new asset; evidence = same-camera localhost render (headless SwiftShader) + Blender render + target page; nothing is ticked from code alone; nothing is marked owner-approved; M2 never claimed. Protected: balcony geometry, glass balustrade, tiles, doors, weather systems, approved character identities.
+Done-definition per environment (Part 12 loop): identify gap → fix (Blender kit first) → rebuild → render same camera at day/golden/blue/night (+rain where outdoors) → compare with target page → no page errors → record in CHECKLIST_STATUS + env STATUS doc → commit/push.
 
-Source: `WELLNESSWORLDREFINE.pdf` (80 pp, thumbnails in `docs/bible/pages/`). Branch `impl/design-bible-v16`, rollback tag `backup/pre-design-bible-v16`. **No push/merge/deploy without the owner's authorisation.**
-Authority order (p.70): approved AFTER images > Section text > this roadmap. Where p.77 says "every scene, every preset, every revision": fixed camera + matching time-of-day, Blender AND localhost, never "claimed from renders alone".
-Verification levels used everywhere: Implemented / Tested / Visually verified (with images). Nothing is "done" without a localhost screenshot against the AFTER image.
-Hard constraints from the Bible: no flat images for navigable space; no invented new locations; do not use the rejected pink-blossom courtyard (p.31/34) or the rejected flower-filled bookshop (p.60/64); bounded compact world (no endless terrain); all spaces enterable/walkable and connected; rain never inside enclosed spaces; same palette across all areas.
+## Phase A — Close visible gaps vs target pages (Parts 1, 5, 6, 12)
+| # | Env | Remaining gap (from CHECKLIST_STATUS) | Work (Blender first) | Target page | Verify |
+|---|---|---|---|---|---|
+| A1 | 12 Shopping street | canopy still sparse; wet cobbles; chalkboards/spill; repeated-building check | denser leaf cards + thicker limb kit; wet-cobble reflection tuning; chalkboard/flower-bucket props; vary façade modules | p.52 | lane renders ×4 times of day + rain |
+| A2 | 08 Courtyard | canopy density, bench glow subtle, tree shadows, no huge empty tile areas | second hero tree silhouette, denser branch kit, bench glow strips brighter, more layered beds | p.31 | court renders blue/golden |
+| A3 | 09 Fountain | no open items; recheck vs 08 continuity + water sound | regression only | p.32-33 | one render + audio path check |
+| A4 | 10/11 Rows | Blender master missing; façade modules, flower boxes, lanterns, topiary/table spill | Blender façade module kit (cornice/shopfront/bay) replacing flat façades; flower boxes; table spill | p.43-48 | per-row before/after |
+| A5 | 05 Lift lobby | D-001/2 pink dominance at golden hour | rebalance palette use (neutral limestone/brass, pink accents only) | p.20 | golden-hour lobby render |
+| A6 | 06 Ground lobby | true reflections | floor reflection (planar fake/probe) tuned; reception detail | p.22 | lobby render |
+| A7 | 07 Entrance | blossom canopy vs "no global pink" | NOT decided: show owner both options (green canopy default, blossom variant) | p.27 | owner call |
+| A8 | 13/14 Cafés | brightness is one global factor; polish props | per-room light balance; Blender counter/shelf props | p.55-60 | interior renders |
+| A9 | 15 Riverside | polish only | regression + wet-floor look | p.62 | promenade renders |
+| A10 | 01-03 Penthouse | re-audit untouched | audit only, no edits to protected geometry | p.4-9 | one render each |
 
-## Environment map (p.71 — to be turned into a measured top-down plan, G1)
-Penthouse (panoramic glazing, balcony) → private lift lobby (s05) → lift → ground-floor public lobby (s06) → building entrance (s07) → courtyard (s08) with fountain square (s09) → boutique & café row (s10) / opposite boutique & bookshop row (s11) / shopping street (s12) → Café Violette interior (s13, opposite the bookshop) ↔ The Quiet Page interior (s14) → riverside promenade → Thames (s15). Penthouse skyline (Canary Wharf) must match the exterior city.
+## Phase B — World/atmosphere (Parts 4, 7, 8)
+B1 s04 corrections: far-bank dark patches in rain/night; tower density vs p.6; keep NOT approved. B2 weather×time×new-space regression (Part 7 "re-verify in every new space"). B3 continuity checks: looking-back sightlines (11), skyline stable across cameras, connections (Part 8).
 
-## Stage 1 — Audit (p.3-4, 70-72 + 77-79 checklists)
-1. Full-resolution read of every page (text pages at 150 dpi for hex values and dimensions), extract: palette table (p.72), tool table (p.75), perf notes (p.76), verification protocol and gates G1–G8 (p.77), handover checklist (p.78), section audit index (p.79-80).
-2. `MATRIX.md`: per section — existing condition, target, modelling, materials, lighting, palette, landscaping, interactions, performance, verification (table below is the seed).
-3. Repo inspection note: R3F + Vite + three 0.169 + drei + rapier; Plan.jsx (penthouse + street shells), Skyline.jsx, street/ (geo, materials), weather system done (round 10), atmosphere presets (golden/afternoon/…), HUD.
-4. Conflict list (see "Open questions") — resolve by Bible precedence, otherwise flag.
-5. Reference captures: original BEFORE screenshots at matching cameras (already available for penthouse/street via `__ww.setFree`).
+## Phase C — Lighting & materials (Parts 2, 3, 5)
+C1 contact AO/soft shadows under benches, planters, props (faint today; no SSAO) — cheap baked/blob shadows first. C2 palette audit rerun (0 errors), perceived-colour check on new foliage/branches. C3 time-of-day light switching/no flicker re-test.
 
-## Stage 2 — Shared foundation (p.72-76)
-- `src/palette.js` central palette (warm cream limestone, red/brown London brick, charcoal ironwork, sage/forest foliage, lavender accent, burgundy/oxblood, antique brass (not yellow), walnut/dark oak, warm lamp 2700–3200 K, blue-hour fill) + Blender mirror JSON; sampled-from-reference swatch check per area (hue/sat/contrast/shadow colour).
-- Material library (Blender script `assets/blender/mat_lib.py` → procedural PBR → baked textures; names STONE_*, BRICK_*, TIMBER_*, METAL_*, GLASS_*, FOLIAGE_*, PAVING_*, FABRIC_*, WATER_) + game material mapping.
-- Colour management: Blender AgX vs three.js ACES/AgX — calibrate exposure/contrast so same swatch renders to comparable colours; document.
-- Lighting standard: one rig per time-of-day preset (golden hour, blue hour, daylight, night), warm practicals, cove lights, soft shadows/contact shadows, AO.
-- Scale/coordinate convention: metres, +y up, one world origin, door heights 2.1–2.4 m, compact bounds; collision radius/height for the rabbit (currently 1.1 m model, 1.54 m capsule → fix).
-- Reusable kit: bevelled architraves, door sets, window sash/mullion kits, cornice, kerb, bollard, lantern, bench, planter, lamp post, awnings, shop signs (fix sign spelling per p.42/49), trim-sheet.
-- Tooling: `@gltf-transform/cli` + validator via npm; export pipeline `assets/blender/*.py → assets/glb → public/models`; texture compression/budgets.
-- Asset & licence register `docs/bible/ASSETS.md` (all generated in-house unless attached by owner; Poly Haven/ambientCG unreachable from here).
+## Phase D — Blender coverage (Part 4)
+Masters/.blend for envs lacking them (s10/s11/s12/s13/s14 minimum), organised collections, scripts re-runnable, seeded variation, no baked lighting in base colour, GLB validated.
 
-## Stage 3 — Benchmark environment
-Pick the Private Lift Lobby (s05, p.16-20): small, reuses shared kit, tests blush plaster, brass, dark stone, cove light, and links to the finished penthouse. Deliver: greybox → camera-matched BEFORE → Blender render → in-game build → localhost shot beside p.17/18 target → fix until it matches. This sets the quality bar.
+## Phase E — Performance (Part 11 / G7) — static only
+Count tris/draw calls per zone (branches add ~35k), instance/merge, LOD/culling where cheap, texture budget. Record M2 as the owner's measurement (`?bench=1`).
 
-## Stage 4 — Environments (order = dependency order)
-| # | Section | Pages | Now | Target / work |
-|---|---|---|---|---|
-| 1 | Penthouse glazing | 1-4 | done in earlier rounds; re-audit vs p.2 | slim bronze/champagne frames, cove ceiling, herringbone floor, skyline depth layers |
-| 2 | Balcony & waterfront | 5-8 | re-audit | layered Canary Wharf skyline (instanced towers, lit windows), water shader, glass balustrade, clouds |
-| 3 | Wall-side interior | 9-12 | done (round 5-8) re-audit | clean walls, concealed cove light, door set, no clutter |
-| 4 | World scale/boundaries | 13-15 | partial | compact bounded world, 3-layer composition, no exposed edge/dark plane; **no AFTER image approved — diagnostics first, get approval before treating as final** |
-| 5 | Private lift lobby | 16-20 | missing | enclosed vestibule 3–3.5×2.2–2.5×2.7–3.0 m, brushed-gold lift doors, indicator, call button, working open/close |
-| 6 | Ground-floor lobby | 21-24 | basic | tall lift, chandelier, curved reception counter, rug, planters; lift travel sync with s05 |
-| 7 | Building entrance | 25-29 | basic | bronze-framed sliding glass doors, courtyard tree & bollard lights visible through |
-| 8 | Courtyard | 30-34 | existing | green-canopy (not pink), restrained cream/lavender planting, circular plaza, benches, townhouse façade modules (recessed sashes, cornices, brick/stone variation) |
-| 9 | Fountain square | 35-40 | basic | 3-tier stone fountain, animated water, lamps, hedges, paths |
-| 10 | Boutique & café row | 41-45 | basic | Maison Home + Café Vivienne shopfronts, awnings, warm window glow, planters |
-| 11 | Opposite boutique/bookshop row | 46-50 | basic | Maison Sauvage, Papier & Co., Juliet balconies, burgundy shopfronts |
-| 12 | Shopping street | 51-55 | existing | bounded street, cobbled/stone paving, lanterns, planters, lavender-pink blue-hour sky |
-| 13 | Café Violette interior | 56-59 | missing | enterable: counter, patisserie, seating, reading nook, wisteria front, entry through shopfront |
-| 14 | The Quiet Page interior | 60-64 | missing | enterable: walnut shelves, central glass chandelier, reading lounge, ladder, **no flowers** |
-| 15 | Riverside promenade | 65-69 | sparse | lantern-lined promenade, burgundy waymarking kiosk/pavilion, green canopy, Thames terminus |
-Each environment closes only after: camera-matched BEFORE / TARGET / BLENDER / LOCALHOST set, colour+lighting assessment, collision + interaction tests, weather pass, defects list.
+## Phase F — Gameplay (Part 9)
+Walk-test every route after each phase; furniture/door/shop-display collision; lift/door sync; no walk-through walls.
 
-## Stage 5 — Refinement
-Foliage rebuild (organic trees, layered leaf cards, instancing, varied greens, no tropical, no pink overuse); water/fountain animation; shadow tuning; signage; interactions (lift, doors, café/bookshop entry); weather in every space (rain wet-ground applyWet on all new ground materials, window droplets on all new glass, indoor muffling zones per space); time-of-day pass for all presets; continuity check when walking between locations.
+## Phase G — Characters (non-blocking)
+Momo pipeline ready; only keep tests green until the model is supplied.
 
-## Stage 6 — Verification & performance (p.76-79)
-Gates G1 layout, G2 palette, G3 form, G4 light, G5 continuity, G6 function, G7 performance (measured — software GL caveat; instancing, LOD, draw-call counts, texture memory, triangle budgets), G8 coverage of all 15 sections. Full playable walkthrough with route log. Final report `docs/bible/FINAL_REPORT.md` + remaining-issues list.
+## Phase H — Final (Parts 12–15)
+Level C review: build, `npm run validate`, matrix, evidence index (4-way for all 15), gates G1–G8 table, 18 absolute rules, docs, OVERNIGHT PRODUCTION REPORT. Owner-only: s04 approval, s07 canopy decision, M2 benchmark, final CHECKLIST confirmation.
 
-## Standing process
-- Commit after each meaningful step on the branch; `RESUME.md` kept current (last done, next action, how to rebuild/serve); `PROGRESS.md` log; `DEFECTS.md`; `ASSETS.md`.
-- Build/serve: `npx vite build --outDir dist4` → `/tmp/serve.sh`; Blender: `python3.13` bpy scripts in `assets/blender/`.
-- Honest reporting: Implemented ≠ Tested ≠ Visually verified; headless SwiftShader cannot judge animation/frame rate.
-
-## Open questions / conflicts to flag (do not silently resolve)
-1. s04 (World scale) has no approved AFTER — only the brief; build to the brief, flag for approval.
-2. s08 earlier pink-blossom version superseded by green-canopy version (p.31/34): follow green.
-3. s14 flower-filled bookshop rejected; approved is the flower-free one.
-4. Hex swatches in the Bible are "indicative"; verify against the images, not as absolute.
-5. p.57-59 café floor plan figures and p.19 lift dimensions are design suggestions; reconcile with existing door positions.
-6. Penthouse is already near-final from earlier rounds; re-audit rather than rebuild (preserves user-approved look, e.g. rabbit player, cream door, interior kit).
-
-## Addendum A — Palette integration milestone (first technical-art milestone; replaces the thin "Stage 2 palette" bullet)
-Must be implemented in the project, not only documented. Order of work:
-1. `src/palette.js` → canonical registry: id (WW_LIMESTONE_CREAM, WW_BRICK_LONDON_RED, WW_WALNUT_DARK, WW_BRASS_ANTIQUE, WW_BURGUNDY, WW_FOLIAGE_FOREST, WW_PAVING_WARM_GREY, glass, …), name, category, sRGB hex + linear RGB, roughness, metallic, normal/bump strength, texture refs, intended environment, lighting notes, source PDF page, status `specified | provisional(estimated)`; never invent values the PDF doesn't give.
-2. Shared material registry (game) generated from that config; Blender materials generated by script from the same JSON (`assets/blender/mat_lib.py`); no double gamma (hex = sRGB → convert once; data maps linear).
-3. Wire existing materials in Plan.jsx / street materials / Skyline to registry ids where they match; do NOT recolour approved environments indiscriminately — use calibration to find genuine inconsistencies.
-4. Material Calibration Studio: real 3D scene in Blender and in localhost (`?scene=calib`): A swatch tiles, B material spheres, C architectural samples (brick/stone/timber/metal/glass/paving), D roughness matte/satin/polished, E white/mid-grey/black + colour-checker, F shadow calibration, G glass/reflection tests, H foliage + bark with backlight; each sample carries its registry id.
-5. Lighting presets (fixed camera/exposure/geometry): neutral daylight, golden hour, blue hour, warm interior evening, overcast daylight, rainy evening, plus a neutral calibration mode (no grading); all lighting + colour-management settings recorded.
-6. Blender-vs-localhost: matched camera/FOV/light direction/exposure/colour management; side-by-sides; CIEDE2000 on reference patches as diagnostic only (not visual approval).
-7. Automated palette audit (`npm run audit:palette`): unregistered colours, missing canonical refs, inconsistent params, duplicate materials, texture colour-space, suspicious metal/roughness, missing textures; documented exceptions list (effects, UI); readable report `docs/bible/PALETTE_AUDIT.md`.
-8. Deliverables: registry, material registry, Blender scene, game scene, swatch screenshots, preset comparison renders, Blender-vs-localhost comparisons, audit, validation report, `docs/bible/PALETTE_USAGE.md` (how future environments must use it).
-Acceptance: central registry; existing materials connected; Blender + localhost show the board; multi-light tests; colour-management differences documented/addressed; audit runs; reusable across the neighbourhood. Surface variation from real textures/normal/roughness/geometry, not random colour noise.
-
-## Addendum B — Section 04 world scale (measure first; no AFTER image exists — do not invent one)
-Status to preserve in all reports: **TECHNICAL DIRECTION APPROVED — FINAL VISUAL CORRECTION PENDING USER APPROVAL.** Never mark s04 visually approved.
-1. Record before touching geometry: camera position/eye height/FOV/pitch/yaw/near/far; penthouse + balcony dimensions; river width; skyline distance. Determine whether the problem is geometry, perspective, or both; no zoom to disguise dimensions.
-2. Metres everywhere; verify existing avatar/door/floor dimensions; realistic clearances; don't shrink buildings or widen streets for a screenshot.
-3. Three layers: A fully playable (penthouse, balcony, lift lobbies, courtyard, shops, approved interiors, connecting paths: geometry + collision + interactions); B nearby scenery (neighbouring buildings, waterfront, trees, boats, riverbanks, visible streets: convincing geometry, physically connected); C distant skyline (optimised 3D, atmospheric perspective, approved Canary Wharf composition).
-4. Remove/conceal: giant dark terrain planes, abrupt water-to-land transitions, exposed map edges, infinite roads, empty horizons, oversized walls, gaps between meshes; coherent shoreline and river scale; no endless water plane with a seam.
-5. Master coordinate system + annotated top-down layout; balcony overlooks the correct river/skyline; no contradictory positions between scenes.
-6. Deliverables: annotated top-down layout, world-scale measurement report, diagnosis of terrain/river problems, corrected Blender preview from the ORIGINAL camera, matching localhost screenshot, interior-to-balcony continuity test, performance assessment; submit the same-angle preview for the owner's review.
-Order: do Addendum B measurements early (they fix the coordinate system every other environment depends on), alongside Addendum A.
+## Order
+A1 → A2 → A5 → A4 → A6 → A8 → A9 → A7(owner flag) → B → C → D → E → F → H, pushing at each milestone.
