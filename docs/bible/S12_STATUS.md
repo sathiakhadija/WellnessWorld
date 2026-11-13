@@ -14,4 +14,4 @@ UPDATE (2026-11-13, later): added overhead warm string-light catenaries across t
 
 ## Overhead foliage (Bible p.52) — 2026-11-13
 - Blender kit `assets/blender/make_branches.py` → `src/baked/branches.json` (3 sprays), placed every ~6 m on both lane facades (`plan.js`).
-- Evidence: `evidence/s12_game_branches_bluehour.png` (no page errors). PARTIAL: canopy now frames the lane top, but limbs read bare/stick-like versus the dense leaf mass in the target; leaf density and limb thickness still to tune. Not approved; M2 performance not measured.
+- Evidence: `evidence/s12_game_branches_bluehour.png` (no page errors). PARTIAL (v2): leafier sprays (1152 leaf tris each, thinner limbs, ~7.4 m spacing) frame the lane top; still sparser than the target canopy and bounded by the lane geometry. Not approved; M2 not measured.

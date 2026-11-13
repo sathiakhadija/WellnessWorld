@@ -749,7 +749,7 @@ export function buildStreet() {
     }
     // Bible s12 (p.52): leafy branches overhanging the lane from both facades, framing the top of the street (Blender kit: assets/blender/make_branches.py)
     { const BR = { leaf: '#5b7a46', stem: '#4a3b2e' }; let bi = 0
-      for (let x = LX0 + 7; x < LX1 - 6; x += 6.2) {
+      for (let x = LX0 + 7; x < LX1 - 6; x += 7.4) {
         baked(g, W0, `branch_${1 + (bi++ % 3)}`, x + (R() - 0.5) * 3, 86.05, -Math.PI / 2 + (R() - 0.5) * 0.4, { ...BR, leaf: R() < 0.5 ? '#5b7a46' : '#6c8a4c' }, 6.3 + R() * 0.9, 1.5 + R() * 0.5)
         baked(g, W0, `branch_${1 + (bi++ % 3)}`, x + 4.2 + (R() - 0.5) * 3, 94.95, Math.PI / 2 + (R() - 0.5) * 0.4, { ...BR, leaf: R() < 0.5 ? '#5b7a46' : '#6c8a4c' }, 6.3 + R() * 0.9, 1.5 + R() * 0.5)
       } }
