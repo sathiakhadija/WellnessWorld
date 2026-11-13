@@ -31,5 +31,8 @@ npm run validate
 - Pose: yaw 0 looks −z, π looks +z, 1.5708 looks −x, −1.5708 looks +x. Street eye height y≈−85.2. Terrace eye y≈−80.6. Penthouse balcony [2.9,1.55,−11.15,…]. Penthouse shots: `tools/shots/penthouse_shots.cjs` (JSON `{name:{pose,preset,weather,wait}}`). `window.__ww.teleport(x,y,z)` moves the avatar.
 - Headless SwiftShader is ~0.3–2 fps; each shot takes minutes. It verifies composition only, never performance.
 
+## Organic kits added (all Blender, `assets/blender/`)
+`make_flowers.py` (flowers/leaves/stems), `make_street_organic.py` (cars ×4 variants, shrubs, grass, bike), `make_hedge.py`, `make_decor_plants.py` (wisteria, posy, topiary), `make_shop_props.py` (mannequins etc.). Foliage material `leaf` is DoubleSide. Run each script, then rebuild.
+
 ## Honest state (see AUDIT_V2_REGISTER.md for detail)
-Done as first passes: near-bank district behind the penthouse, riverside railing/quay, fountain droplets, café/library props, shop-window mannequins, north-park reshape (walks, bandstand, meadows, groves). Not done: organic plant/flower/tree models, fashion-street façade variety + overhead clutter, café ceiling/glazing, library shelves/lounge remodel, vehicles, settings hub, rain splashes/audio, minimap heading, LODs, M2 benchmark.
+Done as first passes: near-bank district behind the penthouse, riverside railing/quay, fountain droplets, café/library props, shop-window mannequins, north-park reshape (walks, bandstand, meadows, groves). Not done: organic tree models (trees are procedural branch+leaf-card, acceptable but not Blender-sculpted), boats,  fashion-street façade variety + overhead clutter, café ceiling/glazing, library shelves/lounge remodel, vehicles, settings hub, rain splashes/audio, minimap heading, LODs, M2 benchmark.

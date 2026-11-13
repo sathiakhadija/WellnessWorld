@@ -202,8 +202,8 @@ export function treeGeo(kind) {
 }
 
 // ---- Phase 1-3 additions: parked cars, bicycles, shrubs, planters (all instanced; muted palette, nothing garish)
-export function carGeo(bodyHex) {
-  const g = bakedGeo('car2'), tint = C(bodyHex), a = g.carbody.attributes.color
+export function carGeo(bodyHex, model = 'car2') {
+  const g = bakedGeo(model), tint = C(bodyHex), a = g.carbody.attributes.color
   for (let i = 0; i < a.count; i++) a.setXYZ(i, a.getX(i) * tint.r, a.getY(i) * tint.g, a.getZ(i) * tint.b)
   const merged = merge([g.carbody, g.metal].map((x) => { if (!x.attributes.color) throw new Error('no colour'); return x }))
   return { metal: merged, glass: g.glass, glow: g.glow }

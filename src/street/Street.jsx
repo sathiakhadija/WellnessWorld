@@ -120,7 +120,7 @@ export function StreetVisuals() {
     const sets = [
       ...makeSet(P.lampGeo(4.8), built.inst.lamp), ...makeSet(P.benchGeo(), built.inst.bench), ...makeSet(P.bollardGeo(), built.inst.bollard), ...makeSet(P.pathLightGeo(), built.inst.pathLight),
       ...makeSet(P.tableGeo(), built.inst.table), ...makeSet(P.chairGeo(), built.inst.chair), ...makeSet(P.urnGeo(), built.inst.urn),
-      ...makeSet(P.carGeo('#7d8794'), built.inst.car1), ...makeSet(P.carGeo('#8b9482'), built.inst.car2), ...makeSet(P.carGeo('#d6cdbc'), built.inst.car3), ...makeSet(P.carGeo('#6a3f46'), built.inst.car4),
+      ...makeSet(P.carGeo('#7d8794'), built.inst.car1), ...makeSet(P.carGeo('#8b9482', 'car3'), built.inst.car2), ...makeSet(P.carGeo('#d6cdbc', 'car4'), built.inst.car3), ...makeSet(P.carGeo('#6a3f46', 'car5'), built.inst.car4),
       ...makeSet(P.bikeGeo(), built.inst.bike), ...makeSet(P.shrubGeo(), built.inst.shrub), ...makeSet(P.grassGeo(), built.inst.grass), ...makeSet(P.planterGeo(), built.inst.planter),
     ]
     const palette = ['#86a84e', '#729a46', '#9ab458', '#63914a', '#a8bb55', '#70a050', '#8cab45']
