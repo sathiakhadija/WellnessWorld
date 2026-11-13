@@ -4,10 +4,11 @@ import * as THREE from 'three'
 import { toWorld, dirWorld } from './geo.js'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import CAFE from '../baked/cafe.json'   // produced by assets/blender/make_cafe.py (Blender)
-import LANTERNS from '../baked/lanterns.json'   // produced by assets/blender/make_lanterns.py (Blender)
+import LANTERNS from '../baked/lanterns.json'
+import CAFEPROPS from '../baked/cafe_props.json'   // assets/blender/make_cafe_props.py (Blender)   // produced by assets/blender/make_lanterns.py (Blender)
 import BRANCHES from '../baked/branches.json'   // produced by assets/blender/make_branches.py (Blender)
 import PLANTS from '../baked/plants.json'   // produced by assets/blender/make_plants.py (Blender)
-const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...BRANCHES }
+const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES }
 const PLANT_RE = /^(hydrangea|lavender|shrub)/   // organic kit: smooth floret balls
 const col = (h) => new THREE.Color(h)
 
@@ -97,7 +98,9 @@ export function cafeInterior(ch, F, c, L) {
   ch.prism(F, cx0 + 0.225, cz0, 0.55, 0.55, FL, FL + 1.05, col('#E6D3CB'), 'trim', 20); ch.prism(F, cx0 + 0.225, cz1, 0.55, 0.55, FL, FL + 1.05, col('#E6D3CB'), 'trim', 20)
   ch.box(F, cx0 - 0.15, cx0 + 0.6, FL + 1.05, FL + 1.1, cz1 - 0.55, cz0 + 0.55, col('#efe6da'), 'slab', 'fulrbd', 1.2, 1.2, 0)
   ch.box(F, cx0 - 0.12, cx0 + 0.5, FL + 1.1, FL + 1.55, cz1 - 0.3, cz0 + 0.3, col('#dfeaec'), 'shopglass', 'fulrb', 1, 1, 0)         // pastry display glass case
-  for (let i = 0; i < 7; i++) ch.prism(F, cx0 + 0.18, cz0 - 0.4 - i * 0.6, 0.12, 0.1, FL + 1.1, FL + 1.22, col(['#e8c79a', '#c98f9f', '#f1dcc0'][i % 3]), 'awning', 8)
+  for (let i = 0; i < 4; i++) baked(ch, F, 'cake_stand', cx0 + 0.2, cz0 - 0.55 - i * 1.05, i * 1.3, { marble: '#f4ede2', brass: '#c9a45e', bloom: ['#d98ea4', '#c9695f', '#8a3b4a', '#d9a05f'][i % 4], bloom2: ['#f1dcc0', '#e8c79a', '#efe1cf', '#f5e8cf'][i % 4] }, FL + 1.1, 1.9)   // Blender cake stands in the pastry case
+  baked(ch, F, 'till', cx0 + 0.18, cz0 + 0.3, 0.2, { metal: '#2c2a2e', glow: '#9fb9c4', brass: '#b58a4d' }, FL + 1.1, 1.0)      // till at the order point
+  baked(ch, F, 'menu_stand', cx0 + 0.3, cz0 + 0.85, 0.35, { wood: '#38261F', metal: '#2b2a2a', marble: '#efe6da' }, FL + 1.1, 1.3)
   ch.box(F, cx0 - 0.1, cx0 + 0.55, FL + 0.3, FL + 0.34, cz1, cz0, col('#ffd9b0'), 'glow', 'l', 1, 1, 0)                                // under-counter glow
   // Bible s13 p.56: fluted counter front, brass foot rail, lit second tier of pastries/tarts in the display case
   for (let z = cz1 + 0.05; z < cz0 - 0.05; z += 0.11) ch.box(F, cx0 - 0.16, cx0 - 0.1, FL + 0.1, FL + 1.03, z, z + 0.07, col('#cdb59c'), 'trim', 'fulr', 1, 1, 0)
@@ -116,6 +119,7 @@ export function cafeInterior(ch, F, c, L) {
     ch.box(F, x1 - 1.9, x1 - 1.1, FL + 1.0, FL + 1.38, z0 + 0.08, z0 + 0.46, col('#8d8a85'), 'metal', 'fulrb', 1, 1, 0.01)   // espresso machine body
     ch.box(F, x1 - 1.9, x1 - 1.1, FL + 1.38, FL + 1.42, z0 + 0.08, z0 + 0.46, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0)
     for (const x of [x1 - 1.7, x1 - 1.3]) ch.prism(F, x, z0 + 0.5, 0.03, 0.03, FL + 1.1, FL + 1.22, col('#2b2630'), 'metal', 6)
+    baked(ch, F, 'grinder', x1 - 0.55, z0 + 0.3, 0.2, { metal: '#8d8a85', brass: '#b58a4d' }, FL + 1.0, 1.0); baked(ch, F, 'cup_stack', x1 - 2.3, z0 + 0.3, 0.1, { marble: '#f4ede2', metal: '#8d8a85' }, FL + 1.0, 1.1); baked(ch, F, 'cup_stack', x1 - 0.95, z0 + 0.3, 0.5, { marble: '#e6dcd2', metal: '#8d8a85' }, FL + 1.0, 1.1)
     ch.box(F, x1 - 2.55, x1 - 0.2, FL + 2.72, FL + 3.28, z0 + 0.02, z0 + 0.05, col('#2b2a2a'), 'trim', 'f', 1, 1, 0)           // chalk menu board
     ch.box(F, x1 - 2.55, x1 - 0.2, FL + 2.72, FL + 2.75, z0 + 0.02, z0 + 0.06, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0); ch.box(F, x1 - 2.55, x1 - 0.2, FL + 3.25, FL + 3.28, z0 + 0.02, z0 + 0.06, col('#B58A4D'), 'metal', 'fulrb', 1, 1, 0)
     for (let i = 0; i < 6; i++) ch.box(F, x1 - 2.4, x1 - 0.5 - (i % 3) * 0.3, FL + 2.85 + (i >> 1) * 0.12, FL + 2.88 + (i >> 1) * 0.12, z0 + 0.05, z0 + 0.06, col('#efe6da'), 'trim', 'f', 1, 1, 0) }
@@ -159,7 +163,7 @@ export function bookInterior(ch, F, c, L) {
   ch.prism(F, x0 + 0.5, -4.0, 0.2, 0.2, FL, FL + 0.6, col('#38261F'), 'wood', 12); baked(ch, F, 'brass_lamp', x0 + 0.5, -4.0, 0, { brass: '#b58a4d', glow: '#ffe0b0' }, FL + 0.6)
   // central circular book island with lit lower shelf
   ch.prism(F, 0, -6.5, 1.0, 1.0, FL, FL + 0.9, col('#38261F'), 'wood', 28); ch.prism(F, 0, -6.5, 1.04, 1.04, FL + 0.9, FL + 0.95, col('#b58a4d'), 'metal', 28); ch.prism(F, 0, -6.5, 1.02, 1.02, FL + 0.28, FL + 0.32, col('#ffd9b0'), 'glow', 28, false)
-  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; ch.prism(F, Math.cos(a) * 0.62, -6.5 + Math.sin(a) * 0.62, 0.12, 0.12, FL + 0.95, FL + 1.12, col(bookCols[i % bookCols.length]), 'trim', 5) }
+  for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2 + 0.3; baked(ch, F, `book_stack_${1 + (i % 3)}`, Math.cos(a) * 0.55, -6.5 + Math.sin(a) * 0.55, -a + i, { wood: bookCols[i % bookCols.length], fabric: bookCols[(i + 3) % bookCols.length], brass: '#b58a4d', metal: '#3a2f2a', marble: '#efe6d2' }, FL + 0.95, 1.1) }   // Blender book stacks + open book (was cuboid placeholders)
   ch.solid(F, -1.05, 1.05, FL, FL + 0.95, -7.55, -5.45, 'island')
   // arched opening to the second reading room (back wall): piers + lintel + arch crown
   ch.box(F, -0.95, 0.95, FL, 2.7, z0 - 0.0, z0 + 0.04, col('#2a1b14'), 'wood', 'f', 1, 1, 0)                                            // recessed back of the arch (dark)
@@ -175,7 +179,7 @@ export function bookInterior(ch, F, c, L) {
   // ceiling: cream coffers + brass chandelier
   for (const z of [-3, -5.5, -8]) for (const x of [-1.8, 0, 1.8]) ch.box(F, x - 0.85, x + 0.85, CE - 0.05, CE, z - 0.9, z + 0.9, col('#e9d9c0'), 'trim', 'd', 1, 1, 0)
   ch.prism(F, 0, -6.5, 0.012, 0.012, 2.6, CE, col('#b58a4d'), 'metal', 4)
-  for (const [r, n, y0, len] of [[0.7, 28, 2.12, 0.58], [0.45, 20, 1.98, 0.5]]) for (let k = 0; k < n; k++) { const a = k * Math.PI * 2 / n; ch.prism(F, Math.cos(a) * r, -6.5 + Math.sin(a) * r, 0.016, 0.016, y0, y0 + len, col(k % 2 ? '#ffe8c0' : '#f4d9a8'), 'glow', 5, false) }   // glass-tube drops (Bible p.60)
+  for (const [r, n, y0, len] of [[0.7, 28, 2.12, 0.58], [0.45, 20, 1.98, 0.5]]) for (let k = 0; k < n; k++) { const a = k * Math.PI * 2 / n; ch.prism(F, Math.cos(a) * r, -6.5 + Math.sin(a) * r, 0.016, 0.016, y0, y0 + len, col(k % 2 ? '#e8c58f' : '#d9b27a'), 'glow', 5, false) }   // glass-tube drops (Bible p.60)
   for (const [r, y] of [[0.7, 2.7], [0.45, 2.5]]) { ch.prism(F, 0, -6.5, r, r, y, y + 0.05, col('#b58a4d'), 'metal', 28); ch.prism(F, 0, -6.5, r - 0.05, r - 0.05, y - 0.05, y, col('#ffe0b0'), 'glow', 28, false) }
   // small brass wall sconces + sign
   for (const z of [-3.2, -6.5, -9.3]) ch.prism(F, x1 - 0.6, z, 0.08, 0.1, 2.7, 2.9, col('#ffe0b0'), 'glow', 8)
