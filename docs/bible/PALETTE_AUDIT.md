@@ -1,6 +1,6 @@
 # Palette audit
 
-Generated 2026-11-13T00:08:56.632Z — registry 39 materials.
+Generated 2026-11-13T03:50:23.182Z — registry 39 materials.
 
 ## Registry checks
 - ⚠️ WW_LIMESTONE_CREAM ≈ WW_MARBLE_LIGHT (ΔE2000 1.7) — consider merging
@@ -10,23 +10,24 @@ Generated 2026-11-13T00:08:56.632Z — registry 39 materials.
 ## Unregistered colours in source (nearest registered colour, ΔE2000)
 | file | distinct hex | unregistered uses | within ΔE<3 of registry |
 |---|---|---|---|
-| src/street/plan.js | 192 | 199 | 159 |
+| src/street/plan.js | 195 | 201 | 162 |
 | src/street/buildings.js | 82 | 64 | 27 |
 | src/street/interiors.js | 68 | 52 | 82 |
+| src/Waterfront.jsx | 34 | 31 | 3 |
 | src/street/props.js | 31 | 26 | 8 |
 | src/street/facade.js | 34 | 23 | 11 |
+| src/Skyline.jsx | 20 | 20 | 0 |
 | src/Tree.jsx | 22 | 19 | 3 |
-| src/Waterfront.jsx | 14 | 14 | 0 |
 | src/street/Street.jsx | 15 | 13 | 2 |
 | src/Plan.jsx | 18 | 12 | 13 |
 | src/street/textures.js | 17 | 11 | 15 |
-| src/Skyline.jsx | 9 | 9 | 0 |
 | src/lobbyTextures.js | 10 | 9 | 2 |
 | src/PenthouseScene.jsx | 7 | 8 | 0 |
 | src/Atmosphere.jsx | 4 | 4 | 0 |
 | src/Lobby.jsx | 6 | 3 | 3 |
+| src/characters/CharacterPicker.jsx | 2 | 1 | 1 |
 
-Total unregistered colour uses: 466 (migrate area by area; do not bulk-recolour approved environments).
+Total unregistered colour uses: 497 (migrate area by area; do not bulk-recolour approved environments).
 
 ## Duplicate MeshStandardMaterial definitions
 - none

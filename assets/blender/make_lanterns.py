@@ -10,9 +10,9 @@ C = '#ffffff'
 def lantern(name, h=1.05, w=0.26):
     reset(); PARTS.clear()
     hw = w / 2
-    keep(box('foot', -hw - 0.03, hw + 0.03, -hw - 0.03, hw + 0.03, 0.0, 0.07, 0.012, 2), 'metal', C)            # plinth
-    keep(box('plinth', -hw, hw, -hw, hw, 0.07, 0.2, 0.012, 2), 'metal', C)
-    keep(box('band', -hw - 0.012, hw + 0.012, -hw - 0.012, hw + 0.012, 0.2, 0.235, 0.008, 2), 'brass', C)        # brass band
+    keep(box('foot', -hw - 0.03, hw + 0.03, -hw - 0.03, hw + 0.03, 0.0, 0.07, 0.012, 1), 'metal', C)            # plinth
+    keep(box('plinth', -hw, hw, -hw, hw, 0.07, 0.2, 0.012, 1), 'metal', C)
+    keep(box('band', -hw - 0.012, hw + 0.012, -hw - 0.012, hw + 0.012, 0.2, 0.235, 0.008, 1), 'brass', C)        # brass band
     gb, gt = 0.235, h - 0.2
     keep(box('glass', -hw + 0.025, hw - 0.025, -hw + 0.025, hw - 0.025, gb + 0.01, gt - 0.01, 0.01, 2), 'glow', C)   # lit glass core
     for sx in (-1, 1):                                                                                                # corner posts
@@ -20,7 +20,7 @@ def lantern(name, h=1.05, w=0.26):
             keep(box(f'post{sx}{sz}', sx * hw - 0.016, sx * hw + 0.016, sz * hw - 0.016, sz * hw + 0.016, gb, gt, 0.006, 1), 'metal', C)
     for k, (y0, y1, grow) in enumerate([(gt, gt + 0.035, 0.02), (gt + 0.035, gt + 0.075, 0.035), (gt + 0.075, gt + 0.105, 0.0)]):   # stepped cap
         s = hw + grow if k < 2 else hw * 0.55
-        keep(box(f'cap{k}', -s, s, -s, s, y0, y1, 0.008, 2), 'metal', C)
+        keep(box(f'cap{k}', -s, s, -s, s, y0, y1, 0.008, 1), 'metal', C)
     keep(lathe('finial', [(0.0, gt + 0.105), (0.03, gt + 0.115), (0.034, gt + 0.14), (0.02, gt + 0.175), (0.0, gt + 0.2)], 12), 'brass', C)
     return finish(name)
 

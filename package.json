@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "audit:palette": "node scripts/palette_audit.mjs",
+    "validate": "node scripts/validate.mjs && node scripts/palette_audit.mjs",
     "build:palette": "node scripts/build_palette.mjs"
   },
   "dependencies": {
