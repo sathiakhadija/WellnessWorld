@@ -9,8 +9,9 @@ import CAFEPROPS from '../baked/cafe_props.json'   // assets/blender/make_cafe_p
 import BRANCHES from '../baked/branches.json'   // produced by assets/blender/make_branches.py (Blender)
 import SHOP from '../baked/shop_props.json'   // assets/blender/make_shop_props.py (Blender)
 import FLOWERS from '../baked/flowers.json'   // assets/blender/make_flowers.py (Blender): curved-petal flowers, veined leaves, tapered stems
+import HEDGE from '../baked/hedge.json'   // assets/blender/make_hedge.py
 import PLANTS from '../baked/plants.json'   // produced by assets/blender/make_plants.py (Blender)
-const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES, ...SHOP, ...FLOWERS }
+const BAKED = { ...CAFE, ...PLANTS, ...LANTERNS, ...CAFEPROPS, ...BRANCHES, ...SHOP, ...FLOWERS, ...HEDGE }
 const PLANT_RE = /^(hydrangea|lavender|shrub)/   // organic kit: smooth floret balls
 const col = (h) => new THREE.Color(h)
 
@@ -29,12 +30,12 @@ function bakedGeo(name) {
 }
 const BUCKET_KEY = { wood: 'wood', metal: 'metal', brass: 'metal', fabric: 'fabric', seat: 'fabric', leather: 'fabric', marble: 'slab', glow: 'glow', leaf: 'leaf', stem: 'leaf', bloom: 'leaf', bloom2: 'leaf' }
 export function baked(ch, F, name, x, z, rot = 0, colors = {}, y = FL, scale = 1) {
-  const cr = Math.cos(rot), sr = Math.sin(rot), geos = bakedGeo(name)
+  const cr = Math.cos(rot), sr = Math.sin(rot), geos = bakedGeo(name), [sx, sy, sz] = Array.isArray(scale) ? scale : [scale, scale, scale]
   for (const [bucket, g] of Object.entries(geos)) {
     const a = ch.acc(BUCKET_KEY[bucket] || 'trim'), pos = g.attributes.position, nor = g.attributes.normal, uvs = g.attributes.uv, col = col_(colors[bucket] || '#ffffff'), idx = g.index
     const base = a.k, N = pos.count
     for (let i = 0; i < N; i++) {
-      const px = pos.getX(i) * scale, py = pos.getY(i) * scale, pz = pos.getZ(i) * scale, nx = nor.getX(i), ny = nor.getY(i), nz = nor.getZ(i)
+      const px = pos.getX(i) * sx, py = pos.getY(i) * sy, pz = pos.getZ(i) * sz, nx = nor.getX(i), ny = nor.getY(i), nz = nor.getZ(i)
       const lx = x + px * cr + pz * sr, lz = z - px * sr + pz * cr, [wx, wy, wz] = toWorld(F, lx, y + py, lz)
       const nlx = nx * cr + nz * sr, nlz = -nx * sr + nz * cr, d = dirWorld(F, nlx, ny, nlz)
       a.p.push(wx, wy, wz); a.n.push(d[0], d[1], d[2]); a.c.push(col.r, col.g, col.b); a.uv.push(uvs.getX(i), uvs.getY(i))

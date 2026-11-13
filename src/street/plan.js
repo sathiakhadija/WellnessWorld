@@ -55,9 +55,13 @@ export function buildStreet() {
     if (!o.nocap) ch.box(W0, x0 - 0.05, x1 + 0.05, h, h + 0.1, z0 - 0.05, z1 + 0.05, col('#e6decd'), 'trim', 'fulrb')
     if (!o.nosolid) ch.solid(W0, x0, x1, 0, h + 0.1, z0, z1, 'wall')
   }
+  // organic hedge: tiled Blender hedge_seg (bumpy superellipse body + leaf fringe) along the long axis, non-uniformly scaled to the requested length/depth/height
+  const leafyHedge = (ch, F, x0, x1, z0, z1, h, c) => {
+    const alongX = (x1 - x0) >= (z1 - z0), len = alongX ? x1 - x0 : z1 - z0, dep = alongX ? z1 - z0 : x1 - x0, nt = Math.max(1, Math.round(len / 2)), tl = len / nt
+    for (let i = 0; i < nt; i++) { const t = (i + 0.5) * tl, cx = alongX ? x0 + t : (x0 + x1) / 2, cz = alongX ? (z0 + z1) / 2 : z0 + t; baked(ch, F, 'hedge_seg', cx, cz, alongX ? 0 : Math.PI / 2, { leaf: c, bloom2: '#' + col(c).clone().multiplyScalar(1.25).getHexString() }, 0, [tl / 2, h + 0.1, dep]) }
+  }
   const hedge = (ch, x0, x1, z0, z1, h = 1.1, c = '#4f6038') => {
-    ch.box(W0, x0, x1, 0, h, z0, z1, col(c), 'leaf', 'fulrb', 1, 1, 0.1)
-    ch.box(W0, x0 + 0.05, x1 - 0.05, h, h + 0.12, z0 + 0.05, z1 - 0.05, col(c).multiplyScalar(1.12), 'leaf', 'u', 1, 1, 0.1)
+    leafyHedge(ch, W0, x0, x1, z0, z1, h, c)
     ch.solid(W0, x0, x1, 0, h + 0.1, z0, z1, 'hedge')
   }
   const lamp = (x, z, ry = 0) => { put('lamp', x, z, ry); pools.push([x, z, 7.5]); halos.push([x, GY + 4.9, z]) }
@@ -424,6 +428,28 @@ export function buildStreet() {
       for (const [bx2, bz2, ry] of [[-52, -58, 0.8], [-36, -76, 0.4], [-50, -24, -0.8], [-30, -12, -0.4], [24, -58, -0.8], [26, -24, 0.8], [8, -16, 0.4]]) bench(bx2, bz2, ry)
       for (const [bx2, bz2] of [[-52, -58], [-36, -76], [-50, -24], [-30, -12], [24, -58], [26, -24], [8, -16]]) for (let i = 0; i < 5; i++) { const a = R() * 6.28, d = 1.6 + R() * 2.2; plantAt(g, bx2 + Math.cos(a) * d, bz2 + Math.sin(a) * d, ['r', 't', 'd', 'c', 'h'][i], 1.2) }   // bedding round each bench: roses, tulips, daisies
     }
+    // ---- MASTER VISUAL RECONSTRUCTION (riverside lawns): the two big empty lawns between the piazza hedges and the groves become formal rose parterres:
+    //      gravel cross-walks, hedge-bordered beds planted with roses / lavender / daisies, an urn at the crossing, benches and a ring of clipped trees.
+    const parterre = (cx, cz, bw, bd, gap = 1.8) => {
+      const W2 = bw * 2 + gap, D2 = bd * 2 + gap
+      surf(g, 'gravel', cx - W2 / 2 - 1, cx + W2 / 2 + 1, cz - D2 / 2 - 1, cz + D2 / 2 + 1, G.gravel, 2, 2, 1)
+      put('urn', cx, cz, 0, 1.4)
+      let q = 0
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+        const x0 = sx < 0 ? cx - W2 / 2 : cx + gap / 2, x1 = x0 + bw, z0 = sz < 0 ? cz - D2 / 2 : cz + gap / 2, z1 = z0 + bd
+        surf(g, 'grass', x0, x1, z0, z1, '#7a8f52', 4, 4, 2)
+        for (const [a, b, c2, d2] of [[x0, x1, z0, z0 + 0.45], [x0, x1, z1 - 0.45, z1], [x0, x0 + 0.45, z0, z1], [x1 - 0.45, x1, z0, z1]]) hedge(g, a, b, c2, d2, 0.5, '#4e6139')
+        const kinds = [['r', 'r', 'd', 'l'], ['l', 'h', 'r', 'c'], ['r', 'p', 'd', 'r'], ['t', 'r', 'c', 'h']][q++ % 4]
+        for (let i = 0; i < 12; i++) plantAt(g, x0 + 0.9 + R() * (bw - 1.8), z0 + 0.9 + R() * (bd - 1.8), kinds[i % 4], 1.2)
+      }
+      for (const [dx, dz] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) bench(cx + dx * (W2 / 2 + 2.6) * (dx ? 1 : 0) + (dz ? 0 : 0), cz + dz * (D2 / 2 + 2.4), dx ? (dx > 0 ? -Math.PI / 2 : Math.PI / 2) : (dz > 0 ? Math.PI : 0))
+      for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) tree('clipped', cx + dx * (W2 / 2 + 3.4), cz + dz * (D2 / 2 + 3.4), 0.9, Math.PI / 2)
+    }
+    parterre(-36, -114, 9, 6.5); parterre(24, -114, 5.5, 5)
+    // ramp-foot garden room (west of the piazza, below the retaining wall): meadow drifts, flowering shrubs and a tree ring so no raw lawn is visible from the walks
+    { const K3 = ['d', 'c', 'r', 'l', 'h', 'p', 't', 'd']; let k3 = 0
+      for (const [x0, x1, z0, z1, n] of [[-92, -62, -128, -101, 60], [14, 36, -128, -101, 20]]) { for (let i = 0; i < n; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K3[k3++ % 8], 1.1 + R() * 0.3); for (let i = 0; i < 5; i++) tree(R() < 0.5 ? 'ornamental' : 'plane', x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), 0.95 + R() * 0.3); for (let i = 0; i < 8; i++) put('shrub', x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), R() * 6, 0.9 + R() * 0.5) }
+      surf(g, 'gravel', -84, -82, -128, -101, G.gravel, 2, 2, 1); bench(-83, -112, Math.PI / 2); bench(-83, -122, Math.PI / 2) }
     // west + east boundary of the neighbourhood (a stone plinth with a tall clipped hedge) so the world has a clear edge
     wall(g, WEST - 0.6, WEST, -132, SOUTH, 1.2); hedge(g, WEST + 0.0, WEST + 1.4, -132, SOUTH, 2.2, '#46583a'); wall(g, EAST, EAST + 0.6, -132, SOUTH, 1.2); hedge(g, EAST - 1.4, EAST, -132, SOUTH, 2.2, '#46583a')
     wall(g, WEST, EAST, SOUTH, SOUTH + 0.8, 2.4, { col: PAL.stock, key: 'brick' })
@@ -484,7 +510,7 @@ export function buildStreet() {
   // =====================================================================================================================================
   {
     const ch = mk('promenade'), T = TERRACE_Y, FT = frame(0, 0, 0, T), stone = col(PAL.limestone), timber = col('#6a4d3a'), bronze = col('#4b3c2b')
-    const hedgeT = (x0, x1, z0, z1, h = 1.0) => { ch.box(FT, x0, x1, 0, h, z0, z1, col('#4e6139'), 'leaf', 'fulrb', 1, 1, 0.1); ch.box(FT, x0 + 0.05, x1 - 0.05, h, h + 0.12, z0 + 0.05, z1 - 0.05, col('#586d41'), 'leaf', 'u', 1, 1, 0.1); ch.solid(FT, x0, x1, 0, h + 0.1, z0, z1, 'hedge')
+    const hedgeT = (x0, x1, z0, z1, h = 1.0) => { leafyHedge(ch, FT, x0, x1, z0, z1, h, '#4e6139'); ch.solid(FT, x0, x1, 0, h + 0.1, z0, z1, 'hedge')
       { const alongX = (x1 - x0) >= (z1 - z0), len = alongX ? x1 - x0 : z1 - z0, rad = Math.max(0.45, (alongX ? z1 - z0 : x1 - x0) * 0.62)       // Audit: scalloped clipped-box crown instead of a flat slab
         for (let t = 0.4; t < len; t += 0.85) { const cx = alongX ? x0 + t : (x0 + x1) / 2, cz = alongX ? (z0 + z1) / 2 : z0 + t; ch.prism(FT, cx, cz, rad, rad * 0.95, h - 0.15, h + 0.32 + ((t * 13) % 1) * 0.12, col(((t * 7) % 1) > 0.5 ? '#5a7043' : '#506639'), 'leaf', 9, true) } } }
     // ---- Zone B: a stone dais on the axis with framing lantern piers and two benches turned to the river (nothing tall in the view)

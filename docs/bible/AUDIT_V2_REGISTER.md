@@ -42,3 +42,6 @@ New Blender kit `assets/blender/make_flowers.py` → `src/baked/flowers.json`: c
 
 ## RESHAPE 3 — Organic street props (car, shrub, grass, bicycle) — PARTIAL
 `assets/blender/make_street_organic.py` → `src/baked/street_organic.json`: lofted rounded car (superellipse sections, tyres + rims, glasshouse, lights, mirrors; one body shape, tinted per instance), leafy shrub mound from ~100 curved leaves, curved grass blades, bicycle with tubular frame/spoked wheels/basket. Wired via props.js. Evidence: reshape_car_organic.png, reshape_shrub_grass_organic.png. OPEN: only one car silhouette (needs hatchback/saloon/van variants), clipped hedges and topiary still primitive, tri budget unmeasured on M2.
+
+## RESHAPE 4 — Hedges + riverside parterres — PARTIAL
+Blender `make_hedge.py` (bumpy superellipse hedge segment + leaf fringe, tiled/non-uniformly scaled; `baked()` now accepts [sx,sy,sz]) replaces flat green hedge boxes (garden + terrace). Two formal rose parterres (gravel cross-walks, hedge-bordered beds, urn, benches, clipped trees) and a ramp-foot garden room replace the empty riverside lawns (reshape_rose_parterre.png, reshape_rampfoot_garden.png). OPEN: bed soil colour pale, plant density modest, hedge fringe not yet visible at distance, lawn strip z -100..-93 still plain, tri budget unmeasured on M2.
