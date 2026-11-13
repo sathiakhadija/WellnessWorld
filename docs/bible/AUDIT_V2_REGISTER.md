@@ -26,3 +26,7 @@ Headless SwiftShader renders + Blender only; NOTHING owner-approved; M2 NOT meas
 | 01 Penthouse door/parquet scale | OPEN (re-audit) |
 ## Not yet verifiable here
 Entrance/lift/door open-close behaviour needs runtime video; M2 FPS; screenshot-only items marked "verify" in the audit.
+
+## Update — library lounge & bedroom window
+- B03.08 bedroom window: PARTIAL — window now shows city with river glimpse (evidence: audit_b03_bedroom_window_golden.png). Not M2-verified.
+- Library lounge chairs: PARTIAL — chairs angled toward each other and the lamp, gallery frames added above (evidence: audit_b02_library_lounge_chairs.png). Shelf book spines and lounge remodel still open. Not owner-approved.
