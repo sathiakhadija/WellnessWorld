@@ -3,7 +3,9 @@ import * as THREE from 'three'
 import { mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { Chunk, frame, C, rng } from './geo.js'
 import { PAL } from './facade.js'
-import BAKED from './baked/props.json'   // produced by assets/blender/make_props.py (Blender 5.3 / bpy): lathe, bevel and swept-curve models
+import PROPS from './baked/props.json'
+import ORG from '../baked/street_organic.json'   // assets/blender/make_street_organic.py (Blender): car, leafy shrub, grass tuft, bicycle
+const BAKED = { ...PROPS, ...ORG }   // produced by assets/blender/make_props.py (Blender 5.3 / bpy): lathe, bevel and swept-curve models
 
 const F0 = frame(0, 0, 0, 0)
 const iron = () => C('#26242b'), brass = () => C(PAL.brass), stone = () => C('#d4c8b0'), oak = () => C('#8a6a48')
@@ -201,7 +203,7 @@ export function treeGeo(kind) {
 
 // ---- Phase 1-3 additions: parked cars, bicycles, shrubs, planters (all instanced; muted palette, nothing garish)
 export function carGeo(bodyHex) {
-  const g = bakedGeo('car'), tint = C(bodyHex), a = g.carbody.attributes.color
+  const g = bakedGeo('car2'), tint = C(bodyHex), a = g.carbody.attributes.color
   for (let i = 0; i < a.count; i++) a.setXYZ(i, a.getX(i) * tint.r, a.getY(i) * tint.g, a.getZ(i) * tint.b)
   const merged = merge([g.carbody, g.metal].map((x) => { if (!x.attributes.color) throw new Error('no colour'); return x }))
   return { metal: merged, glass: g.glass, glow: g.glow }
@@ -220,7 +222,8 @@ export function carGeoOld(bodyHex) {
   c.box(F0, -0.7, -0.35, 0.62, 0.7, -L - 0.02, -L, C('#a2323a'), 'glow', 'b', 1, 1, 0); c.box(F0, 0.35, 0.7, 0.62, 0.7, -L - 0.02, -L, C('#a2323a'), 'glow', 'b', 1, 1, 0)
   return out(c)
 }
-export function bikeGeo() {
+export function bikeGeo() { return bakedGeo('bike2') }
+export function bikeGeoOld() {
   const c = new Chunk('bike', rng(32)), I = C('#2b2a30'), S = C('#8a9484')
   for (const z of [-0.45, 0.45]) { for (let i = 0; i < 12; i++) { const a = (i / 12) * 6.283; c.box(F0, -0.012, 0.012, 0.33 + Math.sin(a) * 0.3 - 0.015, 0.33 + Math.sin(a) * 0.3 + 0.015, z + Math.cos(a) * 0.3 - 0.03, z + Math.cos(a) * 0.3 + 0.03, I, 'metal', 'fulrb', 1, 1, 0) } }
   c.box(F0, -0.012, 0.012, 0.35, 0.82, -0.45, -0.03, S, 'metal', 'fulrb', 1, 1, 0); c.box(F0, -0.012, 0.012, 0.35, 0.8, -0.03, 0.45, S, 'metal', 'fulrb', 1, 1, 0)
@@ -229,12 +232,14 @@ export function bikeGeo() {
   return out(c)
 }
 const shrubTone = (k) => C(['#56693f', '#4d6039', '#627547', '#5a6a46'][k % 4])
-export function shrubGeo() {                                      // dense clipped evergreen mound
+export function shrubGeo() { return bakedGeo('shrub_o0') }
+export function shrubGeoOld() {                                      // dense clipped evergreen mound
   const c = new Chunk('shrub', rng(33))
   c.prism(F0, 0, 0, 0.55, 0.48, 0.0, 0.5, shrubTone(0), 'leaf', 9); c.prism(F0, 0, 0, 0.48, 0.3, 0.5, 0.82, shrubTone(1), 'leaf', 9)
   return out(c)
 }
-export function grassGeo() {                                      // ornamental grass tuft
+export function grassGeo() { return bakedGeo('grass_o') }
+export function grassGeoOld() {                                      // ornamental grass tuft
   const c = new Chunk('grass', rng(34))
   for (let i = 0; i < 9; i++) { const a = (i / 9) * 6.283, r = 0.07 + (i % 3) * 0.05; c.tri(F0, [Math.cos(a) * r - 0.025, 0, Math.sin(a) * r], [Math.cos(a) * r + 0.025, 0, Math.sin(a) * r], [Math.cos(a) * (r + 0.28), 0.62 + (i % 4) * 0.07, Math.sin(a) * (r + 0.28)], C(['#9aa163', '#b2a875', '#8d9a5c'][i % 3]), 'leaf', [Math.cos(a), 0.2, Math.sin(a)]) }
   return out(c)
