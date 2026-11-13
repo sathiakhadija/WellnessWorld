@@ -389,6 +389,36 @@ export function buildStreet() {
       for (let i = 0; i < 90; i++) { const x = -62 + R() * 94, z = -88 + R() * 86; if (Math.abs(x - BX) < 4 || Math.abs(z - PZ) < 4 || (Math.abs(x - BX) < 9 && Math.abs(z - PZ) < 9)) continue; put(R() < 0.7 ? 'grass' : 'shrub', x, z, R() * 6, 0.9 + R() * 0.5) }
       for (const [x, z] of [[-48, -66], [-30, -66], [-48, -22], [-30, -22], [30, -66], [12, -66], [30, -22], [12, -22], [-56, -44], [24, -44]]) tree(R() < 0.5 ? 'ornamental' : 'plane', x, z, 0.85 + R() * 0.3)
     }
+    // ---- MASTER VISUAL RECONSTRUCTION (park): the great lawn was one empty rectangle. It becomes a set of garden rooms: meandering gravel walks, a bandstand
+    //      pavilion on a raised dais, wildflower meadows, tree groves with real canopy, and sheltered benches at path bends. Walks join the existing cross/axial walks.
+    {
+      const PZ2 = -44.8, WALK = (pts, w = 2.3) => ribbon(g, 'gravel', curve(pts, 8), w, G.gravel, 2, 2, 1)
+      WALK([[-62, PZ2], [-54, -52], [-50, -62], [-40, -72], [-30, -80], [BX - 2, -86]])               // NW loop
+      WALK([[34, PZ2], [26, -53], [22, -62], [14, -72], [6, -80], [BX + 2, -86]])                       // NE loop
+      WALK([[-62, PZ2], [-55, -36], [-48, -26], [-38, -16], [-28, -8], [BX - 2, -4]])                   // SW loop
+      WALK([[34, PZ2], [27, -36], [20, -26], [10, -16], [0, -8], [BX + 2, -4]])                         // SE loop
+      // bandstand pavilion (NE room): dais, 8 slender columns, domed hip roof, lit underside
+      {
+        const PX = 15, PZb = -66, FP = frame(PX, PZb, 0, GY), cm = col('#efe6d4')
+        g.box(FP, -3.4, 3.4, 0, 0.45, -3.4, 3.4, col('#e1d6c0'), 'slab', 'fulrb', 2, 2, 0); g.solid(FP, -3.4, 3.4, 0, 0.45, -3.4, 3.4, 'pavilion')
+        for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + 0.39, cx = Math.cos(a) * 2.9, cz = Math.sin(a) * 2.9; g.box(FP, cx - 0.1, cx + 0.1, 0.45, 3.5, cz - 0.1, cz + 0.1, cm, 'trim', 'fulrb', 1, 1, 0) }
+        g.box(FP, -3.2, 3.2, 3.5, 3.72, -3.2, 3.2, cm, 'trim', 'fulrb', 1, 1, 0)
+        g.slope(FP, [-3.4, 3.72, 3.4], [3.4, 3.72, 3.4], [0.6, 5.6, 0.6], [-0.6, 5.6, 0.6], col('#46605a'), 'roof', 1.6, 1.6); g.slope(FP, [3.4, 3.72, -3.4], [-3.4, 3.72, -3.4], [-0.6, 5.6, -0.6], [0.6, 5.6, -0.6], col('#46605a'), 'roof', 1.6, 1.6)
+        g.slope(FP, [-3.4, 3.72, -3.4], [-3.4, 3.72, 3.4], [-0.6, 5.6, 0.6], [-0.6, 5.6, -0.6], col('#46605a'), 'roof', 1.6, 1.6); g.slope(FP, [3.4, 3.72, 3.4], [3.4, 3.72, -3.4], [0.6, 5.6, -0.6], [0.6, 5.6, 0.6], col('#46605a'), 'roof', 1.6, 1.6)
+        g.box(FP, -0.12, 0.12, 5.6, 6.6, -0.12, 0.12, col('#c9a45e'), 'metal', 'fulrb', 1, 1, 0)
+        g.box(FP, -3.0, 3.0, 3.44, 3.5, -3.0, 3.0, col('#ffd9a0'), 'glow', 'd', 1, 1, 0); pools.push([PX, PZb, 6, GY]); halos.push([PX, GY + 3.2, PZb])
+        surf(g, 'sett', PX - 5.5, PX + 5.5, PZb - 5.5, PZb + 5.5, G.sett, 1.6, 1.6, 1)
+        for (const a of [0.8, 2.4, 3.9, 5.5]) bench(PX + Math.cos(a) * 6.4, PZb + Math.sin(a) * 6.4, -a + Math.PI / 2 + Math.PI)
+        for (const [dx, dz] of [[-5.4, -5.4], [5.4, -5.4], [-5.4, 5.4], [5.4, 5.4]]) lamp(PX + dx, PZb + dz, 0)
+      }
+      // wildflower meadows in the two southern rooms + herbaceous drifts along the new walks
+      const K2 = ['h', 'l', 'p', 'l', 'h', 's', 'p']; let kj = 0
+      for (const [x0, x1, z0, z1] of [[-58, -32, -34, -10], [6, 30, -34, -10], [-58, -34, -86, -56]]) for (let i = 0; i < 70; i++) plantAt(g, x0 + R() * (x1 - x0), z0 + R() * (z1 - z0), K2[kj++ % 7], 0.85 + R() * 0.5)
+      // groves with proper canopy at the corners of each room (layered: tall plane + ornamental + shrub underplanting)
+      for (const [gx, gz] of [[-56, -80], [-56, -14], [30, -14], [32, -80], [-24, -58], [-4, -20], [6, -56]]) { for (let i = 0; i < 5; i++) { const a = R() * 6.28, d = R() * 4.5; tree(i < 2 ? 'plane' : 'ornamental', gx + Math.cos(a) * d, gz + Math.sin(a) * d, 1.0 + R() * 0.5) } for (let i = 0; i < 5; i++) put('shrub', gx + (R() - 0.5) * 9, gz + (R() - 0.5) * 9, R() * 6, 0.9 + R() * 0.5) }
+      // sheltered benches at the path bends
+      for (const [bx2, bz2, ry] of [[-52, -58, 0.8], [-36, -76, 0.4], [-50, -24, -0.8], [-30, -12, -0.4], [24, -58, -0.8], [26, -24, 0.8], [8, -16, 0.4]]) bench(bx2, bz2, ry)
+    }
     // west + east boundary of the neighbourhood (a stone plinth with a tall clipped hedge) so the world has a clear edge
     wall(g, WEST - 0.6, WEST, -132, SOUTH, 1.2); hedge(g, WEST + 0.0, WEST + 1.4, -132, SOUTH, 2.2, '#46583a'); wall(g, EAST, EAST + 0.6, -132, SOUTH, 1.2); hedge(g, EAST - 1.4, EAST, -132, SOUTH, 2.2, '#46583a')
     wall(g, WEST, EAST, SOUTH, SOUTH + 0.8, 2.4, { col: PAL.stock, key: 'brick' })

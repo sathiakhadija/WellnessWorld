@@ -33,3 +33,6 @@ Entrance/lift/door open-close behaviour needs runtime video; M2 FPS; screenshot-
 
 ## Update — fashion-street window displays
 - Shopfront displays: PARTIAL — Blender kit `assets/blender/make_shop_props.py` (mannequins ×3 silhouettes, handbag, shoe riser → `src/baked/shop_props.json`); boutique windows (Maison Sauvage, Atelier Bordeaux) now carry mannequins + folded-garment shelves; goods theme now follows the sign (a boutique no longer shows books). Evidence: audit_b02_shop_window_mannequins.png. Overhead clutter reduction, per-shop distinct façades and other shop types' goods still open. Not M2-verified, not owner-approved.
+
+## RESHAPE 1 — North park (great lawn) — PARTIAL (first reshape pass, not approved)
+Before: one empty 100 m lawn, two straight walks, sparse trees (reshape_park_topdown_before.png). After: four meandering gravel loops joining the cross/axial walks, bandstand pavilion on a raised sett dais with lit underside, three wildflower meadow rooms, seven layered tree groves, benches at path bends (reshape_park_*.png). Still open: pond/water feature, perimeter treatment of the parcel edge, tree variety. Not M2-verified.
