@@ -228,6 +228,18 @@ export function shopBuilding(ch, F, o) {
     ch.tri(F, [winX0 - 0.1, ground - 0.4, 0.16], [winX0 - 0.1, ground - 1.15, 1.35], [winX0 - 0.1, ground - 0.4, 1.35], aw.clone().multiplyScalar(0.85), 'awning', [-1, 0, 0])
     ch.tri(F, [winX1 + 0.1, ground - 0.4, 0.16], [winX1 + 0.1, ground - 1.15, 1.35], [winX1 + 0.1, ground - 0.4, 1.35], aw.clone().multiplyScalar(0.85), 'awning', [1, 0, 0])
   }
+  // ---- MASTER VISUAL RECONSTRUCTION (shopfront variety): each shop draws a style so a row no longer repeats one awning/sign — 0 plain, 1 striped, 2 scalloped valance, 3 projecting blade sign (+ a menu board)
+  { const sv = (R() * 4) | 0, awc = col(o.awning || PAL.sage), cream = col('#efe6d2')
+    if (o.awning !== false && sv === 1) { const nS = Math.max(4, Math.round((winX1 - winX0) / 0.28)), sw = (winX1 - winX0 + 0.2) / nS
+      for (let i = 0; i < nS; i += 2) { const xa = winX0 - 0.1 + i * sw, xb = xa + sw; ch.slope(F, [xa, ground - 0.4 + 0.004, 0.16], [xb, ground - 0.4 + 0.004, 0.16], [xb, ground - 1.15 + 0.004, 1.35], [xa, ground - 1.15 + 0.004, 1.35], cream, 'awning', 2, 2) } }
+    if (o.awning !== false && sv === 2) { const nS = Math.max(6, Math.round((winX1 - winX0) / 0.3)), sw = (winX1 - winX0 + 0.2) / nS
+      for (let i = 0; i < nS; i++) { const xa = winX0 - 0.1 + i * sw, xb = xa + sw, xm = (xa + xb) / 2; ch.tri(F, [xa, ground - 1.15, 1.35], [xb, ground - 1.15, 1.35], [xm, ground - 1.42, 1.35], i % 2 ? awc : awc.clone().multiplyScalar(0.9), 'awning', [0, 0, 1]) } }
+    if (sv === 3) { const bx = o.doorSide === 'l' ? w / 2 - 0.05 : -w / 2 + 0.05, by = ground + 0.55, bs = bx < 0 ? 1 : -1, ir = col('#26242b')
+      ch.box(F, bx - 0.02, bx + 0.02, by, by + 0.04, 0.16, 1.15, ir, 'metal', 'fulrb', 1, 1, 0); ch.box(F, bx - 0.02, bx + 0.02, by - 0.5, by, 1.1, 1.14, ir, 'metal', 'fulrb', 1, 1, 0)   // iron bracket
+      for (const sd of [-1, 1]) ch.acc('sign').quad(W(F, bx + sd * 0.025, by - 0.5, sd > 0 ? 1.1 : 0.55), W(F, bx + sd * 0.025, by - 0.5, sd > 0 ? 0.55 : 1.1), W(F, bx + sd * 0.025, by - 0.02, sd > 0 ? 0.55 : 1.1), W(F, bx + sd * 0.025, by - 0.02, sd > 0 ? 1.1 : 0.55), col('#ffffff'), dirW(F), signUVq(o.sign), 1)
+      ch.box(F, bx - 0.015, bx + 0.015, by - 0.52, by - 0.5, 0.52, 1.12, ir, 'metal', 'fulrb', 1, 1, 0)
+      baked(ch, F, 'menu_stand', dx + (bs > 0 ? -1.3 : 1.3), 1.3, bs * 0.3, { wood: '#5a4636', metal: '#2a3a30', marble: '#f1ecdf' }, 0, 1.5) }
+  }
   // wall lanterns beside the shopfront + clipped topiary pots at the corners (not in front of the door)
   for (const sx of [-1, 1]) { const lx = sx * (w / 2 - 0.12); ch.box(F, lx - 0.05, lx + 0.05, ground - 1.35, ground - 0.95, 0.16, 0.3, col('#ffd9a0'), 'glow', 'fulrb', 1, 1, 0); ch.box(F, lx - 0.06, lx + 0.06, ground - 0.95, ground - 0.9, 0.15, 0.31, col('#2b2623'), 'metal', 'fulrbd', 1, 1, 0); ch.box(F, lx - 0.06, lx + 0.06, ground - 1.4, ground - 1.35, 0.15, 0.31, col('#2b2623'), 'metal', 'fulrbu', 1, 1, 0) }
   for (const sx of [-1, 1]) {

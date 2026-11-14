@@ -53,3 +53,6 @@ Café ceiling (was flat peach plane): stained-oak cross beams + spine beam, plas
 Blender `make_decor_plants.py` (hanging wisteria racemes, vase posy of daisies, leaf-clad topiary in tub) replaces prism blobs in the shopfront wisteria curtains, café/library posies and shop-entrance topiary. **Bug found and fixed:** the `leaf` material was single-sided, so most petals/florets/grass blades were culled from one side; it is now DoubleSide (reshape_flowers_doublesided_fix.png, reshape_wisteria_organic.png). OPEN: wisteria reads slightly stringy at distance, tri/fill-rate impact of double-sided foliage unmeasured on M2.
 
 ## Perf trim pass 2 — static street 1.38M tris (headless count), from 1.69M. Flower/wisteria/posy/window-box kits simplified (blade rows/cols, floret counts); dedicated `boxplant0` for window boxes. Still above the 548k benchmark baseline; M2 not run.
+
+## RESHAPE 7 — Shopfront variety — PARTIAL
+Each shopfront now draws one of four styles (plain, striped awning, scalloped valance, projecting iron blade sign + menu board) so rows no longer repeat the same awning/sign (reshape_shopfront_variety.png). OPEN: façade masses/roofs still repeat in places, overhead clutter not reduced, arched/bay window variants not added.
