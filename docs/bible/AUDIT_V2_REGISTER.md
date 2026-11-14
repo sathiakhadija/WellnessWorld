@@ -56,3 +56,5 @@ Blender `make_decor_plants.py` (hanging wisteria racemes, vase posy of daisies, 
 
 ## RESHAPE 7 — Shopfront variety — PARTIAL
 Each shopfront now draws one of four styles (plain, striped awning, scalloped valance, projecting iron blade sign + menu board) so rows no longer repeat the same awning/sign (reshape_shopfront_variety.png). OPEN: façade masses/roofs still repeat in places, overhead clutter not reduced, arched/bay window variants not added.
+
+- Overhead clutter (lane): string-light catenaries every 10.5 m (was 7) and branch sprays every 9.6 m (was 7.4) — PARTIAL, reshape_lane_less_clutter.png.
