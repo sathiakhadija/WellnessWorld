@@ -12,7 +12,7 @@ function veins(g, R, W, H, n, colour, alpha, width) {
     g.strokeStyle = colour.replace('A', (alpha * (0.4 + R() * 0.6)).toFixed(3)); g.lineWidth = width * (0.4 + R() * 1.2); g.stroke()
   }
 }
-export function marbleLight() {
+export function marbleLight(grout = true) {
   const W = 1024, H = 768, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), R = rng(11)
   g.fillStyle = '#f3ebe3'; g.fillRect(0, 0, W, H)
   const cols = 4, rows = 3, tw = W / cols, th = H / rows
@@ -22,7 +22,8 @@ export function marbleLight() {
     g.translate(c * tw, r * th); veins(g, R, tw, th, 7, 'rgba(176,160,148,A)', 0.55, 1.6); veins(g, R, tw, th, 4, 'rgba(206,172,150,A)', 0.4, 3.2); veins(g, R, tw, th, 3, 'rgba(255,255,255,A)', 0.7, 2.4)
     g.restore()
   }
-  g.strokeStyle = 'rgba(150,130,118,0.5)'; g.lineWidth = 2; for (let c = 0; c <= cols; c++) { g.beginPath(); g.moveTo(c * tw, 0); g.lineTo(c * tw, H); g.stroke() } for (let r = 0; r <= rows; r++) { g.beginPath(); g.moveTo(0, r * th); g.lineTo(W, r * th); g.stroke() }
+  if (!grout) { g.fillStyle = 'rgba(243,235,227,0.5)'; g.fillRect(0, 0, W, H) }       // feature marble: softer veining
+  if (grout) { g.strokeStyle = 'rgba(150,130,118,0.5)'; g.lineWidth = 2; for (let c = 0; c <= cols; c++) { g.beginPath(); g.moveTo(c * tw, 0); g.lineTo(c * tw, H); g.stroke() } for (let r = 0; r <= rows; r++) { g.beginPath(); g.moveTo(0, r * th); g.lineTo(W, r * th); g.stroke() } }
   return tex(cv)
 }
 export function marbleDark() {
@@ -68,8 +69,22 @@ export function liftSign() {
   g.font = '600 54px "Playfair Display", Georgia, serif'; g.textAlign = 'center'; g.fillText('Lift', 128, 212); g.fillRect(60, 226, 136, 3)
   return tex(cv)
 }
+export function plaster() {                 // Task 003: warm ivory limewash — soft low-frequency mottling so the walls are not a flat colour
+  const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(91)
+  g.fillStyle = '#e9dccb'; g.fillRect(0, 0, S, S)
+  for (let i = 0; i < 70; i++) { const x = R() * S, y = R() * S, r = 40 + R() * 140, rg = g.createRadialGradient(x, y, 0, x, y, r); const v = R() < 0.5 ? '255,248,236' : '196,176,150'; rg.addColorStop(0, `rgba(${v},${0.05 + R() * 0.06})`); rg.addColorStop(1, `rgba(${v},0)`); g.fillStyle = rg; g.fillRect(0, 0, S, S) }
+  for (let i = 0; i < 3000; i++) { g.fillStyle = `rgba(${R() < 0.5 ? '255,255,255' : '120,100,80'},${R() * 0.035})`; g.fillRect(R() * S, R() * S, 2, 2) }
+  return tex(cv, { wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping })
+}
+export function walnut() {                  // Task 003: dark walnut, grain running vertically (uv v = height)
+  const W = 256, H = 512, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), R = rng(57)
+  g.fillStyle = '#4a3326'; g.fillRect(0, 0, W, H)
+  for (let x = 0; x < W; x += 1) { const v = 40 + R() * 40; g.fillStyle = `rgba(${v + 22},${v + 8},${v - 6},${0.35 + R() * 0.3})`; g.fillRect(x, 0, 1 + (R() < 0.2 ? 1 : 0), H) }
+  for (let i = 0; i < 40; i++) { const x = R() * W; g.strokeStyle = `rgba(20,12,8,${0.15 + R() * 0.25})`; g.lineWidth = 0.8 + R() * 1.6; g.beginPath(); g.moveTo(x, 0); for (let y = 0; y <= H; y += 32) g.lineTo(x + Math.sin(y * 0.02 + i) * 3, y); g.stroke() }
+  return tex(cv, { wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping })
+}
 export function indicator(label = '▲ PH') {
   const W = 256, H = 96, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d')
-  g.fillStyle = '#0d0b0a'; g.fillRect(0, 0, W, H); g.fillStyle = '#ffb35a'; g.font = '700 56px "Helvetica Neue", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(label, W / 2, H / 2 + 3)
+  g.fillStyle = '#120e0b'; g.fillRect(0, 0, W, H); g.fillStyle = '#ead5a8'; g.font = '500 44px "Helvetica Neue", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(label, W / 2, H / 2 + 3)
   return tex(cv)
 }

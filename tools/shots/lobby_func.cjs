@@ -1,0 +1,15 @@
+// Task 003 functional check: walk into the lobby, see the lift prompt, activate the lift, confirm the ride overlay starts.
+const { chromium } = require('playwright')
+;(async () => {
+  const b = await chromium.launch({ args: ['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--use-angle=swiftshader'] })
+  const p = await b.newPage({ viewport: { width: 960, height: 540 } }); const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{ if(m.type()==='error') errs.push('console: '+m.text().slice(0,120)) })
+  await p.goto('http://localhost:4176/?weather=sunny',{waitUntil:'load'})
+  await p.waitForFunction(()=>window.__ww&&window.__street,null,{timeout:300000}); await p.waitForTimeout(3000)
+  await p.evaluate(()=>{ window.__ww.doorForce('entrance',1); window.__ww.teleport(1.2,0.05,2.0) }); await p.waitForTimeout(12000)
+  const txt=()=>p.evaluate(()=>[...document.querySelectorAll('.ww-prompt')].map(e=>e.textContent).join('|'))
+  console.log('prompt near lift:', await txt())
+  const lift=()=>p.evaluate(()=>{ let r; window.__ww.scene().traverse(o=>{ if(o.name==='' && o.children&&0) r=1 }); return null })
+  await p.keyboard.press('Enter'); await p.waitForTimeout(60000)
+  console.log('overlay present after Enter:', await p.evaluate(()=>!!document.querySelector('.ww-ov')), '| body mentions ride card:', await p.evaluate(()=>document.body.innerText.slice(0,200).replace(/\n/g,' / ')))
+  console.log('errors',JSON.stringify(errs.slice(0,4))); await b.close()
+})().catch(e=>{console.error(e);process.exit(2)})
