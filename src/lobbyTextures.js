@@ -111,3 +111,56 @@ export function rugRect() {                  // beige woven rug with a darker bo
   g.fillStyle = 'rgba(176,150,118,0.35)'; for (let x = 100; x < W - 100; x += 40) for (let y = 100; y < H - 100; y += 40) { g.beginPath(); g.moveTo(x, y - 6); g.lineTo(x + 6, y); g.lineTo(x, y + 6); g.lineTo(x - 6, y); g.fill() }
   return tex(cv)
 }
+
+// ---- Decor textures (Task 003 refinement 5): every shelf / console object gets a real surface. UVs are box-projected in metres in Lobby.jsx (kit()), so each texture tiles per `tile` metres.
+const REP = { wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping }
+export function clothTex(base, kind = 'cloth', seed = 3) {            // book cover: woven cloth or fine-grain leather with a debossed border frame
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(seed)
+  g.fillStyle = base; g.fillRect(0, 0, S, S)
+  if (kind === 'cloth') { for (let y = 0; y < S; y += 2) { g.fillStyle = `rgba(0,0,0,${0.06 + R() * 0.07})`; g.fillRect(0, y, S, 1) } for (let x = 0; x < S; x += 2) { g.fillStyle = `rgba(255,255,255,${0.04 + R() * 0.06})`; g.fillRect(x, 0, 1, S) } }
+  else { for (let i = 0; i < 5200; i++) { const x = R() * S, y = R() * S, r = 0.6 + R() * 1.3; g.fillStyle = R() < 0.5 ? `rgba(0,0,0,${0.03 + R() * 0.05})` : `rgba(255,235,210,${0.02 + R() * 0.035})`; g.beginPath(); g.arc(x, y, r, 0, 6.3); g.fill() } for (let i = 0; i < 24; i++) { g.strokeStyle = `rgba(0,0,0,${0.08 + R() * 0.1})`; g.lineWidth = 0.7; g.beginPath(); let x = R() * S, y = R() * S; g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += (R() - 0.5) * 40; y += (R() - 0.5) * 40; g.lineTo(x, y) } g.stroke() } }
+  return tex(cv, REP)
+}
+export function labelTex() {                                          // cream spine / cover label with a gilt border and printed title lines
+  const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(8)
+  g.fillStyle = '#efe4cc'; g.fillRect(0, 0, S, S)
+  g.strokeStyle = '#a07c3c'; g.lineWidth = 3; g.strokeRect(5, 5, S - 10, S - 10); g.lineWidth = 1; g.strokeRect(11, 11, S - 22, S - 22)
+  for (let i = 0; i < 6; i++) { g.fillStyle = `rgba(48,34,24,${0.7 + R() * 0.25})`; const w = 40 + R() * 50, y = 24 + i * 15; g.fillRect((S - w) / 2, y, w, i === 0 ? 6 : 3) }
+  return tex(cv, REP)
+}
+export function paperTex() {                                          // page block: stacked leaves seen edge-on, warm and slightly uneven
+  const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(21)
+  g.fillStyle = '#efe6d0'; g.fillRect(0, 0, S, S)
+  for (let y = 0; y < S; y += 2) { g.fillStyle = `rgba(120,96,64,${0.1 + R() * 0.16})`; g.fillRect(0, y, S, 1) }
+  for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(150,120,80,${R() * 0.1})`; g.fillRect(R() * S, 0, 1 + R() * 3, S) }
+  return tex(cv, REP)
+}
+export function glazeTex(base, fleck = '#7a6044', seed = 5, clouds = true) {       // ceramic glaze: tonal clouds, iron flecks, hairline crazing
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(seed)
+  g.fillStyle = base; g.fillRect(0, 0, S, S)
+  for (let i = 0; i < (clouds ? 40 : 0); i++) { const x = R() * S, y = R() * S, r = 30 + R() * 80, rg = g.createRadialGradient(x, y, 0, x, y, r); const v = R() < 0.5 ? '255,250,240' : '120,100,80'; rg.addColorStop(0, `rgba(${v},${0.06 + R() * 0.08})`); rg.addColorStop(1, `rgba(${v},0)`); g.fillStyle = rg; g.fillRect(0, 0, S, S) }
+  for (let i = 0; i < 380; i++) { g.fillStyle = fleck + Math.floor(40 + R() * 90).toString(16).padStart(2, '0'); const r = 0.5 + R() * 1.4; g.beginPath(); g.arc(R() * S, R() * S, r, 0, 6.3); g.fill() }
+  for (let i = 0; i < 18; i++) { g.strokeStyle = 'rgba(90,70,50,0.12)'; g.lineWidth = 0.6; g.beginPath(); let x = R() * S, y = R() * S; g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (R() - 0.5) * 36; y += (R() - 0.5) * 36; g.lineTo(x, y) } g.stroke() }
+  return tex(cv, REP)
+}
+export function leafTex(base, seed = 9) {                             // foliage: mottled green with fine branching veins and lighter margins
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(seed)
+  g.fillStyle = base; g.fillRect(0, 0, S, S)
+  for (let i = 0; i < 50; i++) { const x = R() * S, y = R() * S, r = 20 + R() * 50, rg = g.createRadialGradient(x, y, 0, x, y, r); const v = R() < 0.5 ? '190,220,140' : '10,40,20'; rg.addColorStop(0, `rgba(${v},${0.12 + R() * 0.12})`); rg.addColorStop(1, `rgba(${v},0)`); g.fillStyle = rg; g.fillRect(0, 0, S, S) }
+  for (let i = 0; i < 14; i++) { const x0 = R() * S, y0 = R() * S; for (const s of [-1, 1]) for (let k = 0; k < 7; k++) { g.strokeStyle = `rgba(225,240,170,${0.18 + R() * 0.12})`; g.lineWidth = 0.9; g.beginPath(); const x = x0 + k * 7, y = y0 + k * 3; g.moveTo(x, y); g.lineTo(x + s * 18, y + 14 + R() * 6); g.stroke() } g.strokeStyle = 'rgba(235,245,180,0.3)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + 50, y0 + 21); g.stroke() }
+  return tex(cv, REP)
+}
+export function barkTex() {                                           // twig bark: vertical fissures with lenticels
+  const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(14)
+  g.fillStyle = '#4b382a'; g.fillRect(0, 0, S, S)
+  for (let i = 0; i < 40; i++) { g.strokeStyle = `rgba(${R() < 0.5 ? '20,12,8' : '130,104,80'},${0.2 + R() * 0.25})`; g.lineWidth = 0.7 + R() * 1.5; const x = R() * S; g.beginPath(); g.moveTo(x, 0); for (let y = 0; y <= S; y += 16) g.lineTo(x + (R() - 0.5) * 4, y); g.stroke() }
+  for (let i = 0; i < 30; i++) { g.fillStyle = 'rgba(200,180,150,0.45)'; g.fillRect(R() * S, R() * S, 3, 1) }
+  return tex(cv, REP)
+}
+export function bronzeBrushed(base = '#8a6a45') {                     // brushed metal: fine linear streaks + soft patina
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(33)
+  g.fillStyle = base; g.fillRect(0, 0, S, S)
+  for (let y = 0; y < S; y++) { g.fillStyle = `rgba(${R() < 0.5 ? '255,226,170' : '40,24,10'},${R() * 0.14})`; g.fillRect(0, y, S, 1) }
+  for (let i = 0; i < 12; i++) { const x = R() * S, y = R() * S, rg = g.createRadialGradient(x, y, 0, x, y, 50); rg.addColorStop(0, 'rgba(60,40,20,0.12)'); rg.addColorStop(1, 'rgba(60,40,20,0)'); g.fillStyle = rg; g.fillRect(0, 0, S, S) }
+  return tex(cv, REP)
+}

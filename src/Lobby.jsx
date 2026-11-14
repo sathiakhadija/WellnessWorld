@@ -20,12 +20,20 @@ export const LOBBY = { x0: -0.4, x1: 2.8, z0: 0.4, z1: 2.8, h: 3.1, cx: 1.2, lif
 const clamp01 = (v) => Math.min(1, Math.max(0, v)), smooth = (t) => t * t * (3 - 2 * t)
 
 const cache = {}
+const TILE = { bookA: 0.12, bookB: 0.12, bookC: 0.12, bookD: 0.12, paper: 0.03, label: 0.03, ceramic: 0.2, ceramic2: 0.2, ivy1: 0.06, ivy2: 0.06, stem: 0.05, bronze: 0.12, shade: 0.12 }
 function kit(name) {
   if (cache[name]) return cache[name]
   const o = {}
   for (const [bucket, d] of Object.entries(KIT[name] || DEC[name])) {
     const n = d.p.length / 3, uv = new Float32Array(n * 2), P = new Float32Array(n * 3); P.set(d.p)
-    for (let i = 0; i < n; i++) { if (bucket === 'top') { uv[i * 2] = P[i * 3]; uv[i * 2 + 1] = P[i * 3 + 2] } else if (bucket === 'rug') { uv[i * 2] = P[i * 3] / 1.56 + 0.5; uv[i * 2 + 1] = P[i * 3 + 2] / 1.56 + 0.5 } else { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] } }
+    if (!KIT[name] && TILE[bucket]) {                                  // decor kits: per-triangle box projection, uv in tiles (1 tile = TILE[bucket] metres)
+      const T = TILE[bucket]
+      for (let t = 0; t < n; t += 3) {
+        const a = t * 3, ux = P[a + 3] - P[a], uy = P[a + 4] - P[a + 1], uz = P[a + 5] - P[a + 2], vx = P[a + 6] - P[a], vy = P[a + 7] - P[a + 1], vz = P[a + 8] - P[a + 2]
+        const nx = Math.abs(uy * vz - uz * vy), ny = Math.abs(uz * vx - ux * vz), nz = Math.abs(ux * vy - uy * vx)
+        for (let k = 0; k < 3; k++) { const x = P[a + k * 3], y = P[a + k * 3 + 1], z = P[a + k * 3 + 2]; let u, v; if (ny >= nx && ny >= nz) { u = x; v = z } else if (nx >= nz) { u = z; v = y } else { u = x; v = y }; uv[(t + k) * 2] = u / T; uv[(t + k) * 2 + 1] = v / T }
+      }
+    } else for (let i = 0; i < n; i++) { if (bucket === 'top') { uv[i * 2] = P[i * 3]; uv[i * 2 + 1] = P[i * 3 + 2] } else if (bucket === 'rug') { uv[i * 2] = P[i * 3] / 1.56 + 0.5; uv[i * 2 + 1] = P[i * 3 + 2] / 1.56 + 0.5 } else { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] } }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); o[bucket] = toCreasedNormals(g, 0.7)
   }
   return (cache[name] = o)
@@ -43,6 +51,9 @@ function petalMat(m, tint) {
   return m
 }
 
+// decor material helper: colour map + the same canvas as a bump map, tiled per TILE metres
+const dm = (t, o) => { const { bump = 0.5, ...r } = o; const m = new THREE.MeshStandardMaterial({ map: t, bumpMap: t, bumpScale: bump, color: '#ffffff', ...r }); return m }
+
 function useMats() {
   return useMemo(() => {
     const brass = ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true).lerp(new THREE.Color('#cdbb98'), 0.4), roughness: 0.4, metalness: 1, envMapIntensity: 1.3 }, 'lobbyBrass')
@@ -59,20 +70,22 @@ function useMats() {
       brass, dark: ww('WW_IRONWORK_CHARCOAL', { roughness: 0.45, metalness: 0.4 }, 'lobbyDark2'),
       tube: warm, wax: ww('WW_LIMESTONE_CREAM', { roughness: 0.6 }, 'lobbyWax'),
       rug: ww('WW_RUG_CREAM', { map: LT.rugTex(), roughness: 1 }, 'lobbyRug'),
-      ivy1: ww('WW_FOLIAGE_FOREST', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy2'),
-      stem: ww('WW_BARK', { roughness: 1 }, 'lobbyStem'),
+      ivy1: ww('WW_FOLIAGE_FOREST', { map: LT.leafTex('#e2f0cc', 9), side: THREE.DoubleSide, roughness: 0.55 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { map: LT.leafTex('#eef2c4', 12), side: THREE.DoubleSide, roughness: 0.55 }, 'lobbyIvy2'),
+      stem: ww('WW_BARK', { map: LT.barkTex(), color: '#ffffff', roughness: 1 }, 'lobbyStem'),
       bloom1: petalMat(ww('WW_FLOWER_PINK_MUTED', { roughness: 0.7 }, 'lobbyB1'), '#ff9fb4'), bloom2: petalMat(ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.7 }, 'lobbyB2'), '#ffd3dc'),
       cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.7), toneMapped: false }),                        // Task 003: softer than the bare LED tube
       frame: new THREE.MeshStandardMaterial({ color: '#d6c9b3', roughness: 0.62, envMapIntensity: 0.3 }),
       rod: new THREE.MeshStandardMaterial({ color: '#fff4de', emissive: new THREE.Color('#ffd9a0'), emissiveIntensity: 0.85, roughness: 0.3, toneMapped: false }),
-      bronze: new THREE.MeshStandardMaterial({ color: '#8a6a45', metalness: 1, roughness: 0.42, envMapIntensity: 1.1 }),
+      bronze: new THREE.MeshStandardMaterial({ map: LT.bronzeBrushed(), bumpMap: LT.bronzeBrushed(), bumpScale: 0.4, color: '#ffffff', metalness: 1, roughness: 0.42, envMapIntensity: 1.1 }),
       shade: new THREE.MeshStandardMaterial({ color: '#d9b87c', emissive: new THREE.Color('#ffcf94'), emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.45, side: THREE.DoubleSide }),
-      ceramic: new THREE.MeshStandardMaterial({ color: '#efe6d8', roughness: 0.35 }),
+      ceramic: dm(LT.glazeTex('#efe6d8', '#6a5238', 5), { roughness: 0.3, bump: 0.12 }),
       niche: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6 }),
       nicheMirror: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6, side: THREE.DoubleSide }),
-      ceramic2: new THREE.MeshStandardMaterial({ color: '#cdbba4', roughness: 0.42 }), paper: new THREE.MeshStandardMaterial({ color: '#efe6d2', roughness: 0.9 }), bookD: new THREE.MeshStandardMaterial({ color: '#7d5a3c', roughness: 0.8 }),
+      burgundy: dm(LT.glazeTex('#682D3E', '#2a0f18', 7, false), { roughness: 0.82, bump: 0.15 }),     // main console vase: matte burgundy ceramic with a fine speckled body
+      ceramic2: dm(LT.glazeTex('#cdbba4', '#4a3626', 6), { roughness: 0.55, bump: 0.2 }), paper: dm(LT.paperTex(), { roughness: 0.9, bump: 0.8 }), label: dm(LT.labelTex(), { roughness: 0.7, bump: 0.3 }),
+      bookD: dm(LT.clothTex('#8a5f3a', 'leather', 4), { roughness: 0.62, bump: 0.35 }),
       rug2: new THREE.MeshStandardMaterial({ map: LT.rugRect(), roughness: 1 }),
-      bookA: new THREE.MeshStandardMaterial({ color: '#d9c9ae', roughness: 0.8 }), bookB: new THREE.MeshStandardMaterial({ color: '#4a3326', roughness: 0.8 }), bookC: new THREE.MeshStandardMaterial({ color: '#a98b63', roughness: 0.8 }),
+      bookA: dm(LT.clothTex('#dccdb2', 'cloth', 1), { roughness: 0.85, bump: 0.8 }), bookB: dm(LT.clothTex('#5a4030', 'leather', 2), { roughness: 0.55, bump: 0.35 }), bookC: dm(LT.clothTex('#b3946a', 'cloth', 3), { roughness: 0.85, bump: 0.8 }),
       glass: new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.22, roughness: 0.05, depthWrite: false }),
       ceil: new THREE.MeshStandardMaterial({ color: wwColor('WW_CEILING_CREAM'), roughness: 0.95, emissive: new THREE.Color(wwHex('WW_LAMP_WARM')), emissiveMap: LT.ceilingGlow(), emissiveIntensity: 0.2 }),
       art: new THREE.MeshStandardMaterial({ map: LT.artTex(), roughness: 0.6 }),
@@ -203,7 +216,7 @@ export default function Lobby() {
         <mesh geometry={G.arch} position={[0, 0, 0.0]} material={M.niche} receiveShadow />
       </group>
       <Kit name="console" M={M} position={[x0, 0, 1.95]} rotY={Math.PI / 2} over={{ dark: M.bronze }} />
-      <Kit name="bloom_vase" M={M} position={[x0 + 0.22, 0.82, 1.6]} />
+      <Kit name="bloom_vase" M={M} position={[x0 + 0.22, 0.82, 1.6]} over={{ ceramic: M.burgundy }} />
       <Kit name="lamp" M={M} position={[x0 + 0.2, 0.82, 2.32]} />
       <Kit name="vase_bottle" M={M} position={[x0 + 0.2, 0.82, 2.02]} scale={[0.85, 0.85, 0.85]} />
 

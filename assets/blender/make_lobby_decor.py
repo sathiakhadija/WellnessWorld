@@ -71,6 +71,7 @@ def book_up(parts, name, x, w, h, d, cover, lean=0.0, yaw=0.0):
     """standing book: cover box + page-top strip + bronze spine band; pivot at the bottom centre of the spine."""
     o = part(box(name + 'c', -w / 2, w / 2, -d, 0, 0, h, bevel=0.0025, segs=2), cover); o.location = (x, 0, 0); o.rotation_euler = (0, lean, yaw)
     p = part(box(name + 'p', -w / 2 + 0.003, w / 2 - 0.003, -d + 0.004, -0.006, h - 0.002, h + 0.0012, bevel=0), 'paper'); p.location = (x, 0, 0); p.rotation_euler = (0, lean, yaw)
+    lb = part(box(name + 'l', -w / 2 + 0.005, w / 2 - 0.005, -d - 0.0012, -d + 0.001, h * 0.4, h * 0.7, bevel=0), 'label'); lb.location = (x, 0, 0); lb.rotation_euler = (0, lean, yaw)
     for z in (h * 0.78, h * 0.2):
         s = part(box(name + f's{z:.2f}', -w / 2 - 0.0006, w / 2 + 0.0006, -d - 0.0006, -d + 0.003, z, z + 0.005, bevel=0), 'bronze'); s.location = (x, 0, 0); s.rotation_euler = (0, lean, yaw)
 
@@ -90,6 +91,8 @@ def books_stack(name, seed):
         bx('b', -L / 2, L / 2, -D, 0, z, z + 0.004, c); bx('t', -L / 2, L / 2, -D, 0, z + T - 0.004, z + T, c)
         bx('s', -L / 2, -L / 2 + 0.008, -D, 0, z, z + T, c); bx('p', -L / 2 + 0.008, L / 2 - 0.004, -D + 0.004, -0.004, z + 0.004, z + T - 0.004, 'paper', 0)
         bx('r', -L / 2 - 0.0006, -L / 2 + 0.003, -D * 0.62, -D * 0.38, z + 0.003, z + T - 0.003, 'bronze', 0)
+        bx('l', -L * 0.3, L * 0.3, -D * 0.78, -D * 0.4, z + T, z + T + 0.0012, 'label', 0)
+        bx('sl', -L / 2 - 0.0012, -L / 2 + 0.001, -D * 0.8, -D * 0.2, z + T * 0.2, z + T * 0.8, 'label', 0)
         z += T
     return finish(name)
 
