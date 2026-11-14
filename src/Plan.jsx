@@ -63,13 +63,7 @@ function buildArch() {
   // Bible s03: clean planar walls — no raised-panel mouldings, no pilaster, no ornate cornice (a thin shadow-gap trim only)
   add('trim', -4.45, -4.42, 3.62, 3.66, -11.79, 0.05)
   add('led', -4.45, -4.40, 3.585, 3.615, -11.79, 0.05)                                       // concealed perimeter cove glow (Bible s03 D)
-  {   // framed marble artwork on the bay between the doors (approved AFTER shows one, picture-light above)
-    const [a, b] = segs[1], zc = (a + b) / 2, hw = 0.55
-    add('brass', -4.45, -4.425, 1.05, 1.09, zc - hw - 0.04, zc + hw + 0.04); add('brass', -4.45, -4.425, 2.31, 2.35, zc - hw - 0.04, zc + hw + 0.04)
-    add('brass', -4.45, -4.425, 1.05, 2.35, zc - hw - 0.04, zc - hw); add('brass', -4.45, -4.425, 1.05, 2.35, zc + hw, zc + hw + 0.04)
-    add('doorHi', -4.45, -4.435, 1.09, 2.31, zc - hw, zc + hw)
-    add('brass', -4.45, -4.40, 2.45, 2.48, zc - 0.3, zc + 0.3); add('led', -4.45, -4.43, 2.42, 2.45, zc - 0.28, zc + 0.28)
-  }
+  // Task 002: the gold-framed marble artwork and its picture light between the two doors were removed (blank wall canvas).
 
   // ---- front wall (rebuilt) with the main entrance: a 1.3 m opening through the whole 0.4 m wall, panelled surround, lintel
   const EX0 = 0.55, EX1 = 1.85
@@ -483,10 +477,7 @@ function RoomLights({ M }) {
       {discs.map((p, i) => (
         <mesh key={i} position={p} rotation={[Math.PI / 2, 0, 0]} material={M.downlight}><circleGeometry args={[0.075, 20]} /></mesh>
       ))}
-      {/* warm wash from the brass sconces / cove onto the panelled wall and doors */}
-      <pointLight userData={{ wx: 1 }} position={[-3.9, 2.3, -4.43]} intensity={4} distance={6} decay={1.5} color="#ffbf7a" />
-      <pointLight userData={{ wx: 1 }} position={[-3.9, 2.3, -8.1]} intensity={3} distance={6} decay={1.5} color="#ffbf7a" />
-      <pointLight userData={{ wx: 1 }} position={[-3.9, 2.3, -11.1]} intensity={4} distance={6} decay={1.5} color="#ffbf7a" />
+      {/* Task 002: the three warm wash lights that served the removed wall sconces / artwork on the left wall are gone; room + cove + ceiling lights remain */}
       <pointLight userData={{ wx: 1 }} position={[-7.2, 3.0, -6.0]} intensity={7} distance={9} decay={1.5} color="#ffc486" />
       <pointLight userData={{ wx: 1 }} position={[-6.7, 3.0, -10.05]} intensity={5} distance={7} decay={1.5} color="#ffd2a0" />
     </>

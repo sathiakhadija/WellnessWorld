@@ -92,11 +92,12 @@ function Penthouse({ onSpawn, onMats }) {
     const colliders = []
     const remove = [], mats = {}
     scene.traverse((o) => {
+      if (o.name === 'WW_Trim_Mouldings_3' || o.name === 'WW_Trim_Mouldings_4') { remove.push(o); return }   // Task 002: the two left-wall sconces (brass plates/caps + glow tubes) are separate GLB meshes; they exist only on that wall
       if (o.name?.startsWith('WW_Adjoining') || o.name?.startsWith('WW_Blossom') || o.name?.startsWith('WW_Balcony') || o.name?.startsWith('WW_Balustrade') || o.name === 'WW_COL_Balcony') { remove.push(o); return }   // old side cells (+ their props) and the old tree: rebuilt in code
       // Single authoritative source for the left wall, its door openings and the front wall = Plan.jsx. Every GLB triangle of the old V8 left wall
       // (plaster, door linings/architraves in Trim_Satin, skirting) is removed by MATERIAL, not by mesh name: GLTFLoader numbers split primitives
       // differently from the Blender export, so the V9/V10 name lists missed the old door linings ("WW_Walls_2"), which stayed inside the new door
-      // openings (the "central vertical structure"), and the old skirting, which ran across the doorway floors. Sconces (Brass/SconceGlow) are kept.
+      // openings (the "central vertical structure"), and the old skirting, which ran across the doorway floors. (Sconces were kept here until Task 002 removed them by mesh name.)
       if (o.isMesh && ['WW_Plaster_Ivory_GAME', 'WW_Trim_Satin_GAME', 'WW_Skirting_GAME'].includes(o.material?.name)) {
         dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, (x) => LEFTWALL(x)))                // old left wall slab, linings, panelling, skirting (x <= -4.40)
         dropTris(o.geometry, (pos, a, b, c) => all3(pos, a, b, c, FRONT_WALL))                         // old front wall slab (rebuilt with the entrance)
