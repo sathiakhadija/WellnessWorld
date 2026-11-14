@@ -22,7 +22,7 @@ export function marbleLight(grout = true, soft = !grout) {
     g.translate(c * tw, r * th); veins(g, R, tw, th, 7, 'rgba(176,160,148,A)', 0.55, 1.6); veins(g, R, tw, th, 4, 'rgba(206,172,150,A)', 0.4, 3.2); veins(g, R, tw, th, 3, 'rgba(255,255,255,A)', 0.7, 2.4)
     g.restore()
   }
-  if (soft) { g.fillStyle = 'rgba(243,235,227,0.58)'; g.fillRect(0, 0, W, H) }       // feature marble: softer veining
+  if (soft) { g.fillStyle = 'rgba(243,235,227,0.42)'; g.fillRect(0, 0, W, H) }       // feature marble: softer veining
   if (grout) { g.strokeStyle = 'rgba(150,130,118,0.5)'; g.lineWidth = 2; for (let c = 0; c <= cols; c++) { g.beginPath(); g.moveTo(c * tw, 0); g.lineTo(c * tw, H); g.stroke() } for (let r = 0; r <= rows; r++) { g.beginPath(); g.moveTo(0, r * th); g.lineTo(W, r * th); g.stroke() } }
   return tex(cv)
 }
@@ -96,9 +96,9 @@ export function marbleFeature() {            // Task 003 refinement: cream featu
   const vein = (col, w) => {
     let x = R() * W, y = -20, a = Math.PI / 2 + (R() - 0.5) * 0.9; const pts = [[x, y]]
     for (let k = 0; k < 90; k++) { a += (R() - 0.5) * 0.22; x += Math.cos(a) * 14; y += Math.sin(a) * 14; pts.push([x, y]) }
-    for (const [lw, al] of [[w * 5, 0.05], [w * 2.4, 0.1], [w, 0.34]]) { g.beginPath(); pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py))); g.strokeStyle = col.replace('A', (al * (0.6 + R() * 0.5)).toFixed(3)); g.lineWidth = lw; g.lineJoin = 'round'; g.stroke() }
+    for (const [lw, al] of [[w * 5, 0.08], [w * 2.4, 0.16], [w, 0.55]]) { g.beginPath(); pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py))); g.strokeStyle = col.replace('A', (al * (0.6 + R() * 0.5)).toFixed(3)); g.lineWidth = lw; g.lineJoin = 'round'; g.stroke() }
   }
-  for (let i = 0; i < 7; i++) vein('rgba(150,136,126,A)', 1.1); for (let i = 0; i < 4; i++) vein('rgba(196,158,112,A)', 1.4)
+  for (let i = 0; i < 13; i++) vein('rgba(128,112,100,A)', 1.5); for (let i = 0; i < 7; i++) vein('rgba(190,146,96,A)', 1.9)
   return tex(cv, { wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping })
 }
 export function rugRect() {                  // beige woven rug with a darker border band and fine inner line (rectangular, ~1.9 x 1.25 m)

@@ -31,6 +31,18 @@ function kit(name) {
   return (cache[name] = o)
 }
 
+// Back-lit petal look without transmission: double-sided, a touch of opacity, and a view-dependent glow (thin edges / grazing angles glow, like light through a petal).
+function petalMat(m, tint) {
+  m.side = THREE.DoubleSide; m.transparent = true; m.opacity = 0.94
+  const c = new THREE.Color(tint)
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uPetal = { value: c }
+    sh.fragmentShader = 'uniform vec3 uPetal;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += uPetal * (0.22 + 0.55 * pow(1.0 - abs(dot(normalize(vNormal), normalize(vViewPosition))), 1.6));')
+  }
+  m.customProgramCacheKey = () => 'petal' + tint
+  return m
+}
+
 function useMats() {
   return useMemo(() => {
     const brass = ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true).lerp(new THREE.Color('#cdbb98'), 0.4), roughness: 0.4, metalness: 1, envMapIntensity: 1.3 }, 'lobbyBrass')
@@ -49,7 +61,7 @@ function useMats() {
       rug: ww('WW_RUG_CREAM', { map: LT.rugTex(), roughness: 1 }, 'lobbyRug'),
       ivy1: ww('WW_FOLIAGE_FOREST', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy2'),
       stem: ww('WW_BARK', { roughness: 1 }, 'lobbyStem'),
-      bloom1: ww('WW_FLOWER_PINK_MUTED', { roughness: 0.85 }, 'lobbyB1'), bloom2: ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.85 }, 'lobbyB2'),
+      bloom1: petalMat(ww('WW_FLOWER_PINK_MUTED', { roughness: 0.7 }, 'lobbyB1'), '#ff9fb4'), bloom2: petalMat(ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.7 }, 'lobbyB2'), '#ffd3dc'),
       cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.7), toneMapped: false }),                        // Task 003: softer than the bare LED tube
       frame: new THREE.MeshStandardMaterial({ color: '#d6c9b3', roughness: 0.62, envMapIntensity: 0.3 }),
       rod: new THREE.MeshStandardMaterial({ color: '#fff4de', emissive: new THREE.Color('#ffd9a0'), emissiveIntensity: 0.85, roughness: 0.3, toneMapped: false }),
@@ -57,6 +69,7 @@ function useMats() {
       shade: new THREE.MeshStandardMaterial({ color: '#d9b87c', emissive: new THREE.Color('#ffcf94'), emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.45, side: THREE.DoubleSide }),
       ceramic: new THREE.MeshStandardMaterial({ color: '#efe6d8', roughness: 0.35 }),
       niche: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6 }),
+      nicheMirror: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6, side: THREE.DoubleSide }),
       ceramic2: new THREE.MeshStandardMaterial({ color: '#cdbba4', roughness: 0.42 }), paper: new THREE.MeshStandardMaterial({ color: '#efe6d2', roughness: 0.9 }), bookD: new THREE.MeshStandardMaterial({ color: '#7d5a3c', roughness: 0.8 }),
       rug2: new THREE.MeshStandardMaterial({ map: LT.rugRect(), roughness: 1 }),
       bookA: new THREE.MeshStandardMaterial({ color: '#d9c9ae', roughness: 0.8 }), bookB: new THREE.MeshStandardMaterial({ color: '#4a3326', roughness: 0.8 }), bookC: new THREE.MeshStandardMaterial({ color: '#a98b63', roughness: 0.8 }),
@@ -116,7 +129,7 @@ export default function Lobby() {
     const ex = (sh, d) => new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 24 })
     const arch = ex(archShape(1.1, 2.41), 0.03); arch.translate(0, 0.14, 0)
     const glow = ex(archShape(1.17, 2.455), 0.012); glow.translate(0, 0.14, 0)
-    const rect = new THREE.Shape(); rect.moveTo(-0.43, 0); rect.lineTo(0.43, 0); rect.lineTo(0.43, 2.31); rect.lineTo(-0.43, 2.31); rect.lineTo(-0.43, 0)
+    const rect = new THREE.Shape(); rect.moveTo(0, 0); rect.lineTo(0.425, 0); rect.lineTo(0.425, 2.29); rect.lineTo(0, 2.29); rect.lineTo(0, 0)
     const slab = ex(rect, 0.03)
     const pts = [[0.0, 0], [0.05, 0], [0.065, 0.04], [0.05, 0.1], [0.07, 0.16], [0.06, 0.2], [0.05, 0.215], [0.03, 0.22], [0, 0.22]].map(([x, y]) => new THREE.Vector2(x, y))
     const vase = new THREE.LatheGeometry(pts, 20)
@@ -195,7 +208,12 @@ export default function Lobby() {
       <Kit name="vase_bottle" M={M} position={[x0 + 0.2, 0.82, 2.02]} scale={[0.85, 0.85, 0.85]} />
 
       {/* ---- right wall (Task 003): marble feature slab + three walnut shelves with soft under-light, restrained styling ---- */}
-      <mesh geometry={G.slab} position={[x1 - 0.002, 0.14, 2.35]} rotation={[0, -Math.PI / 2, 0]} material={M.niche} receiveShadow />
+      {/* book-matched marble feature wall: two mirrored halves, bronze perimeter trim and a centre joint */}
+      <group position={[x1 - 0.002, 0.14, 2.35]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh geometry={G.slab} position={[0, 0, 0]} material={M.niche} receiveShadow />
+        <mesh geometry={G.slab} position={[0, 0, 0]} scale={[-1, 1, 1]} material={M.nicheMirror} receiveShadow />
+        {[[0, 2.3, 0.87, 0.016], [0, 0.0, 0.87, 0.016], [-0.435, 1.15, 0.016, 2.3], [0.435, 1.15, 0.016, 2.3], [0, 1.15, 0.006, 2.3]].map(([x, y, w, hh], i) => <mesh key={'sl' + i} position={[x, y, 0.036]} material={M.bronze}><boxGeometry args={[w, hh, i === 4 ? 0.006 : 0.014]} /></mesh>)}
+      </group>
       <group position={[x1 - 0.03, 0, 2.35]} rotation={[0, -Math.PI / 2, 0]}>
         {[1.12, 1.56, 2.0].map((y, i) => <Kit key={'sh' + i} name="shelf2" M={M} position={[0, y, 0]} over={{ top: M.marble, brass: M.bronze, tube: M.cove }} />)}
         <Kit name="books_row" M={M} position={[-0.27, 1.156, 0.07]} />

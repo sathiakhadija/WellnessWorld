@@ -137,6 +137,8 @@ def chandelier(name):
         for i in range(n):
             a = math.tau * (i + 0.5) / n; ln = 0.07 + 0.06 * (0.5 + 0.5 * math.sin(i * 1.7))
             o = part(box(f'd{R}{i}', -0.003, 0.003, -0.003, 0.003, zb - ln, zb, bevel=0), 'rod'); o.location = (math.cos(a) * R, math.sin(a) * R, 0)
+            for zz, rr in ((zb - ln * 0.5, 0.0075), (zb - ln, 0.0095)):                    # faceted beads: a mid bead and a drop at the tip
+                bd = part(lathe(f'db{R}{i}{zz:.3f}', [(0, -0.012), (rr, -0.004), (rr, 0.004), (0, 0.012)], 6), 'rod'); bd.location = (math.cos(a) * R, math.sin(a) * R, zz)
     part(ring('disc', 0.0, 0.0, 0, 0, 4) if False else lathe('glowdisc', [(0, -0.47), (0.2, -0.47), (0.2, -0.465), (0, -0.465)], 24), 'rod')
     part(lathe('canopy', [(0, 0), (0.14, 0), (0.14, -0.015), (0.06, -0.025), (0, -0.025)], 24), 'bronze')
     return finish(name)
