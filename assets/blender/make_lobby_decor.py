@@ -89,7 +89,7 @@ def books_stack(name, seed):
         def bx(nm, x0, x1, y0, y1, z0, z1, bucket, bev=0.0015):
             o = part(box(f'{name}{i}{nm}', x0, x1, y0, y1, z0, z1, bevel=bev, segs=2 if bev else 1), bucket); o.rotation_euler = (0, 0, yaw); return o
         bx('b', -L / 2, L / 2, -D, 0, z, z + 0.004, c); bx('t', -L / 2, L / 2, -D, 0, z + T - 0.004, z + T, c)
-        bx('s', -L / 2, -L / 2 + 0.008, -D, 0, z, z + T, c); bx('p', -L / 2 + 0.008, L / 2 - 0.004, -D + 0.004, -0.004, z + 0.004, z + T - 0.004, 'paper', 0)
+        bx('s', -L / 2, -L / 2 + 0.008, -D, 0, z, z + T, c); bx('p', -L / 2 + 0.008, L / 2 - 0.004, -D + 0.004, -0.004, z + 0.004, z + T - 0.004, 'paperF', 0)
         bx('r', -L / 2 - 0.0006, -L / 2 + 0.003, -D * 0.62, -D * 0.38, z + 0.003, z + T - 0.003, 'bronze', 0)
         bx('l', -L * 0.3, L * 0.3, -D * 0.78, -D * 0.4, z + T, z + T + 0.0012, 'label', 0)
         bx('sl', -L / 2 - 0.0012, -L / 2 + 0.001, -D * 0.8, -D * 0.2, z + T * 0.2, z + T * 0.8, 'label', 0)
@@ -149,7 +149,7 @@ def chandelier(name):
 def candle(name):
     reset(); PARTS.clear()
     part(lathe('jar', [(0, 0), (0.035, 0), (0.038, 0.01), (0.038, 0.07), (0.034, 0.072), (0.034, 0.012), (0, 0.012)], 22), 'bronze')
-    part(lathe('wax', [(0, 0.012), (0.032, 0.012), (0.032, 0.06), (0, 0.06)], 20), 'paper')
+    part(lathe('wax', [(0, 0.012), (0.032, 0.012), (0.032, 0.06), (0, 0.06)], 20), 'ceramic')
     part(lathe('flame', [(0, 0.06), (0.006, 0.066), (0.003, 0.082), (0, 0.088)], 8), 'rod')
     return finish(name)
 

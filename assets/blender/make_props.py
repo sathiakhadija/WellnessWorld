@@ -76,7 +76,11 @@ def bake(asset):
         me = apply_all(o); me.calc_loop_triangles()
         mat = o.matrix_world
         b = out.setdefault(bucket, {'p': [], 'c': []})
+        uvd = me.uv_layers.active.data if me.uv_layers.active else None
+        if uvd is not None: b.setdefault('uv', [])
         for t in me.loop_triangles:
+            if uvd is not None:
+                for li in t.loops: b['uv'].extend([round(uvd[li].uv[0], 4), round(uvd[li].uv[1], 4)])
             vs = [frame_xyz(mat @ me.vertices[i].co) for i in t.vertices]
             # flip winding because the y/z swap is a reflection-free rotation (x, z, -y) => proper rotation, keep order
             for v in vs: b['p'].extend(round(c, 4) for c in v); b['c'].extend(round(c, 4) for c in col)

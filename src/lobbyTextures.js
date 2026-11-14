@@ -128,11 +128,11 @@ export function labelTex() {                                          // cream s
   for (let i = 0; i < 6; i++) { g.fillStyle = `rgba(48,34,24,${0.7 + R() * 0.25})`; const w = 40 + R() * 50, y = 24 + i * 15; g.fillRect((S - w) / 2, y, w, i === 0 ? 6 : 3) }
   return tex(cv, REP)
 }
-export function paperTex() {                                          // page block: stacked leaves seen edge-on, warm and slightly uneven
+export function paperTex(vertical = false) {                          // page block: stacked leaves seen edge-on (period ~2 mm at tile 0.03 m)
   const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(21)
   g.fillStyle = '#efe6d0'; g.fillRect(0, 0, S, S)
-  for (let y = 0; y < S; y += 2) { g.fillStyle = `rgba(120,96,64,${0.1 + R() * 0.16})`; g.fillRect(0, y, S, 1) }
-  for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(150,120,80,${R() * 0.1})`; g.fillRect(R() * S, 0, 1 + R() * 3, S) }
+  for (let k = 0; k < S; k += 8) { g.fillStyle = `rgba(120,96,64,${0.22 + R() * 0.18})`; vertical ? g.fillRect(k, 0, 2, S) : g.fillRect(0, k, S, 2) }
+  for (let k = 4; k < S; k += 8) { g.fillStyle = `rgba(255,252,240,${0.3 + R() * 0.3})`; vertical ? g.fillRect(k, 0, 2, S) : g.fillRect(0, k, S, 2) }
   return tex(cv, REP)
 }
 export function glazeTex(base, fleck = '#7a6044', seed = 5, clouds = true) {       // ceramic glaze: tonal clouds, iron flecks, hairline crazing
@@ -143,12 +143,24 @@ export function glazeTex(base, fleck = '#7a6044', seed = 5, clouds = true) {    
   for (let i = 0; i < 18; i++) { g.strokeStyle = 'rgba(90,70,50,0.12)'; g.lineWidth = 0.6; g.beginPath(); let x = R() * S, y = R() * S; g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (R() - 0.5) * 36; y += (R() - 0.5) * 36; g.lineTo(x, y) } g.stroke() }
   return tex(cv, REP)
 }
-export function leafTex(base, seed = 9) {                             // foliage: mottled green with fine branching veins and lighter margins
+export function leafTex(base, seed = 9) {                             // one whole leaf per UV square (u across, v base->tip): midrib, paired side veins, pale margin, darker base
   const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(seed)
   g.fillStyle = base; g.fillRect(0, 0, S, S)
-  for (let i = 0; i < 50; i++) { const x = R() * S, y = R() * S, r = 20 + R() * 50, rg = g.createRadialGradient(x, y, 0, x, y, r); const v = R() < 0.5 ? '190,220,140' : '10,40,20'; rg.addColorStop(0, `rgba(${v},${0.12 + R() * 0.12})`); rg.addColorStop(1, `rgba(${v},0)`); g.fillStyle = rg; g.fillRect(0, 0, S, S) }
-  for (let i = 0; i < 14; i++) { const x0 = R() * S, y0 = R() * S; for (const s of [-1, 1]) for (let k = 0; k < 7; k++) { g.strokeStyle = `rgba(225,240,170,${0.18 + R() * 0.12})`; g.lineWidth = 0.9; g.beginPath(); const x = x0 + k * 7, y = y0 + k * 3; g.moveTo(x, y); g.lineTo(x + s * 18, y + 14 + R() * 6); g.stroke() } g.strokeStyle = 'rgba(235,245,180,0.3)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + 50, y0 + 21); g.stroke() }
-  return tex(cv, REP)
+  for (let i = 0; i < 18; i++) { const x = R() * S, y = R() * S, r = 30 + R() * 60, rg = g.createRadialGradient(x, y, 0, x, y, r); const v = R() < 0.5 ? '255,255,200' : '20,60,20'; rg.addColorStop(0, `rgba(${v},${0.1 + R() * 0.1})`); rg.addColorStop(1, `rgba(${v},0)`); g.fillStyle = rg; g.fillRect(0, 0, S, S) }
+  const gr = g.createLinearGradient(0, S, 0, 0); gr.addColorStop(0, 'rgba(10,50,20,0.28)'); gr.addColorStop(0.5, 'rgba(10,50,20,0)'); gr.addColorStop(1, 'rgba(255,255,200,0.12)'); g.fillStyle = gr; g.fillRect(0, 0, S, S)
+  g.lineCap = 'round'
+  for (let k = 0; k < 9; k++) for (const s of [-1, 1]) { const y = S - 14 - k * 26; g.strokeStyle = 'rgba(240,250,190,0.5)'; g.lineWidth = 2.2 - k * 0.12; g.beginPath(); g.moveTo(S / 2, y); g.quadraticCurveTo(S / 2 + s * 40, y - 8, S / 2 + s * 100, y - 52 + k * 3); g.stroke() }
+  g.strokeStyle = 'rgba(245,252,200,0.75)'; g.lineWidth = 4.5; g.beginPath(); g.moveTo(S / 2, S); g.lineTo(S / 2, 6); g.stroke()
+  g.strokeStyle = 'rgba(20,50,20,0.14)'; g.lineWidth = 1; for (let i = 0; i < 200; i++) { const x = R() * S, y = R() * S; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (R() - 0.5) * 8, y + (R() - 0.5) * 8); g.stroke() }
+  return tex(cv, { wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping })
+}
+export function petalTex(base = '#ffc4d2', seed = 1) {                // cherry-blossom petal per UV square: deeper pink at the base, pale rim, fine radiating veins, notched tip
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(seed * 7)
+  g.fillStyle = base; g.fillRect(0, 0, S, S)
+  const gr = g.createLinearGradient(0, S, 0, 0); gr.addColorStop(0, 'rgba(210,60,100,0.55)'); gr.addColorStop(0.45, 'rgba(255,150,180,0.12)'); gr.addColorStop(1, 'rgba(255,255,255,0.35)'); g.fillStyle = gr; g.fillRect(0, 0, S, S)
+  for (let i = 0; i < 17; i++) { const x1 = S / 2 + (i - 8) * 14; g.strokeStyle = `rgba(200,70,110,${0.13 + R() * 0.1})`; g.lineWidth = 1; g.beginPath(); g.moveTo(S / 2, S); g.quadraticCurveTo((S / 2 + x1) / 2, S * 0.5, x1, 14); g.stroke() }
+  const eg = g.createRadialGradient(S / 2, S / 2, S * 0.3, S / 2, S / 2, S * 0.75); eg.addColorStop(0, 'rgba(255,255,255,0)'); eg.addColorStop(1, 'rgba(255,255,255,0.3)'); g.fillStyle = eg; g.fillRect(0, 0, S, S)
+  return tex(cv, { wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping })
 }
 export function barkTex() {                                           // twig bark: vertical fissures with lenticels
   const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'), R = rng(14)

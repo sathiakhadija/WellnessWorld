@@ -20,13 +20,20 @@ export const LOBBY = { x0: -0.4, x1: 2.8, z0: 0.4, z1: 2.8, h: 3.1, cx: 1.2, lif
 const clamp01 = (v) => Math.min(1, Math.max(0, v)), smooth = (t) => t * t * (3 - 2 * t)
 
 const cache = {}
-const TILE = { bookA: 0.12, bookB: 0.12, bookC: 0.12, bookD: 0.12, paper: 0.03, label: 0.03, ceramic: 0.2, ceramic2: 0.2, ivy1: 0.06, ivy2: 0.06, stem: 0.05, bronze: 0.12, shade: 0.12 }
+const CYL = new Set(['ceramic', 'ceramic2'])
+const TILE = { bookA: 0.12, bookB: 0.12, bookC: 0.12, bookD: 0.12, paper: 0.03, paperF: 0.03, label: 0.03, ceramic: 0.2, ceramic2: 0.2, ivy1: 0.06, ivy2: 0.06, stem: 0.05, bronze: 0.12, shade: 0.12 }
 function kit(name) {
   if (cache[name]) return cache[name]
   const o = {}
   for (const [bucket, d] of Object.entries(KIT[name] || DEC[name])) {
     const n = d.p.length / 3, uv = new Float32Array(n * 2), P = new Float32Array(n * 3); P.set(d.p)
-    if (!KIT[name] && TILE[bucket]) {                                  // decor kits: per-triangle box projection, uv in tiles (1 tile = TILE[bucket] metres)
+    if (!KIT[name] && d.uv && d.uv.length === n * 2) uv.set(d.uv)                  // baked per-blade UVs (u across, v along): leaves and petals carry whole-leaf textures
+    else if (!KIT[name] && CYL.has(bucket)) {                          // lathed ceramics: cylindrical projection about the kit's vertical axis (no seams between box faces)
+      for (let t = 0; t < n; t += 3) {
+        const a = [0, 1, 2].map((k) => Math.atan2(P[(t + k) * 3], P[(t + k) * 3 + 2])), lo = Math.min(...a), hi = Math.max(...a)
+        for (let k = 0; k < 3; k++) { const an = hi - lo > Math.PI && a[k] < 0 ? a[k] + 2 * Math.PI : a[k]; uv[(t + k) * 2] = (an * 0.06) / 0.2; uv[(t + k) * 2 + 1] = P[(t + k) * 3 + 1] / 0.2 }
+      }
+    } else if (!KIT[name] && TILE[bucket]) {                                  // decor kits: per-triangle box projection, uv in tiles (1 tile = TILE[bucket] metres)
       const T = TILE[bucket]
       for (let t = 0; t < n; t += 3) {
         const a = t * 3, ux = P[a + 3] - P[a], uy = P[a + 4] - P[a + 1], uz = P[a + 5] - P[a + 2], vx = P[a + 6] - P[a], vy = P[a + 7] - P[a + 1], vz = P[a + 8] - P[a + 2]
@@ -70,9 +77,9 @@ function useMats() {
       brass, dark: ww('WW_IRONWORK_CHARCOAL', { roughness: 0.45, metalness: 0.4 }, 'lobbyDark2'),
       tube: warm, wax: ww('WW_LIMESTONE_CREAM', { roughness: 0.6 }, 'lobbyWax'),
       rug: ww('WW_RUG_CREAM', { map: LT.rugTex(), roughness: 1 }, 'lobbyRug'),
-      ivy1: ww('WW_FOLIAGE_FOREST', { map: LT.leafTex('#e2f0cc', 9), side: THREE.DoubleSide, roughness: 0.55 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { map: LT.leafTex('#eef2c4', 12), side: THREE.DoubleSide, roughness: 0.55 }, 'lobbyIvy2'),
+      ivy1: ww('WW_FOLIAGE_FOREST', { map: LT.leafTex('#dfeec8', 9), side: THREE.DoubleSide, roughness: 0.55 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { map: LT.leafTex('#ecf2c2', 12), side: THREE.DoubleSide, roughness: 0.55 }, 'lobbyIvy2'),
       stem: ww('WW_BARK', { map: LT.barkTex(), color: '#ffffff', roughness: 1 }, 'lobbyStem'),
-      bloom1: petalMat(ww('WW_FLOWER_PINK_MUTED', { roughness: 0.7 }, 'lobbyB1'), '#ff9fb4'), bloom2: petalMat(ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.7 }, 'lobbyB2'), '#ffd3dc'),
+      bloom1: petalMat(ww('WW_FLOWER_PINK_MUTED', { map: LT.petalTex('#ffc4d2', 1), roughness: 0.7 }, 'lobbyB1'), '#ff9fb4'), bloom2: petalMat(ww('WW_FLOWER_PINK_MUTED', { map: LT.petalTex('#fff0f3', 2), color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.7 }, 'lobbyB2'), '#ffd3dc'),
       cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.7), toneMapped: false }),                        // Task 003: softer than the bare LED tube
       frame: new THREE.MeshStandardMaterial({ color: '#d6c9b3', roughness: 0.62, envMapIntensity: 0.3 }),
       rod: new THREE.MeshStandardMaterial({ color: '#fff4de', emissive: new THREE.Color('#ffd9a0'), emissiveIntensity: 0.85, roughness: 0.3, toneMapped: false }),
@@ -82,7 +89,7 @@ function useMats() {
       niche: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6 }),
       nicheMirror: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6, side: THREE.DoubleSide }),
       burgundy: dm(LT.glazeTex('#682D3E', '#2a0f18', 7, false), { roughness: 0.82, bump: 0.15 }),     // main console vase: matte burgundy ceramic with a fine speckled body
-      ceramic2: dm(LT.glazeTex('#cdbba4', '#4a3626', 6), { roughness: 0.55, bump: 0.2 }), paper: dm(LT.paperTex(), { roughness: 0.9, bump: 0.8 }), label: dm(LT.labelTex(), { roughness: 0.7, bump: 0.3 }),
+      ceramic2: dm(LT.glazeTex('#cdbba4', '#4a3626', 6), { roughness: 0.55, bump: 0.2 }), paper: dm(LT.paperTex(true), { roughness: 0.9, bump: 0.5 }), paperF: dm(LT.paperTex(false), { roughness: 0.9, bump: 0.5 }), label: dm(LT.labelTex(), { roughness: 0.7, bump: 0.3 }),
       bookD: dm(LT.clothTex('#8a5f3a', 'leather', 4), { roughness: 0.62, bump: 0.35 }),
       rug2: new THREE.MeshStandardMaterial({ map: LT.rugRect(), roughness: 1 }),
       bookA: dm(LT.clothTex('#dccdb2', 'cloth', 1), { roughness: 0.85, bump: 0.8 }), bookB: dm(LT.clothTex('#5a4030', 'leather', 2), { roughness: 0.55, bump: 0.35 }), bookC: dm(LT.clothTex('#b3946a', 'cloth', 3), { roughness: 0.85, bump: 0.8 }),

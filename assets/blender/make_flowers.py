@@ -20,7 +20,7 @@ def blade(bm, base, d, L, W, bend=0.0, cup=0.0, fold=0.0, rows=5, cols=3, prof=0
             ang = bend / rows; rot = Matrix.Rotation(ang, 3, ss); dd = rot @ dd; nn = rot @ nn
             if twist: rt = Matrix.Rotation(twist / rows, 3, dd); ss = rt @ ss; nn = rt @ nn
             p = p + dd * (L / rows)
-    grid = []
+    grid = []; uvl = bm.loops.layers.uv.verify(); uvmap = {}
     for (pp, ss, nn, u) in sp:
         w = max(0.0, math.sin(math.pi * min(1.0, u ** tip if u > 0 else 0)) ** prof) if u < 1 else 0.0
         if u == 0: w = 0.12
@@ -28,13 +28,15 @@ def blade(bm, base, d, L, W, bend=0.0, cup=0.0, fold=0.0, rows=5, cols=3, prof=0
         for j in range(cols + 1):
             v = -1 + 2 * j / cols
             off = ss * (v * w * W * 0.5) + nn * (cup * v * v * w * W * 0.5 - fold * (1 - abs(v)) * w * W * 0.12 * 0 + (-fold * abs(v) * w * W * 0.3))
-            row.append(bm.verts.new(pp + off))
+            vt = bm.verts.new(pp + off); uvmap[vt] = (j / cols, u); row.append(vt)
         grid.append(row)
     for i in range(rows):
         for j in range(cols):
             a, b, c, d2 = grid[i][j], grid[i][j + 1], grid[i + 1][j + 1], grid[i + 1][j]
             for q in ((a, b, c, d2), (d2, c, b, a)):
-                try: bm.faces.new(q)
+                try:
+                    fc = bm.faces.new(q)
+                    for lp in fc.loops: lp[uvl].uv = uvmap[lp.vert]
                 except ValueError: pass
 
 def tube(bm, pts, r0, r1, seg=3):
