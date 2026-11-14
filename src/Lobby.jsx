@@ -50,7 +50,8 @@ function useMats() {
       ivy1: ww('WW_FOLIAGE_FOREST', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy2'),
       stem: ww('WW_BARK', { roughness: 1 }, 'lobbyStem'),
       bloom1: ww('WW_FLOWER_PINK_MUTED', { roughness: 0.85 }, 'lobbyB1'), bloom2: ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.85 }, 'lobbyB2'),
-      cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.78), toneMapped: false }),                        // Task 003: softer than the bare LED tube
+      cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.7), toneMapped: false }),                        // Task 003: softer than the bare LED tube
+      frame: new THREE.MeshStandardMaterial({ color: '#d6c9b3', roughness: 0.62, envMapIntensity: 0.3 }),
       rod: new THREE.MeshStandardMaterial({ color: '#fff4de', emissive: new THREE.Color('#ffd9a0'), emissiveIntensity: 0.85, roughness: 0.3, toneMapped: false }),
       bronze: new THREE.MeshStandardMaterial({ color: '#8a6a45', metalness: 1, roughness: 0.42, envMapIntensity: 1.1 }),
       shade: new THREE.MeshStandardMaterial({ color: '#d9b87c', emissive: new THREE.Color('#ffcf94'), emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.45, side: THREE.DoubleSide }),
@@ -60,7 +61,7 @@ function useMats() {
       rug2: new THREE.MeshStandardMaterial({ map: LT.rugRect(), roughness: 1 }),
       bookA: new THREE.MeshStandardMaterial({ color: '#d9c9ae', roughness: 0.8 }), bookB: new THREE.MeshStandardMaterial({ color: '#4a3326', roughness: 0.8 }), bookC: new THREE.MeshStandardMaterial({ color: '#a98b63', roughness: 0.8 }),
       glass: new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.22, roughness: 0.05, depthWrite: false }),
-      ceil: new THREE.MeshStandardMaterial({ color: wwColor('WW_CEILING_CREAM'), roughness: 0.95, emissive: new THREE.Color(wwHex('WW_LAMP_WARM')), emissiveMap: LT.ceilingGlow(), emissiveIntensity: 0.3 }),
+      ceil: new THREE.MeshStandardMaterial({ color: wwColor('WW_CEILING_CREAM'), roughness: 0.95, emissive: new THREE.Color(wwHex('WW_LAMP_WARM')), emissiveMap: LT.ceilingGlow(), emissiveIntensity: 0.2 }),
       art: new THREE.MeshStandardMaterial({ map: LT.artTex(), roughness: 0.6 }),
       sign: new THREE.MeshBasicMaterial({ map: LT.liftSign(), transparent: true, toneMapped: false, depthWrite: false }),
       indicator: new THREE.MeshBasicMaterial({ map: LT.indicator('▲ PH'), toneMapped: false }),
@@ -123,7 +124,7 @@ export default function Lobby() {
     for (const sx of [-1, 1]) for (let k = 0; k < 9; k++) { const x = sx * (0.6 + k * 0.042); const b = new THREE.BoxGeometry(0.022, 2.5, 0.014); b.translate(x, 1.31, -0.057); ribs.push(b) }
     return { arch, archGlow: glow, slab, vase, flutes: mergeGeometries(ribs) }
   }, [])
-  const warm = wwHex('WW_LAMP_WARM'), W2 = W / 2
+  const warm = '#ffe3c2', W2 = W / 2
   const wallH = h + 0.2
   return (
     <group>
@@ -152,9 +153,9 @@ export default function Lobby() {
       {[[0.1, 1.0], [2.3, 1.0], [0.1, 2.2], [2.3, 2.2]].map(([x, z], i) => <mesh key={'dl' + i} position={[x, h - 0.004, z]} rotation={[Math.PI / 2, 0, 0]} material={M.tube}><circleGeometry args={[0.05, 20]} /></mesh>)}
 
       {/* Task 003: slim moulded frames only where wall space is free (reference shows them beside the niche / entrance); the old frames behind the console / shelves stay gone */}
-      <Kit name="pf_tall" M={M} position={[0.075, 0.5, z0 + 0.01]} /><Kit name="pf_tall" M={M} position={[2.325, 0.5, z0 + 0.01]} />
-      <Kit name="pf_tall" M={M} position={[x0 + 0.0, 0.5, 0.82]} rotY={Math.PI / 2} scale={[0.82, 1, 1]} />
-      <Kit name="pf_tall" M={M} position={[x1 - 0.0, 0.5, 1.0]} rotY={-Math.PI / 2} scale={[0.9, 1, 1]} />
+      <Kit name="pf_tall" M={M} position={[0.075, 0.5, z0 + 0.01]} over={{ trim: M.frame }} /><Kit name="pf_tall" M={M} position={[2.325, 0.5, z0 + 0.01]} over={{ trim: M.frame }} />
+      <Kit name="pf_tall" M={M} position={[x0 + 0.0, 0.5, 0.82]} rotY={Math.PI / 2} scale={[0.82, 1, 1]} over={{ trim: M.frame }} />
+      <Kit name="pf_tall" M={M} position={[x1 - 0.0, 0.5, 1.0]} rotY={-Math.PI / 2} scale={[0.9, 1, 1]} over={{ trim: M.frame }} />
 
       {/* ---- lift wall: dark marble surround, indicator, brass frame, doors, sign, call panel ---- */}
       <Kit name="lift_surround" M={M} position={[cx, 0, z1]} rotY={Math.PI} />

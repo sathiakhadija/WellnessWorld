@@ -27,19 +27,19 @@ def bloom_vase(name, seed):
     part(lathe('vase', [(0, 0), (0.045, 0), (0.06, 0.02), (0.07, 0.07), (0.072, 0.12), (0.06, 0.18), (0.035, 0.235), (0.027, 0.27), (0.033, 0.285), (0.027, 0.288), (0, 0.288)], 28), 'ceramic')
     B = {k: new_bm() for k in ('bloom1', 'bloom2', 'ivy1', 'stem')}
     base = Vector((0, 0, 0.27))
-    for k in range(8):
-        az = k / 8 * math.tau + rnd.uniform(-0.3, 0.3); lean = 0.1 + rnd.random() * 0.4; L = 0.45 + rnd.random() * 0.26
+    for k in range(11):
+        az = k / 11 * math.tau + rnd.uniform(-0.3, 0.3); lean = 0.12 + rnd.random() * 0.5; L = 0.52 + rnd.random() * 0.34
         wob = rnd.uniform(0.01, 0.03)
         pts = [base + Vector((math.cos(az) * lean * L * (s / 6) ** 1.5 + math.sin(s * 1.3 + k) * wob * (s / 6), math.sin(az) * lean * L * (s / 6) ** 1.5, L * (s / 6) * (1 - 0.25 * lean))) for s in range(7)]
-        tube(B['stem'], pts, 0.0075, 0.0022, 4)
+        tube(B['stem'], pts, 0.0085, 0.0024, 3)
         for s in range(1, 7):                                                  # twigs bearing blossoms + buds
-            p = pts[s]; tw = rnd.randint(2, 3)
+            p = pts[s]; tw = rnd.randint(3, 4)
             for _ in range(tw):
                 ta = rnd.random() * math.tau; tl = 0.04 + rnd.random() * 0.06
                 tip = p + Vector((math.cos(ta) * tl, math.sin(ta) * tl, tl * (0.3 + rnd.random() * 0.5)))
                 tube(B['stem'], [p, p.lerp(tip, 0.5) + Vector((0, 0, 0.006)), tip], 0.0025, 0.0012, 3)
-                blossom(B, tip, (tip - p) * 0.5 + Vector((0, 0, 0.8)) + Vector((rnd.uniform(-0.4, 0.4), rnd.uniform(-0.4, 0.4), 0)), rnd, 0.042 + rnd.random() * 0.014, rnd.random() < 0.35)
-        blossom(B, pts[-1], Vector((math.cos(az) * lean, math.sin(az) * lean, 1.0)), rnd, 0.05)
+                blossom(B, tip, (tip - p) * 0.5 + Vector((0, 0, 0.8)) + Vector((rnd.uniform(-0.4, 0.4), rnd.uniform(-0.4, 0.4), 0)), rnd, 0.052 + rnd.random() * 0.016, rnd.random() < 0.35)
+        blossom(B, pts[-1], Vector((math.cos(az) * lean, math.sin(az) * lean, 1.0)), rnd, 0.062)
         if k % 2: blade(B['ivy1'], pts[3], Vector((math.cos(az), math.sin(az), 0.6)), 0.05, 0.02, bend=-0.3, rows=2, cols=1)
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
     return finish(name)
@@ -129,9 +129,15 @@ def chandelier(name):
         for i in range(n):
             a = math.tau * i / n; x, y = math.cos(a) * R, math.sin(a) * R
             o = part(box(f'{tag}r{i}', -0.0085, 0.0085, -0.0085, 0.0085, zt - h, zt - 0.014, bevel=0.0), 'rod'); o.location = (x, y, 0); o.rotation_euler = (0, 0, a)
-    tier(0.5, -0.04, 0.13, 56, 'u'); tier(0.3, -0.2, 0.13, 36, 'l')
-    for k in range(4):
-        a = k * math.pi / 2 + 0.4; o = part(box(f'h{k}', -0.004, 0.004, -0.004, 0.004, -0.2, -0.04, bevel=0), 'bronze'); o.location = (math.cos(a) * 0.4, math.sin(a) * 0.4, 0)
+    tier(0.52, -0.04, 0.12, 60, 'u'); tier(0.37, -0.2, 0.12, 44, 'm'); tier(0.23, -0.36, 0.11, 30, 'l')
+    for R, z0, z1 in ((0.45, -0.04, -0.2), (0.3, -0.2, -0.36)):
+        for k in range(4):
+            a = k * math.pi / 2 + 0.4; o = part(box(f'h{k}{R}', -0.004, 0.004, -0.004, 0.004, z1, z0, bevel=0), 'bronze'); o.location = (math.cos(a) * R, math.sin(a) * R, 0)
+    for R, zb, n in ((0.52, -0.174, 40), (0.37, -0.334, 28)):                         # fine hanging glass strands below the upper two tiers
+        for i in range(n):
+            a = math.tau * (i + 0.5) / n; ln = 0.07 + 0.06 * (0.5 + 0.5 * math.sin(i * 1.7))
+            o = part(box(f'd{R}{i}', -0.003, 0.003, -0.003, 0.003, zb - ln, zb, bevel=0), 'rod'); o.location = (math.cos(a) * R, math.sin(a) * R, 0)
+    part(ring('disc', 0.0, 0.0, 0, 0, 4) if False else lathe('glowdisc', [(0, -0.47), (0.2, -0.47), (0.2, -0.465), (0, -0.465)], 24), 'rod')
     part(lathe('canopy', [(0, 0), (0.14, 0), (0.14, -0.015), (0.06, -0.025), (0, -0.025)], 24), 'bronze')
     return finish(name)
 
