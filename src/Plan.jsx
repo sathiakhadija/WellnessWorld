@@ -15,6 +15,7 @@ import { camStore, toast } from './camStore.js'
 import { applyWet } from './weather/wet.js'
 import KIT from './baked/interior.json'
 import Lobby from './Lobby.jsx'
+import { starterDoor } from './doors/starterDoor.js'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 const WORLD = interactionGroups([GROUPS.world])
@@ -78,17 +79,12 @@ function buildArch() {
   add('brass', EX0 + 0.03, EX1 - 0.03, 0, 0.005, 0.3, 0.37)                               // brushed-brass threshold strip under the door line
   // ONE frame: an espresso lining wraps the whole reveal (jambs + head, full 0.4 m wall depth) and a slim flat casing sits on the room face.
   // (V10 stacked a pale lining, a broad dark casing, an inner bead and plinth blocks here; that read as nested frames.)
-  add('trim', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('trim', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('trim', EX0, EX1, 3.07, 3.1, 0, 0.4)
-  add('trim', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('trim', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('trim', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
+  // Task 001: the frame is plain matte black (key 'doorBk')
+  add('doorBk', EX0, EX0 + 0.03, 0, 3.1, 0, 0.4); add('doorBk', EX1 - 0.03, EX1, 0, 3.1, 0, 0.4); add('doorBk', EX0, EX1, 3.07, 3.1, 0, 0.4)
+  add('doorBk', EX0 - 0.08, EX0, 0, 3.18, -0.02, 0); add('doorBk', EX1, EX1 + 0.08, 0, 3.18, -0.02, 0); add('doorBk', EX0 - 0.08, EX1 + 0.08, 3.1, 3.18, -0.02, 0)
   // (flanking raised panels and panel pairs removed — Bible s03 clean walls; sconces stay)
   add('skirt', -4.45, EX0 - 0.08, 0, 0.18, -0.03, 0); add('skirt', EX1 + 0.08, 3.61, 0, 0.18, -0.03, 0)
-  // Bible s05: taupe-blush wall panels with slim cream mouldings flanking the entrance (p.17)
-  for (const [px0, px1] of [[-0.45, 0.47], [1.93, 2.75]]) {
-    add('blush', px0, px1, 0.2, 2.95, -0.022, -0.0)
-    for (const [tx0, tx1, ty0, ty1] of [[px0, px1, 0.2, 0.24], [px0, px1, 2.91, 2.95], [px0, px0 + 0.04, 0.2, 2.95], [px1 - 0.04, px1, 0.2, 2.95]]) add('trim', tx0, tx1, ty0, ty1, -0.034, -0.0)
-  }
-  // Bible s05: tall vertical glowing tube sconces with brass caps flanking the entrance (p.17)
-  for (const sx of [0.06, 2.34]) { add('led', sx - 0.03, sx + 0.03, 0.85, 2.55, -0.065, -0.03); add('brass', sx - 0.05, sx + 0.05, 0.8, 0.85, -0.08, -0.03); add('brass', sx - 0.05, sx + 0.05, 2.55, 2.6, -0.08, -0.03); add('brass', sx - 0.04, sx + 0.04, 1.62, 1.68, -0.075, -0.03) }
+  // Task 001: the flanking blush wall panels and the two glowing tube sconces were removed; the plain taupe wall continues.
 
   // ---- BEDROOM  interior x -9.65..-4.85, z -8.15..-3.85
   add('plaster', -9.85, -4.85, Y0, YT, -3.85, -3.65, true)                                  // north wall
@@ -170,6 +166,9 @@ function makeMats(src = {}) {
     deckSide: std(wwHex('WW_LIMESTONE_FACADE'), { roughness: 0.8 }),
     balGlass: new THREE.MeshStandardMaterial({ color: '#d4ebe8', roughness: 0.05, metalness: 0, transparent: true, opacity: 0.14, depthWrite: false }),
     black: std('#101012', { metalness: 0, roughness: 0.9, envMapIntensity: 0 }),
+    doorBk: std('#18171b', { roughness: 0.6, metalness: 0, envMapIntensity: 0.15 }),                                // Task 001 matte black frame
+    doorLeaf: std('#17171b', { roughness: 0.42, metalness: 0.05, envMapIntensity: 1.1 }),                         // Task 001 matte black fluted leaf (soft sheen so the flutes read)
+    doorGold: std('#c9a35c', { metalness: 1, roughness: 0.36, envMapIntensity: 2.2 }),                           // Task 001 brushed gold pull
     led: new THREE.MeshBasicMaterial({ color: '#ffc77a', toneMapped: false }),
     tube: new THREE.MeshBasicMaterial({ color: '#fff1d6', toneMapped: false }),
     brass: std(wwHex('WW_BRASS_ANTIQUE', true), { metalness: 1, roughness: 0.42, envMapIntensity: 2.6 }),       // brushed brass
@@ -279,20 +278,31 @@ function Door({ d, M }) {
   )
 }
 
-// ------------------------------------------------------------------ main entrance (front wall) + "Go Outside" transition placeholder
-// Activating it swings the door open onto a warm light, fades to a placeholder card (see DESTINATIONS in destinations.js) and waits for Enter to come back.
+// ------------------------------------------------------------------ main entrance (front wall)
+// Task 001: single black fluted leaf (src/doors/starterDoor.js) on a conventional hinge. It swings INWARD into the penthouse hall (about 90 deg),
+// the lobby warm-light spill and the interaction id ('entrance', Enter key, world.doors.entrance) are unchanged from the previous door.
+// The anchor below (hinge position + style) is all a future door variant needs to change.
+const ENTRANCE = { hinge: [0.61, 0, 0.33], style: starterDoor, openAngle: 1.57, seconds: 1.1 }
+const inSwing = (pt) => pt.z < 0.2 && pt.x > 0.5 && Math.hypot(pt.x - ENTRANCE.hinge[0], pt.z - ENTRANCE.hinge[2]) < ENTRANCE.style.w + 0.15
+
 function Entrance({ M }) {
   const st = useRef({ t: 0, target: 0, hold: 0 })
-  const rot = useRef(), glow = useRef(), light = useRef()
-  const blockRef = useRef(true)
+  const rot = useRef(), light = useRef()
+  const blockRef = useRef(true), openRef = useRef(false)
   const [block, setBlock] = useState(true)
-  const X0 = 0.585, W = 1.22, Z = 0.33
+  const [openCol, setOpenCol] = useState(false)
+  const style = ENTRANCE.style
+  const geo = useMemo(() => style.build(style), [style])
+  const [HX, , HZ] = ENTRANCE.hinge
   useEffect(() => {
     const it = {
       id: 'entrance', label: 'main entrance', x: 1.2, z: 0.15, range: 2.0,
       prompt: () => (st.current.target === 1 ? '🚪 Close the door' : '🚪 Open the door'),
       isOpen: () => st.current.target === 1,
-      toggle: () => { st.current.target = st.current.target === 1 ? 0 : 1; return false },
+      toggle: () => {
+        if (inSwing(world.player) || inSwing(world.companion)) return 'Step back from the door'
+        st.current.target = st.current.target === 1 ? 0 : 1; return false
+      },
     }
     world.interactables.push(it); world.doors.entrance = st.current
     return () => { const i = world.interactables.indexOf(it); if (i >= 0) world.interactables.splice(i, 1); delete world.doors.entrance }
@@ -301,28 +311,36 @@ function Entrance({ M }) {
     const s = st.current, step = world.fastAnim ? dt : Math.min(dt, 0.05)
     if (s.force != null) { s.t = s.force; s.target = s.force > 0.5 ? 1 : 0 }
     const dir = s.force != null ? 0 : Math.sign(s.target - s.t)
-    if (dir) s.t = clamp01(s.t + dir * step / 1.3)
-    if (rot.current) rot.current.rotation.y = -smooth(s.t) * 1.75               // swings outward (+z) into the light
+    if (dir) s.t = clamp01(s.t + dir * step / ENTRANCE.seconds)
+    if (rot.current) rot.current.rotation.y = smooth(s.t) * ENTRANCE.openAngle             // +angle = toward the room (-z)
     if (light.current) light.current.intensity = 9 * smooth(s.t)
     const tr = camStore.get().transition
     if (tr === 'closing' && s.t <= 0) camStore.set({ transition: 'idle' })
     const should = s.target === 0 && s.t < 0.04
     if (should !== blockRef.current) { blockRef.current = should; setBlock(should) }
+    const open = s.target === 1 && s.t > 0.97
+    if (open !== openRef.current) { openRef.current = open; setOpenCol(open) }
   })
+  const W = style.w
   return (
     <>
-      <group position={[X0, 0, Z]} rotation={[0, Math.PI / 2, 0]}>
-        <Leaf lw={W} dir={1} hingeZ={0} hingeX={0} M={M} rotRef={rot} mat={M.door} entrance />
+      <group position={[HX, 0, HZ]} rotation={[0, Math.PI / 2, 0]}>
+        <group ref={rot}>
+          <mesh name="WW_Entrance_Door" geometry={geo.leaf} material={M.doorLeaf} castShadow receiveShadow />
+          <mesh name="WW_Entrance_Handle" geometry={geo.gold} material={M.doorGold} castShadow />
+        </group>
       </group>
       <pointLight ref={light} position={[1.2, 2.0, 0.9]} intensity={0} distance={3} decay={1.4} color="#ffcf94" />
       {block && (
         <RigidBody type="fixed" colliders={false}>
-          <CuboidCollider args={[W / 2 + 0.04, DOOR_H / 2, 0.06]} position={[1.2, DOOR_H / 2, Z]} collisionGroups={WORLD} />
+          <CuboidCollider args={[W / 2 + 0.02, DOOR_H / 2, 0.06]} position={[HX + W / 2, DOOR_H / 2, HZ]} collisionGroups={WORLD} />
         </RigidBody>
       )}
-      {[0.06, 2.34].map((x, i) => <Baked key={i} name="sconce" M={M} position={[x, 1.55, -0.0]} rotY={Math.PI} />)}
-      <pointLight userData={{ wx: 1 }} position={[0.06, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
-      <pointLight userData={{ wx: 1 }} position={[2.34, 2.2, -0.5]} intensity={3.2} distance={4} decay={1.5} color="#ffcf94" />
+      {openCol && (
+        <RigidBody type="fixed" colliders={false}>
+          <CuboidCollider args={[0.04, DOOR_H / 2, W / 2]} position={[HX, DOOR_H / 2, HZ - W / 2]} collisionGroups={WORLD} />
+        </RigidBody>
+      )}
     </>
   )
 }
