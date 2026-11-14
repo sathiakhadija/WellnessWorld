@@ -39,7 +39,7 @@ function bakeMap(built) {
 }
 
 const CSS = `
-.wwx-mini{position:fixed;right:16px;top:16px;z-index:5;color:#f4ebe0;font:12px -apple-system,system-ui,sans-serif;background:rgba(26,19,30,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,214,170,.2);border-radius:16px;padding:8px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
+.wwx-mini{position:fixed;right:16px;top:64px;z-index:5;color:#f4ebe0;font:12px -apple-system,system-ui,sans-serif;background:rgba(26,19,30,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,214,170,.2);border-radius:16px;padding:8px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
 .wwx-mini canvas{display:block;border-radius:10px;background:#7ea06a}
 .wwx-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:11px;letter-spacing:.04em}
 .wwx-bar button{all:unset;cursor:pointer;opacity:.85;padding:0 4px;font-size:13px}.wwx-bar button:hover{opacity:1}
@@ -48,6 +48,17 @@ const CSS = `
 .wwx-atmo button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;opacity:.7;transition:all .2s}
 .wwx-atmo button:hover{opacity:1;background:rgba(255,255,255,.1)}.wwx-atmo button.on{opacity:1;background:rgba(236,210,166,.28);box-shadow:0 0 0 1px rgba(236,210,166,.5)}
 .wwx-atmo .lbl{padding:0 8px 0 6px;font-size:11.5px;letter-spacing:.03em;opacity:.9;min-width:112px}.wwx-atmo .auto{font-size:11px;width:auto;padding:0 9px;border-radius:999px}
+
+.wwx-nav{position:fixed;right:16px;top:16px;z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:8px;font:12px -apple-system,system-ui,sans-serif;color:#f4ebe0}
+.wwx-nav .bar{display:flex;gap:6px;background:rgba(26,19,30,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,214,170,.2);border-radius:999px;padding:5px 6px}
+.wwx-nav .bar button{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;height:30px;padding:0 14px;border-radius:999px;font-size:12.5px;letter-spacing:.03em;opacity:.85;transition:all .2s}
+.wwx-nav .bar button:hover{opacity:1;background:rgba(255,255,255,.1)}.wwx-nav .bar button.on{opacity:1;background:rgba(236,210,166,.28);box-shadow:0 0 0 1px rgba(236,210,166,.5)}
+.wwx-nav .bar button:focus-visible{outline:2px solid #ecd2a6;outline-offset:2px}
+.wwx-panel{display:flex;flex-direction:column;gap:10px;background:rgba(26,19,30,.78);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,214,170,.2);border-radius:18px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.wwx-panel[hidden]{display:none}
+.wwx-panel h3{margin:0;font:600 11px -apple-system,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#ecd2a6;opacity:.9}
+.wwx-panel .sec{display:flex;flex-direction:column;gap:4px}
+.wwx-panel .wwx-wx,.wwx-panel .wwx-atmo{position:static;left:auto;bottom:auto;background:none;border:0;border-radius:0;padding:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 
 .wwx-wx{position:fixed;left:16px;bottom:64px;z-index:5;display:flex;flex-direction:column;gap:6px;color:#f4ebe0;font:12px -apple-system,system-ui,sans-serif;background:rgba(26,19,30,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:6px 8px}
 .wwx-wx .row{display:flex;gap:4px;align-items:center}
@@ -101,6 +112,30 @@ export function Atmospheres() {
       <span className="lbl">{PRESETS[a.preset].label}</span>
       <button className={'auto' + (a.auto ? ' on' : '')} title="Automatic day–night progression" onClick={() => atmoStore.set({ auto: !a.auto })}>{a.auto ? '⟳ auto' : '⟳'}</button>
     </div>
+  )
+}
+
+// Top-right navigation bar -> Settings -> Weather and time controls. The two original panels stay mounted (just hidden while closed) so their
+// keyboard shortcuts (; ' [ ]) and all behaviour are exactly as before; only their on-screen location changed.
+export function SettingsMenu() {
+  const c = useCam(), [open, setOpen] = useState(false)
+  useEffect(() => {
+    const on = (e) => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', on); return () => window.removeEventListener('keydown', on)
+  }, [])
+  return (
+    <>
+      <div className="wwx-nav" style={c.clean ? { display: 'none' } : undefined}>
+        <style>{CSS}</style>
+        <nav className="bar" aria-label="Game navigation">
+          <button className={open ? 'on' : ''} aria-expanded={open} aria-controls="wwx-settings" onClick={() => setOpen(!open)}>⚙︎ Settings</button>
+        </nav>
+        <div id="wwx-settings" className="wwx-panel" role="region" aria-label="Settings" hidden={!open}>
+          <div className="sec"><h3>Weather</h3><WeatherPanel /></div>
+          <div className="sec"><h3>Time of day</h3><Atmospheres /></div>
+        </div>
+      </div>
+    </>
   )
 }
 
