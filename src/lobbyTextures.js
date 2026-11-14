@@ -12,7 +12,7 @@ function veins(g, R, W, H, n, colour, alpha, width) {
     g.strokeStyle = colour.replace('A', (alpha * (0.4 + R() * 0.6)).toFixed(3)); g.lineWidth = width * (0.4 + R() * 1.2); g.stroke()
   }
 }
-export function marbleLight(grout = true) {
+export function marbleLight(grout = true, soft = !grout) {
   const W = 1024, H = 768, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), R = rng(11)
   g.fillStyle = '#f3ebe3'; g.fillRect(0, 0, W, H)
   const cols = 4, rows = 3, tw = W / cols, th = H / rows
@@ -22,7 +22,7 @@ export function marbleLight(grout = true) {
     g.translate(c * tw, r * th); veins(g, R, tw, th, 7, 'rgba(176,160,148,A)', 0.55, 1.6); veins(g, R, tw, th, 4, 'rgba(206,172,150,A)', 0.4, 3.2); veins(g, R, tw, th, 3, 'rgba(255,255,255,A)', 0.7, 2.4)
     g.restore()
   }
-  if (!grout) { g.fillStyle = 'rgba(243,235,227,0.5)'; g.fillRect(0, 0, W, H) }       // feature marble: softer veining
+  if (soft) { g.fillStyle = 'rgba(243,235,227,0.58)'; g.fillRect(0, 0, W, H) }       // feature marble: softer veining
   if (grout) { g.strokeStyle = 'rgba(150,130,118,0.5)'; g.lineWidth = 2; for (let c = 0; c <= cols; c++) { g.beginPath(); g.moveTo(c * tw, 0); g.lineTo(c * tw, H); g.stroke() } for (let r = 0; r <= rows; r++) { g.beginPath(); g.moveTo(0, r * th); g.lineTo(W, r * th); g.stroke() } }
   return tex(cv)
 }
@@ -86,5 +86,28 @@ export function walnut() {                  // Task 003: dark walnut, grain runn
 export function indicator(label = '▲ PH') {
   const W = 256, H = 96, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d')
   g.fillStyle = '#120e0b'; g.fillRect(0, 0, W, H); g.fillStyle = '#ead5a8'; g.font = '500 44px "Helvetica Neue", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(label, W / 2, H / 2 + 3)
+  return tex(cv)
+}
+
+export function marbleFeature() {            // Task 003 refinement: cream feature marble — a few long, soft grey/gold veins (no tile grid, no hairline cracks)
+  const W = 1024, H = 1024, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), R = rng(404)
+  const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#f4ece1'); bg.addColorStop(0.5, '#efe4d6'); bg.addColorStop(1, '#f2e8db'); g.fillStyle = bg; g.fillRect(0, 0, W, H)
+  for (let i = 0; i < 26; i++) { const x = R() * W, y = R() * H, r = 90 + R() * 220, rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, `rgba(${R() < 0.5 ? '255,250,242' : '214,196,172'},${0.12 + R() * 0.1})`); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(0, 0, W, H) }
+  const vein = (col, w) => {
+    let x = R() * W, y = -20, a = Math.PI / 2 + (R() - 0.5) * 0.9; const pts = [[x, y]]
+    for (let k = 0; k < 90; k++) { a += (R() - 0.5) * 0.22; x += Math.cos(a) * 14; y += Math.sin(a) * 14; pts.push([x, y]) }
+    for (const [lw, al] of [[w * 5, 0.05], [w * 2.4, 0.1], [w, 0.34]]) { g.beginPath(); pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py))); g.strokeStyle = col.replace('A', (al * (0.6 + R() * 0.5)).toFixed(3)); g.lineWidth = lw; g.lineJoin = 'round'; g.stroke() }
+  }
+  for (let i = 0; i < 7; i++) vein('rgba(150,136,126,A)', 1.1); for (let i = 0; i < 4; i++) vein('rgba(196,158,112,A)', 1.4)
+  return tex(cv, { wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping })
+}
+export function rugRect() {                  // beige woven rug with a darker border band and fine inner line (rectangular, ~1.9 x 1.25 m)
+  const W = 760, H = 500, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), R = rng(8)
+  g.fillStyle = '#dccfbe'; g.fillRect(0, 0, W, H)
+  for (let y = 0; y < H; y += 2) { g.fillStyle = `rgba(${150 + R() * 70},${135 + R() * 60},${115 + R() * 50},${0.1 + R() * 0.12})`; g.fillRect(0, y, W, 1) }
+  for (let i = 0; i < 5000; i++) { g.fillStyle = `rgba(255,255,255,${R() * 0.18})`; g.fillRect(R() * W, R() * H, 2, 1) }
+  g.strokeStyle = 'rgba(160,138,112,0.9)'; g.lineWidth = 26; g.strokeRect(26, 26, W - 52, H - 52)
+  g.strokeStyle = 'rgba(190,168,138,0.9)'; g.lineWidth = 3; g.strokeRect(62, 62, W - 124, H - 124); g.strokeRect(70, 70, W - 140, H - 140)
+  g.fillStyle = 'rgba(176,150,118,0.35)'; for (let x = 100; x < W - 100; x += 40) for (let y = 100; y < H - 100; y += 40) { g.beginPath(); g.moveTo(x, y - 6); g.lineTo(x + 6, y); g.lineTo(x, y + 6); g.lineTo(x - 6, y); g.fill() }
   return tex(cv)
 }

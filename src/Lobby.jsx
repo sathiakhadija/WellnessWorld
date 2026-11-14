@@ -9,6 +9,7 @@ import * as THREE from 'three'
 import { toCreasedNormals, mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { ww, wwColor, wwHex } from './palette.js'
 import KIT from './baked/lobby.json'
+import DEC from './baked/lobby_decor.json'
 import { GROUPS } from './CameraRig.jsx'
 import { world } from './world.js'
 import { camStore } from './camStore.js'
@@ -22,7 +23,7 @@ const cache = {}
 function kit(name) {
   if (cache[name]) return cache[name]
   const o = {}
-  for (const [bucket, d] of Object.entries(KIT[name])) {
+  for (const [bucket, d] of Object.entries(KIT[name] || DEC[name])) {
     const n = d.p.length / 3, uv = new Float32Array(n * 2), P = new Float32Array(n * 3); P.set(d.p)
     for (let i = 0; i < n; i++) { if (bucket === 'top') { uv[i * 2] = P[i * 3]; uv[i * 2 + 1] = P[i * 3 + 2] } else if (bucket === 'rug') { uv[i * 2] = P[i * 3] / 1.56 + 0.5; uv[i * 2 + 1] = P[i * 3 + 2] / 1.56 + 0.5 } else { uv[i * 2] = P[i * 3] + P[i * 3 + 2]; uv[i * 2 + 1] = P[i * 3 + 1] } }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); o[bucket] = toCreasedNormals(g, 0.7)
@@ -34,13 +35,13 @@ function useMats() {
   return useMemo(() => {
     const brass = ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true).lerp(new THREE.Color('#cdbb98'), 0.4), roughness: 0.4, metalness: 1, envMapIntensity: 1.3 }, 'lobbyBrass')
     const warm = new THREE.MeshBasicMaterial({ color: wwHex('WW_LAMP_WARM'), toneMapped: false })
-    const marbleL = LT.marbleLight(), marbleD = LT.marbleDark(), gold = LT.brushedGold(); gold.wrapS = gold.wrapT = THREE.RepeatWrapping
+    const marbleL = LT.marbleLight(true, true), marbleD = LT.marbleDark(), gold = LT.brushedGold(); gold.wrapS = gold.wrapT = THREE.RepeatWrapping
     return {
       blush: ww('WW_PLASTER_BLUSH', { map: LT.plaster(), roughness: 0.88, color: new THREE.Color('#e4d6c3'), envMapIntensity: 0.3 }, 'lobbyIvory'),               // Task 003: warm ivory limewash (was dark blush)
       trim: ww('WW_LIMESTONE_CREAM', { color: wwColor('WW_LIMESTONE_CREAM', true), roughness: 0.5 }, 'lobbyTrim'),
-      floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.3, envMapIntensity: 0.4, color: wwColor('WW_MARBLE_LIGHT').multiplyScalar(0.95) }, 'lobbyFloor'),   // Task 003: calmer reflections
+      floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.32, envMapIntensity: 0.22, color: new THREE.Color('#fff1e0') }, 'lobbyFloor'),   // Task 003: calmer reflections
       marble: ww('WW_MARBLE_DARK', { map: LT.walnut(), color: new THREE.Color('#ffffff'), roughness: 0.55, envMapIntensity: 0.5 }, 'lobbyWalnut'),            // Task 003: the lift surround is dark walnut (bucket name kept from the old dark-marble kit)
-      top: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.3 }, 'lobbyTop'),
+      top: ww('WW_MARBLE_LIGHT', { map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.8, 0.8); return t })(), roughness: 0.3 }, 'lobbyTop2'),
       flute: ww('WW_LIMESTONE_CREAM', { roughness: 0.62 }, 'lobbyFlute'),
       gold: ww('WW_BRASS_ANTIQUE', { color: wwColor('WW_BRASS_ANTIQUE', true).lerp(new THREE.Color('#d6c7a6'), 0.5), map: gold, roughness: 0.46, metalness: 1, envMapIntensity: 1.2 }, 'lobbyGold'),   // brushed champagne, not mirror gold
       brass, dark: ww('WW_IRONWORK_CHARCOAL', { roughness: 0.45, metalness: 0.4 }, 'lobbyDark2'),
@@ -48,12 +49,14 @@ function useMats() {
       rug: ww('WW_RUG_CREAM', { map: LT.rugTex(), roughness: 1 }, 'lobbyRug'),
       ivy1: ww('WW_FOLIAGE_FOREST', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy2'),
       stem: ww('WW_BARK', { roughness: 1 }, 'lobbyStem'),
-      bloom1: ww('WW_FLOWER_PINK_MUTED', { roughness: 0.85 }, 'lobbyB1'), bloom2: ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true), roughness: 0.85 }, 'lobbyB2'),
+      bloom1: ww('WW_FLOWER_PINK_MUTED', { roughness: 0.85 }, 'lobbyB1'), bloom2: ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.85 }, 'lobbyB2'),
       cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.62), toneMapped: false }),                        // Task 003: softer than the bare LED tube
       bronze: new THREE.MeshStandardMaterial({ color: '#8a6a45', metalness: 1, roughness: 0.42, envMapIntensity: 1.1 }),
-      shade: new THREE.MeshStandardMaterial({ color: '#f4e6cf', emissive: new THREE.Color('#ffcf94'), emissiveIntensity: 0.55, roughness: 0.8 }),
+      shade: new THREE.MeshStandardMaterial({ color: '#d9b87c', emissive: new THREE.Color('#ffcf94'), emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.45, side: THREE.DoubleSide }),
       ceramic: new THREE.MeshStandardMaterial({ color: '#efe6d8', roughness: 0.35 }),
-      niche: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleLight(false); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(0.9, 1.1); return t })(), color: '#efe0cc', roughness: 0.3, envMapIntensity: 0.6 }),
+      niche: new THREE.MeshStandardMaterial({ map: (() => { const t = LT.marbleFeature(); t.repeat.set(0.62, 0.62); return t })(), color: '#eadfce', roughness: 0.28, envMapIntensity: 0.6 }),
+      ceramic2: new THREE.MeshStandardMaterial({ color: '#cdbba4', roughness: 0.42 }), paper: new THREE.MeshStandardMaterial({ color: '#efe6d2', roughness: 0.9 }), bookD: new THREE.MeshStandardMaterial({ color: '#7d5a3c', roughness: 0.8 }),
+      rug2: new THREE.MeshStandardMaterial({ map: LT.rugRect(), roughness: 1 }),
       bookA: new THREE.MeshStandardMaterial({ color: '#d9c9ae', roughness: 0.8 }), bookB: new THREE.MeshStandardMaterial({ color: '#4a3326', roughness: 0.8 }), bookC: new THREE.MeshStandardMaterial({ color: '#a98b63', roughness: 0.8 }),
       glass: new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.22, roughness: 0.05, depthWrite: false }),
       ceil: new THREE.MeshStandardMaterial({ color: wwColor('WW_CEILING_CREAM'), roughness: 0.95, emissive: new THREE.Color(wwHex('WW_LAMP_WARM')), emissiveMap: LT.ceilingGlow(), emissiveIntensity: 0.3 }),
@@ -187,23 +190,23 @@ export default function Lobby() {
         <mesh geometry={G.arch} position={[0, 0, 0.0]} material={M.niche} receiveShadow />
       </group>
       <Kit name="console" M={M} position={[x0, 0, 1.95]} rotY={Math.PI / 2} over={{ dark: M.bronze }} />
-      <Kit name="bouquet" M={M} position={[x0 + 0.22, 0.825, 1.62]} />
-      <group position={[x0 + 0.2, 0.82, 2.3]}>
-        <mesh position={[0, 0.03, 0]} material={M.bronze}><cylinderGeometry args={[0.06, 0.07, 0.06, 20]} /></mesh>
-        <mesh position={[0, 0.17, 0]} material={M.bronze}><cylinderGeometry args={[0.008, 0.008, 0.22, 8]} /></mesh>
-        <mesh position={[0, 0.3, 0]} material={M.shade}><cylinderGeometry args={[0.05, 0.1, 0.14, 24, 1, true]} /></mesh>
-      </group>
-      <mesh geometry={G.vase} position={[x0 + 0.18, 0.82, 2.02]} material={M.ceramic} castShadow />
+      <Kit name="bloom_vase" M={M} position={[x0 + 0.22, 0.82, 1.6]} />
+      <Kit name="lamp" M={M} position={[x0 + 0.2, 0.82, 2.32]} />
+      <Kit name="vase_bottle" M={M} position={[x0 + 0.2, 0.82, 2.02]} scale={[0.85, 0.85, 0.85]} />
 
       {/* ---- right wall (Task 003): marble feature slab + three walnut shelves with soft under-light, restrained styling ---- */}
       <mesh geometry={G.slab} position={[x1 - 0.002, 0.14, 2.35]} rotation={[0, -Math.PI / 2, 0]} material={M.niche} receiveShadow />
-      {[1.12, 1.56, 2.0].map((y, i) => <Kit key={'sh' + i} name="shelf" M={M} position={[x1 - 0.03, y, 2.35]} rotY={-Math.PI / 2} over={{ top: M.marble, brass: M.bronze, tube: M.cove }} />)}
-      <Kit name="ivy" M={M} position={[x1 - 0.31, 2.04, 2.6]} />
-      {[[0, 0.045, 0.2, 'bookA'], [0.05, 0.04, 0.22, 'bookB'], [0.1, 0.045, 0.19, 'bookC']].map(([dz, w, hh, m], i) => <mesh key={'bk' + i} position={[x1 - 0.17, 1.16 + hh / 2, 2.12 + dz]} castShadow receiveShadow material={M[m]}><boxGeometry args={[0.15, hh, w]} /></mesh>)}
-      <mesh geometry={G.vase} position={[x1 - 0.17, 1.6, 2.55]} scale={[0.9, 1.1, 0.9]} material={M.ceramic} castShadow />
-      {[[0, 0.03], [0.0, 0.065]].map(([dz, y], i) => <mesh key={'bs' + i} position={[x1 - 0.17, 1.6 + y, 2.2]} castShadow material={M[i ? 'bookC' : 'bookA']}><boxGeometry args={[0.16, 0.03, 0.12]} /></mesh>)}
+      <group position={[x1 - 0.03, 0, 2.35]} rotation={[0, -Math.PI / 2, 0]}>
+        {[1.12, 1.56, 2.0].map((y, i) => <Kit key={'sh' + i} name="shelf2" M={M} position={[0, y, 0]} over={{ top: M.marble, brass: M.bronze, tube: M.cove }} />)}
+        <Kit name="books_row" M={M} position={[-0.27, 1.156, 0.07]} />
+        <Kit name="vase_round" M={M} position={[0.17, 1.156, 0.14]} />
+        <Kit name="books_stack" M={M} position={[-0.12, 1.596, 0.08]} />
+        <Kit name="vase_bottle" M={M} position={[0.2, 1.596, 0.13]} />
+        <Kit name="pothos" M={M} position={[0.17, 2.036, 0.15]} />
+        <Kit name="orb" M={M} position={[-0.17, 2.036, 0.14]} />
+      </group>
 
-      <Kit name="rug" M={M} position={[cx, 0.001, 1.6]} />
+      <mesh position={[cx, 0.003, 1.55]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={M.rug2}><planeGeometry args={[1.9, 1.25]} /></mesh>
 
       {/* ---- lights (warm 3000 K, scaled with the weather like every interior lamp) ---- */}
       {[[0.4, h - 0.25, 1.35, 1.5], [2.0, h - 0.25, 1.35, 1.5], [cx, h - 0.25, 2.3, 1.1], [cx, h - 0.25, 0.9, 0.9]].map(([x, y, z, i], k) => <pointLight key={'pl' + k} userData={{ wx: 1 }} position={[x, y, z]} color={warm} intensity={i} distance={5} decay={1.5} />)}
