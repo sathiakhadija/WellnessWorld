@@ -37,7 +37,7 @@ function useMats() {
     const warm = new THREE.MeshBasicMaterial({ color: wwHex('WW_LAMP_WARM'), toneMapped: false })
     const marbleL = LT.marbleLight(true, true), marbleD = LT.marbleDark(), gold = LT.brushedGold(); gold.wrapS = gold.wrapT = THREE.RepeatWrapping
     return {
-      blush: ww('WW_PLASTER_BLUSH', { map: LT.plaster(), roughness: 0.88, color: new THREE.Color('#e4d6c3'), envMapIntensity: 0.3 }, 'lobbyIvory'),               // Task 003: warm ivory limewash (was dark blush)
+      blush: ww('WW_PLASTER_BLUSH', { map: LT.plaster(), roughness: 0.88, color: new THREE.Color('#dfd5c6'), envMapIntensity: 0.3 }, 'lobbyIvory'),               // Task 003: warm ivory limewash (was dark blush)
       trim: ww('WW_LIMESTONE_CREAM', { color: wwColor('WW_LIMESTONE_CREAM', true), roughness: 0.5 }, 'lobbyTrim'),
       floor: ww('WW_MARBLE_LIGHT', { map: marbleL, roughness: 0.32, envMapIntensity: 0.22, color: new THREE.Color('#fff1e0') }, 'lobbyFloor'),   // Task 003: calmer reflections
       marble: ww('WW_MARBLE_DARK', { map: LT.walnut(), color: new THREE.Color('#ffffff'), roughness: 0.55, envMapIntensity: 0.5 }, 'lobbyWalnut'),            // Task 003: the lift surround is dark walnut (bucket name kept from the old dark-marble kit)
@@ -50,7 +50,8 @@ function useMats() {
       ivy1: ww('WW_FOLIAGE_FOREST', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy1'), ivy2: ww('WW_FOLIAGE_OLIVE', { side: THREE.DoubleSide, roughness: 0.7 }, 'lobbyIvy2'),
       stem: ww('WW_BARK', { roughness: 1 }, 'lobbyStem'),
       bloom1: ww('WW_FLOWER_PINK_MUTED', { roughness: 0.85 }, 'lobbyB1'), bloom2: ww('WW_FLOWER_PINK_MUTED', { color: wwColor('WW_FLOWER_PINK_MUTED', true).lerp(new THREE.Color('#fff4f0'), 0.55), roughness: 0.85 }, 'lobbyB2'),
-      cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.62), toneMapped: false }),                        // Task 003: softer than the bare LED tube
+      cove: new THREE.MeshBasicMaterial({ color: new THREE.Color(wwHex('WW_LAMP_WARM')).multiplyScalar(0.78), toneMapped: false }),                        // Task 003: softer than the bare LED tube
+      rod: new THREE.MeshStandardMaterial({ color: '#fff4de', emissive: new THREE.Color('#ffd9a0'), emissiveIntensity: 0.85, roughness: 0.3, toneMapped: false }),
       bronze: new THREE.MeshStandardMaterial({ color: '#8a6a45', metalness: 1, roughness: 0.42, envMapIntensity: 1.1 }),
       shade: new THREE.MeshStandardMaterial({ color: '#d9b87c', emissive: new THREE.Color('#ffcf94'), emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.45, side: THREE.DoubleSide }),
       ceramic: new THREE.MeshStandardMaterial({ color: '#efe6d8', roughness: 0.35 }),
@@ -150,7 +151,10 @@ export default function Lobby() {
       {[[z0 + 0.05, 0], [z1 - 0.05, 1]].map(([z, i]) => <React.Fragment key={'cz' + i}><Box p={[cx, h - 0.1, z]} s={[W, 0.12, 0.1]} m={M.trim} /><Box p={[cx, h - 0.025, z + (i ? -0.02 : 0.02)]} s={[W - 0.1, 0.05, 0.05]} m={M.cove} /></React.Fragment>)}
       {[[0.1, 1.0], [2.3, 1.0], [0.1, 2.2], [2.3, 2.2]].map(([x, z], i) => <mesh key={'dl' + i} position={[x, h - 0.004, z]} rotation={[Math.PI / 2, 0, 0]} material={M.tube}><circleGeometry args={[0.05, 20]} /></mesh>)}
 
-      {/* Task 003: the old panelling frames were removed; walls are plain ivory limewash with the marble / walnut feature surfaces below */}
+      {/* Task 003: slim moulded frames only where wall space is free (reference shows them beside the niche / entrance); the old frames behind the console / shelves stay gone */}
+      <Kit name="pf_tall" M={M} position={[0.075, 0.5, z0 + 0.01]} /><Kit name="pf_tall" M={M} position={[2.325, 0.5, z0 + 0.01]} />
+      <Kit name="pf_tall" M={M} position={[x0 + 0.0, 0.5, 0.82]} rotY={Math.PI / 2} scale={[0.82, 1, 1]} />
+      <Kit name="pf_tall" M={M} position={[x1 - 0.0, 0.5, 1.0]} rotY={-Math.PI / 2} scale={[0.9, 1, 1]} />
 
       {/* ---- lift wall: dark marble surround, indicator, brass frame, doors, sign, call panel ---- */}
       <Kit name="lift_surround" M={M} position={[cx, 0, z1]} rotY={Math.PI} />
@@ -165,17 +169,12 @@ export default function Lobby() {
       <mesh geometry={G.flutes} position={[cx, 0, z1]} material={M.marble} castShadow receiveShadow />
       {[-0.77, 0.77].map((dx, i) => (
         <group key={'sc' + i} position={[cx + dx, 1.5, z1 - 0.082]}>
-          <Box p={[0, 0, 0]} s={[0.03, 0.62, 0.016]} m={M.tube} />
+          <Box p={[0, 0.15, 0]} s={[0.034, 0.26, 0.018]} m={M.tube} /><Box p={[0, -0.15, 0]} s={[0.034, 0.26, 0.018]} m={M.tube} /><Box p={[0, 0, 0.003]} s={[0.06, 0.04, 0.026]} m={M.bronze} />
           <Box p={[0, 0.34, 0.002]} s={[0.07, 0.03, 0.024]} m={M.bronze} /><Box p={[0, -0.34, 0.002]} s={[0.07, 0.03, 0.024]} m={M.bronze} />
         </group>
       ))}
-      {/* shallow two-ring ceiling light (flush to the 3.1 m ceiling: lowest point 2.9 m) */}
-      <group position={[cx, h - 0.05, 1.55]} rotation={[Math.PI / 2, 0, 0]}>
-        <mesh material={M.cove}><torusGeometry args={[0.5, 0.022, 8, 48]} /></mesh>
-        <mesh position={[0, 0, 0.07]} material={M.cove}><torusGeometry args={[0.3, 0.022, 8, 40]} /></mesh>
-        <mesh position={[0, 0, -0.03]} material={M.trim}><cylinderGeometry args={[0.52, 0.52, 0.012, 48]} /></mesh>
-        <mesh position={[0, 0, 0.035]} material={M.bronze}><cylinderGeometry args={[0.012, 0.012, 0.07, 8]} /></mesh>
-      </group>
+      {/* two-tier fluted-glass ring light (Blender kit): hangs 0.35 m from the 3.1 m ceiling -> lowest point 2.75 m */}
+      <Kit name="chandelier" M={M} position={[cx, h, 1.5]} over={{ rod: M.rod }} castShadow={false} />
       {/* cab behind the doors */}
       <group position={[cx, 0, z1 + 0.7 + 0.04]}>
         {[[-0.7, 1.2, 0, 0.04, 2.4, 1.4], [0.7, 1.2, 0, 0.04, 2.4, 1.4], [0, 1.2, 0.7, 1.4, 2.4, 0.04], [0, 2.4, 0, 1.4, 0.04, 1.4]].map(([x, y, z, sx, sy, sz], i) => <Box key={'cab' + i} p={[x, y, z]} s={[sx, sy, sz]} m={M.cabWall} />)}
@@ -204,6 +203,8 @@ export default function Lobby() {
         <Kit name="vase_bottle" M={M} position={[0.2, 1.596, 0.13]} />
         <Kit name="pothos" M={M} position={[0.17, 2.036, 0.15]} />
         <Kit name="orb" M={M} position={[-0.17, 2.036, 0.14]} />
+        <Kit name="globe" M={M} position={[0.065, 1.596, 0.15]} />
+        <Kit name="candle" M={M} position={[-0.3, 1.596, 0.12]} />
       </group>
 
       <mesh position={[cx, 0.003, 1.55]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={M.rug2}><planeGeometry args={[1.9, 1.25]} /></mesh>

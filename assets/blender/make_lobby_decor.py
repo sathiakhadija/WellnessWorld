@@ -19,7 +19,7 @@ def blossom(B, c, n, rnd, r=0.034, light=False):
         a = rot + i * math.tau / 5
         radial = t * math.cos(a) + b * math.sin(a)
         d = (radial * 0.95 + n * 0.32).normalized()
-        blade(B['bloom2' if light else 'bloom1'], c, d, r * (0.9 + 0.2 * rnd.random()), r * 1.05, bend=0.45, cup=0.55, rows=2, cols=2, prof=0.9, tip=0.8, up=n)
+        blade(B['bloom2' if light else 'bloom1'], c, d, r * (0.9 + 0.2 * rnd.random()), r * 1.05, bend=0.45, cup=0.55, rows=2, cols=1, prof=0.9, tip=0.8, up=n)
     dome(B['bloom2'], c + n * 0.004, 0.0065, 0.006, seg=5, rings=2)
 
 def bloom_vase(name, seed):
@@ -27,8 +27,8 @@ def bloom_vase(name, seed):
     part(lathe('vase', [(0, 0), (0.045, 0), (0.06, 0.02), (0.07, 0.07), (0.072, 0.12), (0.06, 0.18), (0.035, 0.235), (0.027, 0.27), (0.033, 0.285), (0.027, 0.288), (0, 0.288)], 28), 'ceramic')
     B = {k: new_bm() for k in ('bloom1', 'bloom2', 'ivy1', 'stem')}
     base = Vector((0, 0, 0.27))
-    for k in range(5):
-        az = k / 5 * math.tau + rnd.uniform(-0.3, 0.3); lean = 0.12 + rnd.random() * 0.34; L = 0.42 + rnd.random() * 0.2
+    for k in range(8):
+        az = k / 8 * math.tau + rnd.uniform(-0.3, 0.3); lean = 0.1 + rnd.random() * 0.4; L = 0.45 + rnd.random() * 0.26
         wob = rnd.uniform(0.01, 0.03)
         pts = [base + Vector((math.cos(az) * lean * L * (s / 6) ** 1.5 + math.sin(s * 1.3 + k) * wob * (s / 6), math.sin(az) * lean * L * (s / 6) ** 1.5, L * (s / 6) * (1 - 0.25 * lean))) for s in range(7)]
         tube(B['stem'], pts, 0.0075, 0.0022, 4)
@@ -111,7 +111,45 @@ def shelf(name):
     part(box('rear', -0.36, 0.36, -0.006, 0.004, -0.012, 0.048, bevel=0.0015), 'brass')
     return finish(name)
 
+def ring(name, r0, r1, z0, z1, seg=64):
+    bm = bmesh.new(); L = [[bm.verts.new((r * math.cos(math.tau * i / seg), r * math.sin(math.tau * i / seg), z)) for i in range(seg)] for r, z in ((r0, z0), (r1, z0), (r1, z1), (r0, z1))]
+    for a in range(4):
+        A, Bq = L[a], L[(a + 1) % 4]
+        for i in range(seg):
+            j = (i + 1) % seg
+            try: bm.faces.new((A[i], A[j], Bq[j], Bq[i]))
+            except ValueError: pass
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces); return new_obj(name, bm)
+
+def chandelier(name):
+    """two-tier fluted-glass ring light, hangs DOWN from the origin (ceiling): 1.0 m upper ring, 0.6 m lower ring, lowest point 0.35 m below the ceiling."""
+    reset(); PARTS.clear()
+    def tier(R, zt, h, n, tag):
+        part(ring(f'{tag}top', R - 0.025, R + 0.025, zt - 0.014, zt, 64), 'bronze'); part(ring(f'{tag}bot', R - 0.025, R + 0.025, zt - h - 0.014, zt - h, 64), 'bronze')
+        for i in range(n):
+            a = math.tau * i / n; x, y = math.cos(a) * R, math.sin(a) * R
+            o = part(box(f'{tag}r{i}', -0.0085, 0.0085, -0.0085, 0.0085, zt - h, zt - 0.014, bevel=0.0), 'rod'); o.location = (x, y, 0); o.rotation_euler = (0, 0, a)
+    tier(0.5, -0.04, 0.13, 56, 'u'); tier(0.3, -0.2, 0.13, 36, 'l')
+    for k in range(4):
+        a = k * math.pi / 2 + 0.4; o = part(box(f'h{k}', -0.004, 0.004, -0.004, 0.004, -0.2, -0.04, bevel=0), 'bronze'); o.location = (math.cos(a) * 0.4, math.sin(a) * 0.4, 0)
+    part(lathe('canopy', [(0, 0), (0.14, 0), (0.14, -0.015), (0.06, -0.025), (0, -0.025)], 24), 'bronze')
+    return finish(name)
+
+def candle(name):
+    reset(); PARTS.clear()
+    part(lathe('jar', [(0, 0), (0.035, 0), (0.038, 0.01), (0.038, 0.07), (0.034, 0.072), (0.034, 0.012), (0, 0.012)], 22), 'bronze')
+    part(lathe('wax', [(0, 0.012), (0.032, 0.012), (0.032, 0.06), (0, 0.06)], 20), 'paper')
+    part(lathe('flame', [(0, 0.06), (0.006, 0.066), (0.003, 0.082), (0, 0.088)], 8), 'rod')
+    return finish(name)
+
+def globe(name):
+    reset(); PARTS.clear()
+    part(lathe('foot', [(0, 0), (0.035, 0), (0.04, 0.01), (0.02, 0.02), (0, 0.02)], 18), 'bronze')
+    part(lathe('glass', [(0.0, 0.02), (0.03, 0.03), (0.055, 0.06), (0.062, 0.095), (0.055, 0.13), (0.03, 0.155), (0, 0.162)], 24), 'rod')
+    return finish(name)
+
 LIB = {
+    'chandelier': chandelier('chandelier'), 'candle': candle('candle'), 'globe': globe('globe'),
     'bloom_vase': bloom_vase('bloom_vase', 14), 'pothos': pothos('pothos', 6), 'books_row': books_row('books_row', 1), 'books_stack': books_stack('books_stack', 2),
     'vase_bottle': ceramic('vase_bottle', [(0, 0), (0.04, 0), (0.052, 0.015), (0.062, 0.07), (0.058, 0.12), (0.035, 0.17), (0.02, 0.2), (0.022, 0.22), (0.026, 0.225), (0.022, 0.228), (0, 0.228)]),
     'vase_round': ceramic('vase_round', [(0, 0), (0.04, 0), (0.07, 0.025), (0.085, 0.075), (0.07, 0.125), (0.04, 0.15), (0.034, 0.16), (0.04, 0.165), (0.034, 0.168), (0, 0.168)], 'ceramic2'),
