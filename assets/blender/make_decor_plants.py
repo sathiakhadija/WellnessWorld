@@ -10,16 +10,16 @@ exec('def head_daisy' + src2.split('def head_daisy', 1)[1].split('# ---------- w
 def wisteria(name, seed, L=0.9):
     reset(); PARTS.clear(); rnd = random.Random(seed)
     B = {k: new_bm() for k in ('bloom', 'bloom2', 'leaf', 'stem')}
-    for r in range(5):                                                         # five racemes hanging from the top at z=0
-        ox = (r - 2) * 0.1; ll = L * (0.65 + rnd.random() * 0.4)
+    for r in range(3):                                                         # three racemes hanging from the top at z=0
+        ox = (r - 1) * 0.14; ll = L * (0.65 + rnd.random() * 0.4)
         pts = [Vector((ox + math.sin(t * 3 + r) * 0.02, rnd.random() * 0.02, -ll * t)) for t in [i / 7 for i in range(8)]]
         tube(B['stem'], pts, 0.008, 0.003, 4)
-        n = 18
+        n = 12
         for i in range(n):
             t = i / (n - 1); p = pts[min(7, int(t * 7))]; zz = -ll * t * 0.98 - 0.02; wd = 0.045 * (1 - 0.8 * t) + 0.01
-            for k in range(3):
+            for k in range(2):
                 a = rnd.random() * math.tau; d = Vector((math.cos(a) * 0.7, math.sin(a) * 0.7, -0.5)).normalized()
-                blade(B['bloom' if (i + k) % 3 else 'bloom2'], Vector((p.x, p.y, zz)), d, 0.16 * (1 - 0.45 * t) + 0.05, 0.12 * (1 - 0.4 * t) + 0.04, bend=0.5, cup=0.6, rows=1, cols=2, prof=0.7, tip=1.0)
+                blade(B['bloom' if (i + k) % 3 else 'bloom2'], Vector((p.x, p.y, zz)), d, 0.13 * (1 - 0.4 * t) + 0.05, 0.16 * (1 - 0.35 * t) + 0.06, bend=0.5, cup=0.6, rows=1, cols=2, prof=0.7, tip=1.0)
     for j in range(4):                                                         # pinnate leaflets at the top
         a = j * 1.6 + 0.4; blade(B['leaf'], Vector((0, 0, -0.02)), Vector((math.cos(a), math.sin(a), 0.1)), 0.22, 0.07, bend=-0.5, rows=3, cols=1, prof=0.6, tip=0.9)
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
@@ -29,11 +29,11 @@ def posy(name, seed):
     reset(); PARTS.clear(); rnd = random.Random(seed)
     keep(lathe('vase', [(0.0, 0.0), (0.04, 0.0), (0.06, 0.04), (0.055, 0.12), (0.035, 0.16), (0.04, 0.17), (0.0, 0.17)], 14), 'marble', C)
     B = {k: new_bm() for k in ('bloom', 'bloom2', 'leaf', 'stem')}
-    for i in range(6):
-        a = i / 6 * math.tau + rnd.random() * 0.4; lean = 0.02 + rnd.random() * 0.07; h = 0.2 + rnd.random() * 0.1
+    for i in range(5):
+        a = i / 5 * math.tau + rnd.random() * 0.4; lean = 0.02 + rnd.random() * 0.07; h = 0.2 + rnd.random() * 0.1
         pts = [Vector((math.cos(a) * lean * (k / 4) ** 2, math.sin(a) * lean * (k / 4) ** 2, 0.15 + h * k / 4)) for k in range(5)]
         tube(B['stem'], pts, 0.0025, 0.002, 3)
-        head_daisy(B, pts[-1], 0.045, seed + i)
+        head_daisy(B, pts[-1], 0.05, seed + i, 7)
         if i % 2: blade(B['leaf'], pts[1], Vector((math.cos(a), math.sin(a), 0.5)), 0.08, 0.025, bend=-0.4, rows=2, cols=1)
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
     return finish(name)
@@ -52,7 +52,20 @@ def topiary(name, seed, h=1.25, r=0.3):
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
     return finish(name)
 
-LIB = {'wisteria0': wisteria('wisteria0', 3, 0.9), 'wisteria1': wisteria('wisteria1', 8, 1.2), 'posy0': posy('posy0', 5), 'topiary_o': topiary('topiary_o', 9)}
+def boxplant(name, seed):                                                      # trailing leaves + 7 small blooms, 0.9 m long, sits in a window trough (origin: trough top centre)
+    reset(); PARTS.clear(); rnd = random.Random(seed)
+    B = {k: new_bm() for k in ('bloom', 'bloom2', 'leaf', 'stem')}
+    for i in range(10):
+        x = -0.42 + i * 0.093 + rnd.uniform(-0.02, 0.02)
+        blade(B['leaf'], Vector((x, 0, 0.0)), Vector((rnd.uniform(-0.3, 0.3), rnd.uniform(-0.4, 0.4), 1.0)), 0.16 + rnd.random() * 0.08, 0.06, bend=-0.6 - rnd.random() * 0.4, rows=2, cols=1, prof=0.7, tip=0.9)
+    for i in range(7):
+        x = -0.4 + i * 0.133 + rnd.uniform(-0.03, 0.03); h = 0.12 + rnd.random() * 0.08
+        tube(B['stem'], [Vector((x, 0, 0)), Vector((x, 0, h))], 0.004, 0.003, 3)
+        head_daisy(B, (x, 0, h), 0.05, seed + i, 5)
+    mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
+    return finish(name)
+
+LIB = {'boxplant0': boxplant('boxplant0', 21), 'wisteria0': wisteria('wisteria0', 3, 0.9), 'wisteria1': wisteria('wisteria1', 8, 1.2), 'posy0': posy('posy0', 5), 'topiary_o': topiary('topiary_o', 9)}
 for k, v in LIB.items():
     for b in v.values(): b.pop('c', None)
     print(k, sum(len(b['p']) // 9 for b in v.values()), 'tris')

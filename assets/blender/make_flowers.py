@@ -37,7 +37,7 @@ def blade(bm, base, d, L, W, bend=0.0, cup=0.0, fold=0.0, rows=5, cols=3, prof=0
                 try: bm.faces.new(q)
                 except ValueError: pass
 
-def tube(bm, pts, r0, r1, seg=4):
+def tube(bm, pts, r0, r1, seg=3):
     """tapered stem swept through points (list of Vector)."""
     rings = []
     for i, p in enumerate(pts):
@@ -68,7 +68,7 @@ def dome(bm, c, r, h, seg=8, rings=3):
 
 def leaf(bm, base, azim, elev, L, W, bend=0.5, fold=0.5, serr=0):
     d = Vector((math.cos(azim) * math.cos(elev), math.sin(azim) * math.cos(elev), math.sin(elev)))
-    blade(bm, base, d, L, W, bend=-bend, cup=0.0, fold=fold, rows=3, cols=2, prof=0.75, tip=0.8)
+    blade(bm, base, d, L, W, bend=-bend, cup=0.0, fold=fold, rows=2, cols=2, prof=0.75, tip=0.8)
 
 def stem_curve(h, lean, azim, n=6, wob=0.0, rnd=None):
     pts = []
@@ -96,15 +96,15 @@ def head_rose(B, c, r, azim_tilt=0.0, seed=1):
         L = r * (0.45 + 0.75 * ring); W = r * (0.55 + 0.7 * ring)
         base = Vector(c) + Vector((math.cos(a), math.sin(a), 0)) * r * 0.06 * (1 + ring)
         d = Vector((math.cos(a) * math.cos(elev), math.sin(a) * math.cos(elev), math.sin(elev)))
-        blade(B['bloom' if i % 3 else 'bloom2'], base, d, L, W, bend=0.9 - 0.8 * ring, cup=0.55 - 0.25 * ring, rows=3, cols=3, prof=0.55, tip=1.2)
+        blade(B['bloom' if i % 3 else 'bloom2'], base, d, L, W, bend=0.9 - 0.8 * ring, cup=0.55 - 0.25 * ring, rows=3, cols=2, prof=0.55, tip=1.2)
     dome(B['bloom2'], c, r * 0.16, r * 0.18, 6, 2)
 
-def head_daisy(B, c, r, seed=1):
-    rnd = random.Random(seed); n = 12
+def head_daisy(B, c, r, seed=1, n=12):
+    rnd = random.Random(seed)
     for i in range(n):
         a = i / n * math.tau + rnd.random() * 0.08; elev = 0.12 + rnd.random() * 0.15
         d = Vector((math.cos(a) * math.cos(elev), math.sin(a) * math.cos(elev), math.sin(elev)))
-        blade(B['bloom2'], Vector(c) + Vector((math.cos(a), math.sin(a), 0)) * r * 0.16, d, r * (0.9 + rnd.random() * 0.2), r * 0.17, bend=0.25, cup=0.2, rows=3, cols=2, prof=0.5, tip=1.4)
+        blade(B['bloom2'], Vector(c) + Vector((math.cos(a), math.sin(a), 0)) * r * 0.16, d, r * (0.9 + rnd.random() * 0.2), r * 0.17, bend=0.25, cup=0.2, rows=2, cols=2, prof=0.5, tip=1.4)
     dome(B['bloom'], c, r * 0.24, r * 0.16, 8, 3)
 
 def head_tulip(B, c, r, seed=1):
@@ -119,7 +119,7 @@ def head_cosmos(B, c, r, seed=1):
     for i in range(n):
         a = i / n * math.tau + rnd.random() * 0.1; elev = 0.18
         d = Vector((math.cos(a) * math.cos(elev), math.sin(a) * math.cos(elev), math.sin(elev)))
-        blade(B['bloom'], Vector(c) + Vector((math.cos(a), math.sin(a), 0)) * r * 0.1, d, r * 1.05, r * 0.62, bend=0.2, cup=0.35, fold=0.2, rows=3, cols=3, prof=0.5, tip=1.5)
+        blade(B['bloom'], Vector(c) + Vector((math.cos(a), math.sin(a), 0)) * r * 0.1, d, r * 1.05, r * 0.62, bend=0.2, cup=0.35, fold=0.2, rows=2, cols=3, prof=0.5, tip=1.5)
     dome(B['bloom2'], c, r * 0.17, r * 0.12, 7, 2)
 
 def head_floret_ball(B, c, r, seed=1, nflor=34, fs=0.05):                          # hydrangea / viburnum style: a dome of four-petal florets
@@ -156,7 +156,7 @@ def plant(name, kind, seed, n_heads, h, spread, headfn, head_r, leaf_L, leaf_W, 
             t = 0.12 + 0.6 * (j / max(1, leaves_per - 1)); idx = min(len(pts) - 1, int(t * (len(pts) - 1)))
             leaf(B['leaf'], pts[idx], a + (j * 2.1 + rnd.random()), leaf_up + 0.35 * (1 - t), leaf_L * (1.0 - 0.45 * t), leaf_W * (1.0 - 0.3 * t), bend=0.5 + rnd.random() * 0.3, fold=0.5)
         headfn(B, top, head_r * (0.85 + rnd.random() * 0.3), seed + i)
-    for j in range(5):                                                              # basal rosette leaves
+    for j in range(4):                                                              # basal rosette leaves
         a = rnd.random() * math.tau
         leaf(B['leaf'], Vector((math.cos(a) * 0.02, math.sin(a) * 0.02, 0.02)), a, 0.45 + rnd.random() * 0.4, leaf_L * 1.1, leaf_W * 1.05, bend=0.7, fold=0.55)
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
@@ -183,7 +183,7 @@ def lavender_new(name, seed, n=12, h=0.5):
         pts = [Vector((math.cos(a) * (rr + lean * (k / 5) ** 2), math.sin(a) * (rr + lean * (k / 5) ** 2), hh * k / 5)) for k in range(6)]
         tube(B['stem'], pts, 0.004, 0.003, 4)
         head_spike(B, (pts[-1].x, pts[-1].y, hh * 0.68), hh * 0.34, seed + i)
-    for j in range(14):                                                              # narrow grey-green leaves
+    for j in range(8):                                                              # narrow grey-green leaves
         a = rnd.random() * math.tau
         blade(B['leaf'], Vector((math.cos(a) * 0.03, math.sin(a) * 0.03, 0.02)), Vector((math.cos(a) * 0.45, math.sin(a) * 0.45, 0.9)), 0.2 + rnd.random() * 0.15, 0.02, bend=-0.5, rows=3, cols=1, prof=0.5, tip=1.0)
     mk(name, [(f'{name}_{k}', bm, k) for k, bm in B.items()])
@@ -197,7 +197,7 @@ LIB['daisy1'] = plant('daisy1', 'daisy', 212, 6, 0.34, 0.4, head_daisy, 0.055, 0
 LIB['tulip0'] = plant('tulip0', 'tulip', 301, 4, 0.42, 0.24, head_tulip, 0.04, 0.32, 0.075, 0, 0.006)
 LIB['cosmos0'] = plant('cosmos0', 'cosmos', 401, 4, 0.75, 0.5, head_cosmos, 0.06, 0.14, 0.02, 3, 0.005)
 for s in range(3): LIB[f'hydrangea_n{s}'] = hydrangea_new(f'hydrangea_n{s}', 500 + s, 0.58 + s * 0.06, 0.4 + s * 0.04, 4 + s)
-for s in range(2): LIB[f'lavender_n{s}'] = lavender_new(f'lavender_n{s}', 600 + s, 10 + s * 3, 0.46 + s * 0.06)
+for s in range(2): LIB[f'lavender_n{s}'] = lavender_new(f'lavender_n{s}', 600 + s, 7 + s * 2, 0.46 + s * 0.06)
 for k, v in LIB.items():
     for b in v.values(): b.pop('c', None)
     print(k, sum(len(b['p']) // 9 for b in v.values()), 'tris')
